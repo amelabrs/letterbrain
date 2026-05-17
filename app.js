@@ -1,13 +1,42 @@
 /* ── LetterBrain — App Logic ─────────────────────────────────────── */
 
-const ITEMS = [
-    { letter: "A", word: "Apple",    emoji: "🍎", vidStart: 5,  vidEnd: 12 },
-    { letter: "B", word: "Ball",     emoji: "⚽", vidStart: 12, vidEnd: 19 },
-    { letter: "C", word: "Cat",      emoji: "🐱", vidStart: 24, vidEnd: 30 },
-    { letter: "D", word: "Dog",      emoji: "🐶", vidStart: 30, vidEnd: 36 },
-    { letter: "E", word: "Elephant", emoji: "🐘", vidStart: 36, vidEnd: 43 },
-    { letter: "F", word: "Frog",     emoji: "🐸", vidStart: 43, vidEnd: 50 },
+const ALL_ITEMS = [
+    // Level 1: A–F
+    { letter: "A", word: "Apple",    emoji: "🍎", level: 1, vidStart: 5,  vidEnd: 12 },
+    { letter: "B", word: "Ball",     emoji: "⚽", level: 1, vidStart: 12, vidEnd: 19 },
+    { letter: "C", word: "Cat",      emoji: "🐱", level: 1, vidStart: 24, vidEnd: 30 },
+    { letter: "D", word: "Dog",      emoji: "🐶", level: 1, vidStart: 30, vidEnd: 36 },
+    { letter: "E", word: "Elephant", emoji: "🐘", level: 1, vidStart: 36, vidEnd: 43 },
+    { letter: "F", word: "Frog",     emoji: "🐸", level: 1, vidStart: 43, vidEnd: 50 },
+    // Level 2: G–L
+    { letter: "G", word: "Grapes",   emoji: "🍇", level: 2 },
+    { letter: "H", word: "Hat",      emoji: "🎩", level: 2 },
+    { letter: "I", word: "Ice cream",emoji: "🍦", level: 2 },
+    { letter: "J", word: "Juice",    emoji: "🧃", level: 2 },
+    { letter: "K", word: "Kite",     emoji: "🪁", level: 2 },
+    { letter: "L", word: "Lion",     emoji: "🦁", level: 2 },
+    // Level 3: M–R
+    { letter: "M", word: "Moon",     emoji: "🌙", level: 3 },
+    { letter: "N", word: "Nest",     emoji: "🪺", level: 3 },
+    { letter: "O", word: "Orange",   emoji: "🍊", level: 3 },
+    { letter: "P", word: "Penguin",  emoji: "🐧", level: 3 },
+    { letter: "Q", word: "Queen",    emoji: "👸", level: 3 },
+    { letter: "R", word: "Rainbow",  emoji: "🌈", level: 3 },
+    // Level 4: S–X
+    { letter: "S", word: "Sun",      emoji: "☀️", level: 4 },
+    { letter: "T", word: "Tree",     emoji: "🌳", level: 4 },
+    { letter: "U", word: "Umbrella", emoji: "☂️", level: 4 },
+    { letter: "V", word: "Violin",   emoji: "🎻", level: 4 },
+    { letter: "W", word: "Whale",    emoji: "🐋", level: 4 },
+    { letter: "X", word: "Xylophone",emoji: "🎵", level: 4 },
+    // Level 5: Y–Z + review picks
+    { letter: "Y", word: "Yacht",    emoji: "⛵", level: 5 },
+    { letter: "Z", word: "Zebra",    emoji: "🦓", level: 5 },
 ];
+
+let currentLevel = 1;
+let levelItems = [];
+let videoEnabled = true;
 
 // ── Musical Sounds (Web Audio API) ──────────────────────────────────
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -96,7 +125,19 @@ function speak(text) {
 // ── Game Flow ───────────────────────────────────────────────────────
 
 function startGame() {
-    queue = shuffle(ITEMS);
+    currentLevel = parseInt(document.getElementById("level-select").value);
+    videoEnabled = document.getElementById("video-toggle").checked;
+    levelItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
+
+    // Level 5 only has 2 letters — pad with random review from other levels
+    if (levelItems.length < 6) {
+        const others = shuffle(ALL_ITEMS.filter((it) => it.level !== currentLevel));
+        while (levelItems.length < 6) {
+            levelItems.push(others.pop());
+        }
+    }
+
+    queue = shuffle(levelItems);
     currentIndex = 0;
     stars = 0;
     document.getElementById("stars").textContent = stars;
@@ -125,7 +166,7 @@ function loadRound() {
     speak(`What starts with ${currentItem.letter}?`);
 
     // Pick 3 wrong choices + 1 correct, shuffle
-    const wrong = shuffle(ITEMS.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
+    const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
     const options = shuffle([currentItem, ...wrong]);
 
     // Render choices
@@ -171,9 +212,11 @@ function handleChoice(btn, chosen) {
         showFeedback(true);
         spawnConfetti();
 
-        // Play video reward after speech finishes
-        setTimeout(() => playVideoReward(), 1600);
-        return; // Don't auto-advance — video will handle it
+        // Play video reward if enabled and this letter has a video clip
+        if (videoEnabled && currentItem.vidStart != null) {
+            setTimeout(() => playVideoReward(), 1600);
+            return; // Don't auto-advance — video will handle it
+        }
     } else {
         btn.classList.add("wrong");
 
@@ -190,7 +233,7 @@ function handleChoice(btn, chosen) {
         showFeedback(false);
     }
 
-    // Advance after delay (wrong answers only — correct uses video)
+    // Advance after delay (wrong answers, or correct without video)
     setTimeout(() => {
         currentIndex++;
         loadRound();
