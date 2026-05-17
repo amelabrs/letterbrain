@@ -14,7 +14,7 @@ const ALL_ITEMS = [
     { letter: "I", word: "Igloo",    image: "images/igloo.png", level: 2, vidStart: 69, vidEnd: 76 },
     { letter: "J", word: "Joker",    image: "images/joker.png", level: 2, vidStart: 75, vidEnd: 82 },
     // Level 3: K–N
-    { letter: "K", word: "King",     image: "images/king.png", level: 3, vidStart: 87, vidEnd: 94 },
+    { letter: "K", word: "King",     image: "images/king.png", level: 3, vidStart: 87, vidEnd: 93 },
     { letter: "L", word: "Lion",     image: "images/lion.png", level: 3, vidStart: 93, vidEnd: 99 },
     { letter: "M", word: "Monkey",   image: "images/monkey.png", level: 3, vidStart: 99, vidEnd: 105 },
     { letter: "N", word: "Nose",     image: "images/nose.png", level: 3, vidStart: 105, vidEnd: 111 },
