@@ -166,6 +166,29 @@ function buildLevelGrid() {
 // Build on load
 buildLevelGrid();
 
+// ── Hidden Reset (long-press title for 3s) ────────────────────────────
+let resetTimer = null;
+const title = document.getElementById("app-title");
+title.addEventListener("touchstart", () => {
+    resetTimer = setTimeout(doReset, 3000);
+});
+title.addEventListener("touchend", () => clearTimeout(resetTimer));
+title.addEventListener("touchcancel", () => clearTimeout(resetTimer));
+title.addEventListener("mousedown", () => {
+    resetTimer = setTimeout(doReset, 3000);
+});
+title.addEventListener("mouseup", () => clearTimeout(resetTimer));
+title.addEventListener("mouseleave", () => clearTimeout(resetTimer));
+
+function doReset() {
+    if (confirm("Reset all progress?")) {
+        localStorage.removeItem("lb_unlocked");
+        buildLevelGrid();
+        showScreen("start-screen");
+        speak("Progress reset!");
+    }
+}
+
 // ── Game Flow ───────────────────────────────────────────────────────
 
 function startGame(lvl) {
