@@ -1,39 +1,38 @@
 /* ── LetterBrain — App Logic ─────────────────────────────────────── */
 
 const ALL_ITEMS = [
-    // Level 1: A–D
+    // Level 1: A–F
     { letter: "A", word: "Apple",    emoji: "🍎", level: 1, vidStart: 5,  vidEnd: 12 },
     { letter: "B", word: "Ball",     emoji: "⚽", level: 1, vidStart: 12, vidEnd: 19 },
     { letter: "C", word: "Cat",      emoji: "🐱", level: 1, vidStart: 24, vidEnd: 30 },
     { letter: "D", word: "Dog",      emoji: "🐶", level: 1, vidStart: 30, vidEnd: 36 },
-    // Level 2: E–H
-    { letter: "E", word: "Elephant", emoji: "🐘", level: 2, vidStart: 36, vidEnd: 43 },
-    { letter: "F", word: "Frog",     emoji: "🐸", level: 2, vidStart: 43, vidEnd: 50 },
+    { letter: "E", word: "Elephant", emoji: "🐘", level: 1, vidStart: 36, vidEnd: 43 },
+    { letter: "F", word: "Frog",     emoji: "🐸", level: 1, vidStart: 43, vidEnd: 50 },
+    // Level 2: G–J
     { letter: "G", word: "Goat",     emoji: "🐐", level: 2, vidStart: 56, vidEnd: 62 },
     { letter: "H", word: "Horse",    emoji: "🐴", level: 2, vidStart: 62, vidEnd: 69 },
-    // Level 3: I–L
-    { letter: "I", word: "Igloo",    emoji: "🏠", level: 3, vidStart: 69, vidEnd: 76 },
-    { letter: "J", word: "Joker",    emoji: "🃏", level: 3, vidStart: 75, vidEnd: 82 },
+    { letter: "I", word: "Igloo",    emoji: "🏠", level: 2, vidStart: 69, vidEnd: 76 },
+    { letter: "J", word: "Joker",    emoji: "🃏", level: 2, vidStart: 75, vidEnd: 82 },
+    // Level 3: K–N
     { letter: "K", word: "King",     emoji: "🤴", level: 3, vidStart: 88, vidEnd: 95 },
     { letter: "L", word: "Lion",     emoji: "🦁", level: 3, vidStart: 95, vidEnd: 102 },
-    // Level 4: M–P
-    { letter: "M", word: "Mango",    emoji: "🥭", level: 4, vidStart: 102, vidEnd: 109 },
-    { letter: "N", word: "Nose",     emoji: "👃", level: 4, vidStart: 109, vidEnd: 116 },
+    { letter: "M", word: "Mango",    emoji: "🥭", level: 3, vidStart: 102, vidEnd: 109 },
+    { letter: "N", word: "Nose",     emoji: "👃", level: 3, vidStart: 109, vidEnd: 116 },
+    // Level 4: O–R
     { letter: "O", word: "Orange",   emoji: "🍊", level: 4, vidStart: 118, vidEnd: 125 },
     { letter: "P", word: "Papaya",   emoji: "🥭", level: 4, vidStart: 125, vidEnd: 132 },
-    // Level 5: Q–T
-    { letter: "Q", word: "Queen",    emoji: "👸", level: 5, vidStart: 132, vidEnd: 139 },
-    { letter: "R", word: "Rabbit",   emoji: "🐰", level: 5, vidStart: 139, vidEnd: 146 },
+    { letter: "Q", word: "Queen",    emoji: "👸", level: 4, vidStart: 132, vidEnd: 139 },
+    { letter: "R", word: "Rabbit",   emoji: "🐰", level: 4, vidStart: 139, vidEnd: 146 },
+    // Level 5: S–V
     { letter: "S", word: "Snake",    emoji: "🐍", level: 5, vidStart: 150, vidEnd: 157 },
     { letter: "T", word: "Tiger",    emoji: "🐯", level: 5, vidStart: 157, vidEnd: 164 },
-    // Level 6: U–X
-    { letter: "U", word: "Uncle",    emoji: "👨", level: 6, vidStart: 164, vidEnd: 171 },
-    { letter: "V", word: "Van",      emoji: "🚐", level: 6, vidStart: 171, vidEnd: 178 },
+    { letter: "U", word: "Uncle",    emoji: "👨", level: 5, vidStart: 164, vidEnd: 171 },
+    { letter: "V", word: "Van",      emoji: "🚐", level: 5, vidStart: 171, vidEnd: 178 },
+    // Level 6: W–Z
     { letter: "W", word: "Watch",    emoji: "⌚", level: 6, vidStart: 182, vidEnd: 189 },
     { letter: "X", word: "Xmas Tree",emoji: "🎄", level: 6, vidStart: 189, vidEnd: 196 },
-    // Level 7: Y–Z + review
-    { letter: "Y", word: "Yacht",    emoji: "⛵", level: 7, vidStart: 196, vidEnd: 203 },
-    { letter: "Z", word: "Zebra",    emoji: "🦓", level: 7, vidStart: 203, vidEnd: 210 },
+    { letter: "Y", word: "Yacht",    emoji: "⛵", level: 6, vidStart: 196, vidEnd: 203 },
+    { letter: "Z", word: "Zebra",    emoji: "🦓", level: 6, vidStart: 203, vidEnd: 210 },
 ];
 
 let currentLevel = 1;
