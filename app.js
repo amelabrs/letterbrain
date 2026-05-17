@@ -81,6 +81,7 @@ let currentIndex = 0; // which round we're on
 let currentItem = null;
 let stars = 0;
 let answered = false;
+let roundClean = true; // true until a wrong guess this round
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -211,6 +212,7 @@ function loadRound() {
     }
 
     answered = false;
+    roundClean = true;
     currentItem = queue[currentIndex];
 
     // Update letter display
@@ -266,8 +268,10 @@ function handleChoice(btn, chosen) {
         });
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
-        stars++;
-        document.getElementById("stars").textContent = stars;
+        if (roundClean) {
+            stars++;
+            document.getElementById("stars").textContent = stars;
+        }
 
         playCorrectSound();
         setTimeout(() => speak(`${currentItem.letter} for ${currentItem.word}!`), 500);
@@ -284,6 +288,7 @@ function handleChoice(btn, chosen) {
         btn.classList.add("wrong");
         btn.disabled = true;
 
+        roundClean = false;
         playWrongSound();
         setTimeout(() => speak("Try again!"), 400);
 
@@ -429,7 +434,7 @@ function showDone() {
     const maxLevel = Math.max(...ALL_ITEMS.map((it) => it.level));
     let newUnlock = false;
 
-    if (stars >= UNLOCK_THRESHOLD && currentLevel === unlocked && nextLevel <= maxLevel) {
+    if (stars === queue.length && currentLevel === unlocked && nextLevel <= maxLevel) {
         setUnlockedLevel(nextLevel);
         newUnlock = true;
     }
@@ -442,12 +447,9 @@ function showDone() {
     } else if (stars === queue.length) {
         document.getElementById("unlock-msg").style.display = "none";
         speak("Amazing! You got them all right!");
-    } else if (stars >= UNLOCK_THRESHOLD) {
-        document.getElementById("unlock-msg").style.display = "none";
-        speak(`Great job! You got ${stars} out of ${queue.length}!`);
     } else {
         document.getElementById("unlock-msg").style.display = "none";
-        speak(`Good try! Get ${UNLOCK_THRESHOLD} stars to unlock the next level!`);
+        speak(`Good try! You got ${stars} out of ${queue.length}. Get all right to unlock the next level!`);
     }
 
     spawnConfetti();
