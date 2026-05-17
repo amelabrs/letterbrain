@@ -2,37 +2,37 @@
 
 const ALL_ITEMS = [
     // Level 1: A–F
-    { letter: "A", word: "Apple",    emoji: "🍎", level: 1, vidStart: 5,  vidEnd: 12 },
-    { letter: "B", word: "Ball",     emoji: "⚽", level: 1, vidStart: 12, vidEnd: 19 },
+    { letter: "A", word: "Apple",    image: "images/apple.png", level: 1, vidStart: 5,  vidEnd: 12 },
+    { letter: "B", word: "Ball",     image: "images/ball.png", level: 1, vidStart: 12, vidEnd: 19 },
     { letter: "C", word: "Cat",      image: "images/cat.png", level: 1, vidStart: 24, vidEnd: 30 },
     { letter: "D", word: "Dog",      image: "images/dog.png", level: 1, vidStart: 30, vidEnd: 36 },
-    { letter: "E", word: "Elephant", emoji: "🐘", level: 1, vidStart: 36, vidEnd: 43 },
-    { letter: "F", word: "Frog",     emoji: "🐸", level: 1, vidStart: 43, vidEnd: 50 },
+    { letter: "E", word: "Elephant", image: "images/elephant.png", level: 1, vidStart: 36, vidEnd: 43 },
+    { letter: "F", word: "Frog",     image: "images/frog.png", level: 1, vidStart: 43, vidEnd: 50 },
     // Level 2: G–J
-    { letter: "G", word: "Goat",     emoji: "🐐", level: 2, vidStart: 56, vidEnd: 62 },
-    { letter: "H", word: "Horse",    emoji: "🐴", level: 2, vidStart: 62, vidEnd: 69 },
-    { letter: "I", word: "Igloo",    emoji: "🏠", level: 2, vidStart: 69, vidEnd: 76 },
-    { letter: "J", word: "Joker",    emoji: "🃏", level: 2, vidStart: 75, vidEnd: 82 },
+    { letter: "G", word: "Goat",     image: "images/goat.png", level: 2, vidStart: 56, vidEnd: 62 },
+    { letter: "H", word: "Horse",    image: "images/horse.png", level: 2, vidStart: 62, vidEnd: 69 },
+    { letter: "I", word: "Igloo",    image: "images/igloo.png", level: 2, vidStart: 69, vidEnd: 76 },
+    { letter: "J", word: "Joker",    image: "images/joker.png", level: 2, vidStart: 75, vidEnd: 82 },
     // Level 3: K–N
-    { letter: "K", word: "King",     emoji: "🤴", level: 3, vidStart: 88, vidEnd: 95 },
-    { letter: "L", word: "Lion",     emoji: "🦁", level: 3, vidStart: 95, vidEnd: 102 },
-    { letter: "M", word: "Mango",    emoji: "🥭", level: 3, vidStart: 102, vidEnd: 109 },
-    { letter: "N", word: "Nose",     emoji: "👃", level: 3, vidStart: 109, vidEnd: 116 },
+    { letter: "K", word: "King",     image: "images/king.png", level: 3, vidStart: 88, vidEnd: 95 },
+    { letter: "L", word: "Lion",     image: "images/lion.png", level: 3, vidStart: 95, vidEnd: 102 },
+    { letter: "M", word: "Mango",    image: "images/mango.png", level: 3, vidStart: 102, vidEnd: 109 },
+    { letter: "N", word: "Nose",     image: "images/nose.png", level: 3, vidStart: 109, vidEnd: 116 },
     // Level 4: O–R
-    { letter: "O", word: "Orange",   emoji: "🍊", level: 4, vidStart: 118, vidEnd: 125 },
-    { letter: "P", word: "Papaya",   emoji: "🍓", level: 4, vidStart: 125, vidEnd: 132 },
-    { letter: "Q", word: "Queen",    emoji: "👸", level: 4, vidStart: 132, vidEnd: 139 },
-    { letter: "R", word: "Rabbit",   emoji: "🐰", level: 4, vidStart: 139, vidEnd: 146 },
+    { letter: "O", word: "Orange",   image: "images/orange.png", level: 4, vidStart: 118, vidEnd: 125 },
+    { letter: "P", word: "Papaya",   image: "images/papaya.png", level: 4, vidStart: 125, vidEnd: 132 },
+    { letter: "Q", word: "Queen",    image: "images/queen.png", level: 4, vidStart: 132, vidEnd: 139 },
+    { letter: "R", word: "Rabbit",   image: "images/rabbit.png", level: 4, vidStart: 139, vidEnd: 146 },
     // Level 5: S–V
-    { letter: "S", word: "Snake",    emoji: "🐍", level: 5, vidStart: 150, vidEnd: 157 },
-    { letter: "T", word: "Tiger",    emoji: "🐯", level: 5, vidStart: 157, vidEnd: 164 },
-    { letter: "U", word: "Uncle",    emoji: "👨", level: 5, vidStart: 164, vidEnd: 171 },
-    { letter: "V", word: "Van",      emoji: "🚐", level: 5, vidStart: 171, vidEnd: 178 },
+    { letter: "S", word: "Snake",    image: "images/snake.png", level: 5, vidStart: 150, vidEnd: 157 },
+    { letter: "T", word: "Tiger",    image: "images/tiger.png", level: 5, vidStart: 157, vidEnd: 164 },
+    { letter: "U", word: "Uncle",    image: "images/uncle.png", level: 5, vidStart: 164, vidEnd: 171 },
+    { letter: "V", word: "Van",      image: "images/van.png", level: 5, vidStart: 171, vidEnd: 178 },
     // Level 6: W–Z
-    { letter: "W", word: "Watch",    emoji: "⌚", level: 6, vidStart: 182, vidEnd: 189 },
-    { letter: "X", word: "Xmas Tree",emoji: "🎄", level: 6, vidStart: 189, vidEnd: 196 },
-    { letter: "Y", word: "Yacht",    emoji: "⛵", level: 6, vidStart: 196, vidEnd: 203 },
-    { letter: "Z", word: "Zebra",    emoji: "🦓", level: 6, vidStart: 203, vidEnd: 210 },
+    { letter: "W", word: "Watch",    image: "images/watch.png", level: 6, vidStart: 182, vidEnd: 189 },
+    { letter: "X", word: "Xmas Tree",image: "images/xmastree.png", level: 6, vidStart: 189, vidEnd: 196 },
+    { letter: "Y", word: "Yacht",    image: "images/yacht.png", level: 6, vidStart: 196, vidEnd: 203 },
+    { letter: "Z", word: "Zebra",    image: "images/zebra.png", level: 6, vidStart: 203, vidEnd: 210 },
 ];
 
 let currentLevel = 1;
