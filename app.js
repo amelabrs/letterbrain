@@ -23,10 +23,10 @@ const ALL_ITEMS = [
     { letter: "Q", word: "Queen",    emoji: "👸", level: 3, vidStart: 132, vidEnd: 139 },
     { letter: "R", word: "Rabbit",   emoji: "🐰", level: 3, vidStart: 139, vidEnd: 146 },
     // Level 4: S–X
-    { letter: "S", word: "Sun",      emoji: "☀️", level: 4 },
-    { letter: "T", word: "Tree",     emoji: "🌳", level: 4 },
-    { letter: "U", word: "Umbrella", emoji: "☂️", level: 4 },
-    { letter: "V", word: "Violin",   emoji: "🎻", level: 4 },
+    { letter: "S", word: "Snake",    emoji: "🐍", level: 4, vidStart: 150, vidEnd: 157 },
+    { letter: "T", word: "Tiger",    emoji: "🐯", level: 4, vidStart: 157, vidEnd: 164 },
+    { letter: "U", word: "Uncle",    emoji: "👨", level: 4, vidStart: 164, vidEnd: 171 },
+    { letter: "V", word: "Van",      emoji: "🚐", level: 4, vidStart: 171, vidEnd: 178 },
     { letter: "W", word: "Whale",    emoji: "🐋", level: 4 },
     { letter: "X", word: "Xylophone",emoji: "🎵", level: 4 },
     // Level 5: Y–Z + review picks
