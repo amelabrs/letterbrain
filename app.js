@@ -1,12 +1,12 @@
 /* ── LetterBrain — App Logic ─────────────────────────────────────── */
 
 const ITEMS = [
-    { letter: "A", word: "Apple",    emoji: "🍎" },
-    { letter: "B", word: "Ball",     emoji: "⚽" },
-    { letter: "C", word: "Cat",      emoji: "🐱" },
-    { letter: "D", word: "Dog",      emoji: "🐶" },
-    { letter: "E", word: "Elephant", emoji: "🐘" },
-    { letter: "F", word: "Frog",     emoji: "🐸" },
+    { letter: "A", word: "Apple",    emoji: "🍎", vidStart: 5,  vidEnd: 12 },
+    { letter: "B", word: "Ball",     emoji: "⚽", vidStart: 12, vidEnd: 19 },
+    { letter: "C", word: "Cat",      emoji: "🐱", vidStart: 19, vidEnd: 26 },
+    { letter: "D", word: "Dog",      emoji: "🐶", vidStart: 26, vidEnd: 33 },
+    { letter: "E", word: "Elephant", emoji: "🐘", vidStart: 33, vidEnd: 40 },
+    { letter: "F", word: "Frog",     emoji: "🐸", vidStart: 40, vidEnd: 47 },
 ];
 
 // ── Musical Sounds (Web Audio API) ──────────────────────────────────
@@ -200,8 +200,6 @@ function handleChoice(btn, chosen) {
 // ── YouTube Video Reward ────────────────────────────────────────────
 
 const VIDEO_ID = "a_DRSc0oZV0";
-const VIDEO_START = 5;
-const VIDEO_END = 12;
 let ytPlayer = null;
 let ytReady = false;
 let videoTimer = null;
@@ -218,8 +216,6 @@ function onYouTubeIframeAPIReady() {
             modestbranding: 1,
             rel: 0,
             showinfo: 0,
-            start: VIDEO_START,
-            end: VIDEO_END,
         },
         events: {
             onReady: () => { ytReady = true; },
@@ -237,23 +233,37 @@ function onPlayerStateChange(e) {
 
 function playVideoReward() {
     if (!ytReady) {
-        // Skip video if API not ready, just advance
         currentIndex++;
         loadRound();
         return;
     }
 
+    const start = currentItem.vidStart;
+    const end = currentItem.vidEnd;
+
     const overlay = document.getElementById("video-overlay");
     overlay.className = "video-overlay show";
-    ytPlayer.seekTo(VIDEO_START, true);
+    ytPlayer.seekTo(start, true);
     ytPlayer.playVideo();
 
-    // Safety timeout in case onStateChange doesn't fire
-    videoTimer = setTimeout(hideVideoOverlay, (VIDEO_END - VIDEO_START + 1) * 1000);
+    // Monitor playback and stop at the end timestamp
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+
+    // Safety timeout
+    setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, (end - start + 2) * 1000);
 }
 
 function hideVideoOverlay() {
-    clearTimeout(videoTimer);
+    clearInterval(videoTimer);
     const overlay = document.getElementById("video-overlay");
     overlay.className = "video-overlay hidden";
     if (ytPlayer) ytPlayer.pauseVideo();
