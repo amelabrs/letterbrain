@@ -14,7 +14,7 @@ const ALL_ITEMS = [
     { letter: "I", word: "Igloo",    image: "images/igloo.png", level: 2, vidStart: 69, vidEnd: 76 },
     { letter: "J", word: "Joker",    image: "images/joker.png", level: 2, vidStart: 75, vidEnd: 82 },
     // Level 3: K–N
-    { letter: "K", word: "King",     image: "images/king.png", level: 3, vidStart: 88, vidEnd: 95 },
+    { letter: "K", word: "King",     image: "images/king.png", level: 3, vidStart: 88, vidEnd: 94 },
     { letter: "L", word: "Lion",     image: "images/lion.png", level: 3, vidStart: 95, vidEnd: 102 },
     { letter: "M", word: "Mango",    image: "images/mango.png", level: 3, vidStart: 102, vidEnd: 109 },
     { letter: "N", word: "Nose",     image: "images/nose.png", level: 3, vidStart: 109, vidEnd: 116 },
@@ -255,17 +255,16 @@ function loadRound() {
 
 function handleChoice(btn, chosen) {
     if (answered) return;
-    answered = true;
 
     const isCorrect = chosen.letter === currentItem.letter;
 
-    // Highlight buttons
-    document.querySelectorAll(".choice-btn").forEach((b) => {
-        b.classList.add("dimmed");
-    });
-    btn.classList.remove("dimmed");
-
     if (isCorrect) {
+        answered = true;
+        // Dim all others, highlight correct
+        document.querySelectorAll(".choice-btn").forEach((b) => {
+            b.classList.add("dimmed");
+        });
+        btn.classList.remove("dimmed");
         btn.classList.add("correct");
         stars++;
         document.getElementById("stars").textContent = stars;
@@ -283,21 +282,17 @@ function handleChoice(btn, chosen) {
         }
     } else {
         btn.classList.add("wrong");
-
-        // Also highlight the correct one
-        document.querySelectorAll(".choice-btn").forEach((b) => {
-            if (b.dataset.letter === currentItem.letter) {
-                b.classList.remove("dimmed");
-                b.classList.add("correct");
-            }
-        });
+        btn.disabled = true;
 
         playWrongSound();
-        setTimeout(() => speak(`Oops! ${currentItem.letter} for ${currentItem.word}.`), 400);
-        showFeedback(false);
+        setTimeout(() => speak("Try again!"), 400);
+
+        // Let the child keep trying — don't advance, don't reveal answer
+        answered = false;
+        return;
     }
 
-    // Advance after delay (wrong answers, or correct without video)
+    // Advance after delay (correct without video)
     setTimeout(() => {
         currentIndex++;
         loadRound();
