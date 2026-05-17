@@ -1,0 +1,21 @@
+{
+  "name": "LetterBrain — ABC for Kids",
+  "short_name": "LetterBrain",
+  "description": "Learn your ABCs with pictures and sounds",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#764ba2",
+  "theme_color": "#764ba2",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
