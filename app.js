@@ -12,7 +12,7 @@ const ALL_ITEMS = [
     { letter: "G", word: "Goat",     emoji: "🐐", level: 2, vidStart: 56, vidEnd: 62 },
     { letter: "H", word: "Horse",    emoji: "🐴", level: 2, vidStart: 62, vidEnd: 69 },
     { letter: "I", word: "Igloo",    emoji: "🏠", level: 2, vidStart: 69, vidEnd: 76 },
-    { letter: "J", word: "Juice",    emoji: "🧃", level: 2 },
+    { letter: "J", word: "Joker",    emoji: "🃏", level: 2, vidStart: 75, vidEnd: 82 },
     { letter: "K", word: "Kite",     emoji: "🪁", level: 2 },
     { letter: "L", word: "Lion",     emoji: "🦁", level: 2 },
     // Level 3: M–R
