@@ -27,11 +27,11 @@ const ALL_ITEMS = [
     { letter: "T", word: "Tiger",    emoji: "🐯", level: 4, vidStart: 157, vidEnd: 164 },
     { letter: "U", word: "Uncle",    emoji: "👨", level: 4, vidStart: 164, vidEnd: 171 },
     { letter: "V", word: "Van",      emoji: "🚐", level: 4, vidStart: 171, vidEnd: 178 },
-    { letter: "W", word: "Whale",    emoji: "🐋", level: 4 },
-    { letter: "X", word: "Xylophone",emoji: "🎵", level: 4 },
+    { letter: "W", word: "Watch",    emoji: "⌚", level: 4, vidStart: 182, vidEnd: 189 },
+    { letter: "X", word: "Xmas Tree",emoji: "🎄", level: 4, vidStart: 189, vidEnd: 196 },
     // Level 5: Y–Z + review picks
-    { letter: "Y", word: "Yacht",    emoji: "⛵", level: 5 },
-    { letter: "Z", word: "Zebra",    emoji: "🦓", level: 5 },
+    { letter: "Y", word: "Yacht",    emoji: "⛵", level: 5, vidStart: 196, vidEnd: 203 },
+    { letter: "Z", word: "Zebra",    emoji: "🦓", level: 5, vidStart: 203, vidEnd: 210 },
 ];
 
 let currentLevel = 1;
