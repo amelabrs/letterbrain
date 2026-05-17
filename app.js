@@ -40,6 +40,29 @@ let levelItems = [];
 let videoEnabled = true;
 const UNLOCK_THRESHOLD = 3; // stars needed to unlock next level
 
+// ── Analytics ────────────────────────────────────────────────────────
+const SHEET_URL = ""; // paste your Google Apps Script web app URL here
+
+function getDeviceId() {
+    let id = localStorage.getItem("lb_deviceId");
+    if (!id) {
+        id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem("lb_deviceId", id);
+    }
+    return id;
+}
+
+function getDeviceName() {
+    return localStorage.getItem("lb_deviceName") || "";
+}
+
+function setDeviceName(name) {
+    localStorage.setItem("lb_deviceName", name);
+}
+
+let roundWrongs = 0;       // wrong guesses for current letter
+let sessionStats = [];     // per-letter results for current level run
+
 function getUnlockedLevel() {
     return parseInt(localStorage.getItem("lb_unlocked") || "1");
 }
@@ -182,11 +205,16 @@ title.addEventListener("mouseup", () => clearTimeout(resetTimer));
 title.addEventListener("mouseleave", () => clearTimeout(resetTimer));
 
 function doReset() {
-    if (confirm("Reset all progress?")) {
+    const action = prompt("Type RESET to clear progress, or enter a device name:");
+    if (!action) return;
+    if (action.trim().toUpperCase() === "RESET") {
         localStorage.removeItem("lb_unlocked");
         buildLevelGrid();
         showScreen("start-screen");
         speak("Progress reset!");
+    } else {
+        setDeviceName(action.trim());
+        speak(`Device named ${action.trim()}`);
     }
 }
 
@@ -200,6 +228,7 @@ function startGame(lvl) {
     queue = shuffle(levelItems);
     currentIndex = 0;
     stars = 0;
+    sessionStats = [];
     document.getElementById("stars").textContent = stars;
     showScreen("quiz-screen");
     loadRound();
@@ -213,6 +242,7 @@ function loadRound() {
 
     answered = false;
     roundClean = true;
+    roundWrongs = 0;
     currentItem = queue[currentIndex];
 
     // Update letter display
@@ -273,6 +303,14 @@ function handleChoice(btn, chosen) {
             document.getElementById("stars").textContent = stars;
         }
 
+        // Record stats for this letter
+        sessionStats.push({
+            letter: currentItem.letter,
+            word: currentItem.word,
+            firstTry: roundClean,
+            wrongs: roundWrongs
+        });
+
         playCorrectSound();
         setTimeout(() => speak(`${currentItem.letter} for ${currentItem.word}!`), 500);
 
@@ -289,6 +327,7 @@ function handleChoice(btn, chosen) {
         btn.disabled = true;
 
         roundClean = false;
+        roundWrongs++;
         playWrongSound();
         setTimeout(() => speak("Try again!"), 400);
 
@@ -454,4 +493,27 @@ function showDone() {
 
     spawnConfetti();
     buildLevelGrid(); // refresh locked states
+    sendStats();
+}
+
+// ── Send Stats to Google Sheet ──────────────────────────────────────
+
+function sendStats() {
+    if (!SHEET_URL) return;
+    const payload = {
+        timestamp: new Date().toISOString(),
+        deviceId: getDeviceId(),
+        deviceName: getDeviceName(),
+        level: currentLevel,
+        stars: stars,
+        total: queue.length,
+        perfect: stars === queue.length,
+        letters: sessionStats
+    };
+    fetch(SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    }).catch(() => {});
 }
