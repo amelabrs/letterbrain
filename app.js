@@ -203,6 +203,7 @@ const VIDEO_ID = "a_DRSc0oZV0";
 let ytPlayer = null;
 let ytReady = false;
 let videoTimer = null;
+let videoShowing = false;
 
 // Called automatically by YouTube IFrame API
 function onYouTubeIframeAPIReady() {
@@ -243,6 +244,7 @@ function playVideoReward() {
 
     const overlay = document.getElementById("video-overlay");
     overlay.className = "video-overlay show";
+    videoShowing = true;
     ytPlayer.seekTo(start, true);
     ytPlayer.playVideo();
 
@@ -256,14 +258,19 @@ function playVideoReward() {
     }, 200);
 
     // Safety timeout
-    setTimeout(() => {
+    safetyTimer = setTimeout(() => {
         clearInterval(videoTimer);
         hideVideoOverlay();
     }, (end - start + 2) * 1000);
 }
 
+let safetyTimer = null;
+
 function hideVideoOverlay() {
+    if (!videoShowing) return; // prevent double-fire
+    videoShowing = false;
     clearInterval(videoTimer);
+    clearTimeout(safetyTimer);
     const overlay = document.getElementById("video-overlay");
     overlay.className = "video-overlay hidden";
     if (ytPlayer) ytPlayer.pauseVideo();
