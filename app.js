@@ -166,11 +166,14 @@ function handleChoice(btn, chosen) {
         document.getElementById("stars").textContent = stars;
 
         playCorrectSound();
-        // Speak "B for Ball!" after the chime
         setTimeout(() => speak(`${currentItem.letter} for ${currentItem.word}!`), 500);
 
         showFeedback(true);
         spawnConfetti();
+
+        // Play video reward after speech finishes
+        setTimeout(() => playVideoReward(), 1600);
+        return; // Don't auto-advance — video will handle it
     } else {
         btn.classList.add("wrong");
 
@@ -187,11 +190,75 @@ function handleChoice(btn, chosen) {
         showFeedback(false);
     }
 
-    // Advance after delay
+    // Advance after delay (wrong answers only — correct uses video)
     setTimeout(() => {
         currentIndex++;
         loadRound();
     }, 2200);
+}
+
+// ── YouTube Video Reward ────────────────────────────────────────────
+
+const VIDEO_ID = "a_DRSc0oZV0";
+const VIDEO_START = 5;
+const VIDEO_END = 12;
+let ytPlayer = null;
+let ytReady = false;
+let videoTimer = null;
+
+// Called automatically by YouTube IFrame API
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player("yt-player", {
+        width: "100%",
+        height: "100%",
+        videoId: VIDEO_ID,
+        playerVars: {
+            autoplay: 0,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            start: VIDEO_START,
+            end: VIDEO_END,
+        },
+        events: {
+            onReady: () => { ytReady = true; },
+            onStateChange: onPlayerStateChange,
+        },
+    });
+}
+
+function onPlayerStateChange(e) {
+    // When video ends (state 0), hide overlay and advance
+    if (e.data === YT.PlayerState.ENDED) {
+        hideVideoOverlay();
+    }
+}
+
+function playVideoReward() {
+    if (!ytReady) {
+        // Skip video if API not ready, just advance
+        currentIndex++;
+        loadRound();
+        return;
+    }
+
+    const overlay = document.getElementById("video-overlay");
+    overlay.className = "video-overlay show";
+    ytPlayer.seekTo(VIDEO_START, true);
+    ytPlayer.playVideo();
+
+    // Safety timeout in case onStateChange doesn't fire
+    videoTimer = setTimeout(hideVideoOverlay, (VIDEO_END - VIDEO_START + 1) * 1000);
+}
+
+function hideVideoOverlay() {
+    clearTimeout(videoTimer);
+    const overlay = document.getElementById("video-overlay");
+    overlay.className = "video-overlay hidden";
+    if (ytPlayer) ytPlayer.pauseVideo();
+    currentIndex++;
+    loadRound();
 }
 
 // ── Feedback ────────────────────────────────────────────────────────

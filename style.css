@@ -314,3 +314,37 @@ header h1 {
     0% { opacity: 1; transform: translateY(0) rotate(0deg); }
     100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
 }
+
+/* ── Video Overlay ───────────────────────────────────────────────── */
+
+.video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    transition: opacity 0.3s;
+}
+
+.video-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.video-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.video-wrap {
+    width: min(90vw, 480px);
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+}
