@@ -41,7 +41,7 @@ let videoEnabled = true;
 const UNLOCK_THRESHOLD = 3; // stars needed to unlock next level
 
 // ── Analytics ────────────────────────────────────────────────────────
-const SHEET_URL = ""; // paste your Google Apps Script web app URL here
+const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
 
 function getDeviceId() {
     let id = localStorage.getItem("lb_deviceId");
@@ -190,33 +190,27 @@ function buildLevelGrid() {
 // Build on load
 buildLevelGrid();
 
-// ── Hidden Reset (long-press title for 3s) ────────────────────────────
-let resetTimer = null;
-const title = document.getElementById("app-title");
-title.addEventListener("touchstart", () => {
-    resetTimer = setTimeout(doReset, 3000);
-});
-title.addEventListener("touchend", () => clearTimeout(resetTimer));
-title.addEventListener("touchcancel", () => clearTimeout(resetTimer));
-title.addEventListener("mousedown", () => {
-    resetTimer = setTimeout(doReset, 3000);
-});
-title.addEventListener("mouseup", () => clearTimeout(resetTimer));
-title.addEventListener("mouseleave", () => clearTimeout(resetTimer));
-
-function doReset() {
-    const action = prompt("Type RESET to clear progress, or enter a device name:");
+// ── Settings (gear icon) ──────────────────────────────────────────────
+document.getElementById("settings-btn").addEventListener("click", () => {
+    const action = prompt(
+        "Settings:\n1 — Name this device\n2 — Reset progress\n\nEnter 1 or 2:"
+    );
     if (!action) return;
-    if (action.trim().toUpperCase() === "RESET") {
-        localStorage.removeItem("lb_unlocked");
-        buildLevelGrid();
-        showScreen("start-screen");
-        speak("Progress reset!");
-    } else {
-        setDeviceName(action.trim());
-        speak(`Device named ${action.trim()}`);
+    if (action.trim() === "1") {
+        const name = prompt("Enter a name for this device (e.g. Mom, Dad):");
+        if (name && name.trim()) {
+            setDeviceName(name.trim());
+            speak(`Device named ${name.trim()}`);
+        }
+    } else if (action.trim() === "2") {
+        if (confirm("Reset all progress?")) {
+            localStorage.removeItem("lb_unlocked");
+            buildLevelGrid();
+            showScreen("start-screen");
+            speak("Progress reset!");
+        }
     }
-}
+});
 
 // ── Game Flow ───────────────────────────────────────────────────────
 
