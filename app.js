@@ -169,10 +169,8 @@ function loadRound() {
     options.forEach((opt) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn";
-        btn.innerHTML = `
-            <span class="choice-emoji">${opt.emoji}</span>
-            <span class="choice-label">${opt.word}</span>
-        `;
+        btn.dataset.letter = opt.letter;
+        btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
         btn.onclick = () => handleChoice(btn, opt);
         choicesEl.appendChild(btn);
     });
@@ -215,7 +213,7 @@ function handleChoice(btn, chosen) {
 
         // Also highlight the correct one
         document.querySelectorAll(".choice-btn").forEach((b) => {
-            if (b.querySelector(".choice-label").textContent === currentItem.word) {
+            if (b.dataset.letter === currentItem.letter) {
                 b.classList.remove("dimmed");
                 b.classList.add("correct");
             }
