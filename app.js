@@ -18,10 +18,10 @@ const ALL_ITEMS = [
     // Level 3: M–R
     { letter: "M", word: "Mango",    emoji: "🥭", level: 3, vidStart: 102, vidEnd: 109 },
     { letter: "N", word: "Nose",     emoji: "👃", level: 3, vidStart: 109, vidEnd: 116 },
-    { letter: "O", word: "Orange",   emoji: "🍊", level: 3 },
-    { letter: "P", word: "Penguin",  emoji: "🐧", level: 3 },
-    { letter: "Q", word: "Queen",    emoji: "👸", level: 3 },
-    { letter: "R", word: "Rainbow",  emoji: "🌈", level: 3 },
+    { letter: "O", word: "Orange",   emoji: "🍊", level: 3, vidStart: 118, vidEnd: 125 },
+    { letter: "P", word: "Papaya",   emoji: "🥭", level: 3, vidStart: 125, vidEnd: 132 },
+    { letter: "Q", word: "Queen",    emoji: "👸", level: 3, vidStart: 132, vidEnd: 139 },
+    { letter: "R", word: "Rabbit",   emoji: "🐰", level: 3, vidStart: 139, vidEnd: 146 },
     // Level 4: S–X
     { letter: "S", word: "Sun",      emoji: "☀️", level: 4 },
     { letter: "T", word: "Tree",     emoji: "🌳", level: 4 },
