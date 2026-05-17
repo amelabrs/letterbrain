@@ -130,14 +130,6 @@ function startGame() {
     videoEnabled = document.getElementById("video-toggle").checked;
     levelItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
 
-    // Level 5 only has 2 letters — pad with random review from other levels
-    if (levelItems.length < 6) {
-        const others = shuffle(ALL_ITEMS.filter((it) => it.level !== currentLevel));
-        while (levelItems.length < 6) {
-            levelItems.push(others.pop());
-        }
-    }
-
     queue = shuffle(levelItems);
     currentIndex = 0;
     stars = 0;
