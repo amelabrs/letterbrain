@@ -4,7 +4,7 @@ const ALL_ITEMS = [
     // Level 1: A–F
     { letter: "A", word: "Apple",    emoji: "🍎", level: 1, vidStart: 5,  vidEnd: 12 },
     { letter: "B", word: "Ball",     emoji: "⚽", level: 1, vidStart: 12, vidEnd: 19 },
-    { letter: "C", word: "Cat",      emoji: "🐱", level: 1, vidStart: 24, vidEnd: 30 },
+    { letter: "C", word: "Cat",      image: "images/cat.png", level: 1, vidStart: 24, vidEnd: 30 },
     { letter: "D", word: "Dog",      emoji: "🐶", level: 1, vidStart: 30, vidEnd: 36 },
     { letter: "E", word: "Elephant", emoji: "🐘", level: 1, vidStart: 36, vidEnd: 43 },
     { letter: "F", word: "Frog",     emoji: "🐸", level: 1, vidStart: 43, vidEnd: 50 },
@@ -170,7 +170,11 @@ function loadRound() {
         const btn = document.createElement("button");
         btn.className = "choice-btn";
         btn.dataset.letter = opt.letter;
-        btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
+        if (opt.image) {
+            btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
+        } else {
+            btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
+        }
         btn.onclick = () => handleChoice(btn, opt);
         choicesEl.appendChild(btn);
     });

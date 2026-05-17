@@ -236,6 +236,13 @@ header h1 {
     height: 90px !important;
 }
 
+.choice-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
 .choice-label {
     display: none;
 }
