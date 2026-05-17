@@ -20,7 +20,7 @@ const ALL_ITEMS = [
     { letter: "N", word: "Nose",     image: "images/nose.png", level: 3, vidStart: 109, vidEnd: 116 },
     // Level 4: O–R
     { letter: "O", word: "Orange",   image: "images/orange.png", level: 4, vidStart: 118, vidEnd: 125 },
-    { letter: "P", word: "Papaya",   image: "images/papaya.png", level: 4, vidStart: 125, vidEnd: 132 },
+    { letter: "P", word: "Parrot",   image: "images/parrot.png", level: 4, vidStart: 125, vidEnd: 132 },
     { letter: "Q", word: "Queen",    image: "images/queen.png", level: 4, vidStart: 132, vidEnd: 139 },
     { letter: "R", word: "Rabbit",   image: "images/rabbit.png", level: 4, vidStart: 139, vidEnd: 146 },
     // Level 5: S–V
