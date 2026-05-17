@@ -20,7 +20,7 @@ const ALL_ITEMS = [
     { letter: "N", word: "Nose",     emoji: "👃", level: 3, vidStart: 109, vidEnd: 116 },
     // Level 4: O–R
     { letter: "O", word: "Orange",   emoji: "🍊", level: 4, vidStart: 118, vidEnd: 125 },
-    { letter: "P", word: "Papaya",   emoji: "🥭", level: 4, vidStart: 125, vidEnd: 132 },
+    { letter: "P", word: "Papaya",   emoji: "🍓", level: 4, vidStart: 125, vidEnd: 132 },
     { letter: "Q", word: "Queen",    emoji: "👸", level: 4, vidStart: 132, vidEnd: 139 },
     { letter: "R", word: "Rabbit",   emoji: "🐰", level: 4, vidStart: 139, vidEnd: 146 },
     // Level 5: S–V
@@ -174,6 +174,9 @@ function loadRound() {
         btn.onclick = () => handleChoice(btn, opt);
         choicesEl.appendChild(btn);
     });
+
+    // Render emoji as high-quality SVGs
+    if (window.twemoji) twemoji.parse(choicesEl, { folder: 'svg', ext: '.svg' });
 
     // Update progress
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;

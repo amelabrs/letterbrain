@@ -231,6 +231,11 @@ header h1 {
     line-height: 1;
 }
 
+.choice-emoji img.emoji {
+    width: 90px !important;
+    height: 90px !important;
+}
+
 .choice-label {
     display: none;
 }
