@@ -123,10 +123,39 @@ function speak(text) {
     speechSynthesis.speak(utter);
 }
 
+// ── Build Level Cards ───────────────────────────────────────────────
+
+function buildLevelGrid() {
+    const grid = document.getElementById("level-grid");
+    grid.innerHTML = "";
+    const levels = [...new Set(ALL_ITEMS.map((it) => it.level))].sort();
+
+    levels.forEach((lvl) => {
+        const items = ALL_ITEMS.filter((it) => it.level === lvl);
+        const card = document.createElement("div");
+        card.className = "level-card";
+        card.onclick = () => startGame(lvl);
+
+        const thumbs = items.map((it) =>
+            `<img src="${it.image}" alt="${it.word}">`
+        ).join("");
+
+        card.innerHTML = `
+            <span class="level-number">${lvl}</span>
+            <div class="level-thumbs">${thumbs}</div>
+            <span class="level-go">▶</span>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Build on load
+buildLevelGrid();
+
 // ── Game Flow ───────────────────────────────────────────────────────
 
-function startGame() {
-    currentLevel = parseInt(document.getElementById("level-select").value);
+function startGame(lvl) {
+    currentLevel = lvl;
     videoEnabled = document.getElementById("video-toggle").checked;
     levelItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
 

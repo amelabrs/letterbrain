@@ -19,19 +19,8 @@
         <div id="start-screen" class="screen active">
             <div class="big-emoji">🎓</div>
             <h2>Learn Your ABCs!</h2>
-            <p>Pick the right picture for each letter</p>
 
-            <div class="settings">
-                <label for="level-select">Level</label>
-                <select id="level-select">
-                    <option value="1">Level 1: A – F</option>
-                    <option value="2">Level 2: G – J</option>
-                    <option value="3">Level 3: K – N</option>
-                    <option value="4">Level 4: O – R</option>
-                    <option value="5">Level 5: S – V</option>
-                    <option value="6">Level 6: W – Z</option>
-                </select>
-            </div>
+            <div id="level-grid"></div>
 
             <div class="settings">
                 <label class="toggle-label">
@@ -39,8 +28,6 @@
                     <span>🎬 Video Reward</span>
                 </label>
             </div>
-
-            <button class="start-btn" onclick="startGame()">Let's Go! 🚀</button>
         </div>
 
         <!-- Quiz Screen -->
