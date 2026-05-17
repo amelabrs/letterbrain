@@ -147,6 +147,21 @@ header h1 {
     font-size: 1.4rem;
 }
 
+.level-card.locked {
+    opacity: 0.4;
+    filter: grayscale(0.8);
+    pointer-events: none;
+}
+
+.unlock-msg {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #f6d365;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    animation: popIn 0.4s ease-out;
+    margin: 8px 0;
+}
+
 .settings {
     width: 100%;
     max-width: 280px;

@@ -38,6 +38,15 @@ const ALL_ITEMS = [
 let currentLevel = 1;
 let levelItems = [];
 let videoEnabled = true;
+const UNLOCK_THRESHOLD = 3; // stars needed to unlock next level
+
+function getUnlockedLevel() {
+    return parseInt(localStorage.getItem("lb_unlocked") || "1");
+}
+
+function setUnlockedLevel(lvl) {
+    localStorage.setItem("lb_unlocked", String(lvl));
+}
 
 // ── Musical Sounds (Web Audio API) ──────────────────────────────────
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -129,12 +138,17 @@ function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
     const levels = [...new Set(ALL_ITEMS.map((it) => it.level))].sort();
+    const unlocked = getUnlockedLevel();
 
     levels.forEach((lvl) => {
         const items = ALL_ITEMS.filter((it) => it.level === lvl);
         const card = document.createElement("div");
-        card.className = "level-card";
-        card.onclick = () => startGame(lvl);
+        const isLocked = lvl > unlocked;
+        card.className = "level-card" + (isLocked ? " locked" : "");
+
+        if (!isLocked) {
+            card.onclick = () => startGame(lvl);
+        }
 
         const thumbs = items.map((it) =>
             `<img src="${it.image}" alt="${it.word}">`
@@ -143,7 +157,7 @@ function buildLevelGrid() {
         card.innerHTML = `
             <span class="level-number">${lvl}</span>
             <div class="level-thumbs">${thumbs}</div>
-            <span class="level-go">▶</span>
+            <span class="level-go">${isLocked ? "🔒" : "▶"}</span>
         `;
         grid.appendChild(card);
     });
@@ -391,12 +405,33 @@ function showDone() {
     document.getElementById("final-total").textContent = queue.length;
     document.getElementById("final-stars").textContent = "⭐".repeat(stars) + "☆".repeat(queue.length - stars);
 
+    // Check if next level should unlock
+    const unlocked = getUnlockedLevel();
+    const nextLevel = currentLevel + 1;
+    const maxLevel = Math.max(...ALL_ITEMS.map((it) => it.level));
+    let newUnlock = false;
+
+    if (stars >= UNLOCK_THRESHOLD && currentLevel === unlocked && nextLevel <= maxLevel) {
+        setUnlockedLevel(nextLevel);
+        newUnlock = true;
+    }
+
     showScreen("done-screen");
 
-    speak(
-        stars === queue.length
-            ? "Amazing! You got them all right!"
-            : `Great job! You got ${stars} out of ${queue.length}!`
-    );
+    if (newUnlock) {
+        document.getElementById("unlock-msg").style.display = "block";
+        speak(`Amazing! You unlocked Level ${nextLevel}!`);
+    } else if (stars === queue.length) {
+        document.getElementById("unlock-msg").style.display = "none";
+        speak("Amazing! You got them all right!");
+    } else if (stars >= UNLOCK_THRESHOLD) {
+        document.getElementById("unlock-msg").style.display = "none";
+        speak(`Great job! You got ${stars} out of ${queue.length}!`);
+    } else {
+        document.getElementById("unlock-msg").style.display = "none";
+        speak(`Good try! Get ${UNLOCK_THRESHOLD} stars to unlock the next level!`);
+    }
+
     spawnConfetti();
+    buildLevelGrid(); // refresh locked states
 }
