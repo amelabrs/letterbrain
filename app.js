@@ -3,10 +3,10 @@
 const ITEMS = [
     { letter: "A", word: "Apple",    emoji: "🍎", vidStart: 5,  vidEnd: 12 },
     { letter: "B", word: "Ball",     emoji: "⚽", vidStart: 12, vidEnd: 19 },
-    { letter: "C", word: "Cat",      emoji: "🐱", vidStart: 19, vidEnd: 26 },
-    { letter: "D", word: "Dog",      emoji: "🐶", vidStart: 26, vidEnd: 33 },
-    { letter: "E", word: "Elephant", emoji: "🐘", vidStart: 33, vidEnd: 40 },
-    { letter: "F", word: "Frog",     emoji: "🐸", vidStart: 40, vidEnd: 47 },
+    { letter: "C", word: "Cat",      emoji: "🐱", vidStart: 24, vidEnd: 30 },
+    { letter: "D", word: "Dog",      emoji: "🐶", vidStart: 30, vidEnd: 36 },
+    { letter: "E", word: "Elephant", emoji: "🐘", vidStart: 36, vidEnd: 43 },
+    { letter: "F", word: "Frog",     emoji: "🐸", vidStart: 43, vidEnd: 50 },
 ];
 
 // ── Musical Sounds (Web Audio API) ──────────────────────────────────
