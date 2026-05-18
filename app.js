@@ -418,10 +418,11 @@ function onYouTubeIframeAPIReady() {
         videoId: VIDEO_ID,
         playerVars: {
             autoplay: 0,
-            controls: 0,
+            controls: 1,
             modestbranding: 1,
             rel: 0,
             showinfo: 0,
+            playsinline: 1,
         },
         events: {
             onReady: () => { ytReady = true; },
@@ -578,8 +579,8 @@ function showDone() {
     buildLevelGrid(); // refresh locked states
     sendStats();
 
-    // Cartoon reward for perfect score
-    if (stars === queue.length && videoEnabled) {
+    // Shorts reward for perfect score (always plays, independent of per-letter video toggle)
+    if (stars === queue.length) {
         setTimeout(() => playCartoonReward(), 2500);
     }
 }
