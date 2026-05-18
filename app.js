@@ -432,14 +432,9 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerStateChange(e) {
-    // When video ends (state 0)
+    // When per-letter video ends (state 0), hide overlay and advance
     if (e.data === YT.PlayerState.ENDED) {
-        if (isCartoonPlaying) {
-            // Cartoon ended naturally — move to next in list
-            cartoonEnded();
-        } else {
-            hideVideoOverlay();
-        }
+        hideVideoOverlay();
     }
 }
 
@@ -493,19 +488,8 @@ function hideVideoOverlay() {
 }
 
 function skipCartoon() {
-    if (!isCartoonPlaying) return;
-    clearTimeout(cartoonTimer);
-    // Save current position so it resumes next time
-    const pos = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
-    const state = getCartoonState();
-    saveCartoonState(state.index, pos);
-    isCartoonPlaying = false;
-    videoShowing = false;
-    const overlay = document.getElementById("video-overlay");
-    overlay.className = "video-overlay hidden";
-    document.getElementById("skip-cartoon").style.display = "none";
-    if (ytPlayer) ytPlayer.pauseVideo();
-    if (ytReady) ytPlayer.cueVideoById(VIDEO_ID);
+    // Legacy — only for video-overlay skip button (per-letter clips)
+    hideVideoOverlay();
 }
 
 // ── Feedback ────────────────────────────────────────────────────────
@@ -585,50 +569,43 @@ function showDone() {
     }
 }
 
-// ── Cartoon Reward (sequential, resumable, 5-min chunks) ────────────
+// ── Shorts Reward (simple iframe, no YT API dependency) ─────────────
 
 function playCartoonReward() {
-    if (!ytReady) return;
     const state = getCartoonState();
     const shortId = SHORTS_IDS[state.index % SHORTS_IDS.length];
 
-    const overlay = document.getElementById("video-overlay");
+    const overlay = document.getElementById("shorts-overlay");
+    const iframe = document.getElementById("shorts-iframe");
+    iframe.src = `https://www.youtube.com/embed/${shortId}?autoplay=1&rel=0&modestbranding=1`;
     overlay.className = "video-overlay show";
-    document.getElementById("skip-cartoon").style.display = "block";
-    videoShowing = true;
     isCartoonPlaying = true;
 
-    ytPlayer.loadVideoById(shortId, state.position);
-    ytPlayer.playVideo();
-
-    // Stop after 5 minutes and save position
+    // Auto-close after 5 minutes
     clearTimeout(cartoonTimer);
     cartoonTimer = setTimeout(() => {
         if (!isCartoonPlaying) return;
-        const pos = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
-        const state = getCartoonState();
-        saveCartoonState(state.index, pos);
-        isCartoonPlaying = false;
-        videoShowing = false;
-        const overlay = document.getElementById("video-overlay");
-        overlay.className = "video-overlay hidden";
-        document.getElementById("skip-cartoon").style.display = "none";
-        if (ytPlayer) ytPlayer.pauseVideo();
-        if (ytReady) ytPlayer.cueVideoById(VIDEO_ID);
+        // Advance to next short for next time
+        const nextIndex = (state.index + 1) % SHORTS_IDS.length;
+        saveCartoonState(nextIndex, 0);
+        hideShorts();
     }, CARTOON_PLAY_DURATION * 1000);
 }
 
-function cartoonEnded() {
-    // Current short finished — advance to next, reset position
+function skipShorts() {
     clearTimeout(cartoonTimer);
     const state = getCartoonState();
+    // Advance to next short for next time
     const nextIndex = (state.index + 1) % SHORTS_IDS.length;
     saveCartoonState(nextIndex, 0);
+    hideShorts();
+}
 
-    // Immediately start the next one (still within the 5-min window)
-    const nextId = SHORTS_IDS[nextIndex];
-    ytPlayer.loadVideoById(nextId, 0);
-    ytPlayer.playVideo();
+function hideShorts() {
+    isCartoonPlaying = false;
+    const overlay = document.getElementById("shorts-overlay");
+    overlay.className = "video-overlay hidden";
+    document.getElementById("shorts-iframe").src = "";
 }
 
 // ── Send Stats to Google Sheet ──────────────────────────────────────
