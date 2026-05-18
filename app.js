@@ -7,7 +7,7 @@ const ALL_ITEMS = [
     { letter: "C", word: "Cat",      image: "images/cat.png", level: 1, vidStart: 24, vidEnd: 30 },
     { letter: "D", word: "Dog",      image: "images/dog.png", level: 1, vidStart: 30, vidEnd: 36 },
     { letter: "E", word: "Elephant", image: "images/elephant.png", level: 1, vidStart: 36, vidEnd: 43 },
-    { letter: "F", word: "Frog",     image: "images/frog.png", level: 1, vidStart: 43, vidEnd: 50 },
+    { letter: "F", word: "Fish",     image: "images/fish.png", level: 1, vidStart: 43, vidEnd: 50 },
     // Level 2: G–J
     { letter: "G", word: "Goat",     image: "images/goat.png", level: 2, vidStart: 56, vidEnd: 62 },
     { letter: "H", word: "Hen",      image: "images/hen.png", level: 2, vidStart: 62, vidEnd: 69 },
@@ -38,6 +38,7 @@ const ALL_ITEMS = [
 let currentLevel = 1;
 let levelItems = [];
 let videoEnabled = true;
+let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
 const UNLOCK_THRESHOLD = 3; // stars needed to unlock next level
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -190,6 +191,15 @@ function buildLevelGrid() {
 // Build on load
 buildLevelGrid();
 
+// ── Mode Tabs ──────────────────────────────────────────────────────────
+document.querySelectorAll(".mode-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+        document.querySelectorAll(".mode-tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        gameMode = tab.dataset.mode;
+    });
+});
+
 // ── Settings (gear icon) ──────────────────────────────────────────────
 document.getElementById("settings-btn").addEventListener("click", () => {
     const action = prompt(
@@ -239,40 +249,70 @@ function loadRound() {
     roundWrongs = 0;
     currentItem = queue[currentIndex];
 
-    // Update letter display
-    const bigLetter = document.getElementById("big-letter");
-    bigLetter.textContent = currentItem.letter;
-    bigLetter.style.animation = "none";
-    // Force reflow to restart animation
-    void bigLetter.offsetWidth;
-    bigLetter.style.animation = "popIn 0.4s ease-out";
+    const letterDisplay = document.getElementById("letter-display");
 
-    // Speak the prompt
-    speak(`What starts with ${currentItem.letter}?`);
+    if (gameMode === "reverse") {
+        // Reverse mode: show image, pick the letter
+        letterDisplay.innerHTML = `
+            <div class="letter-label">What letter?</div>
+            <img id="big-image" class="big-quiz-image" src="${currentItem.image}" alt="?">
+        `;
+        const bigImg = document.getElementById("big-image");
+        bigImg.style.animation = "none";
+        void bigImg.offsetWidth;
+        bigImg.style.animation = "popIn 0.4s ease-out";
 
-    // Pick 3 wrong choices + 1 correct, shuffle
-    const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
-    const options = shuffle([currentItem, ...wrong]);
+        speak("What letter does this start with?");
 
-    // Render choices
-    const choicesEl = document.getElementById("choices");
-    choicesEl.innerHTML = "";
+        // Pick 3 wrong letters + 1 correct, show as letter buttons
+        const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
+        const options = shuffle([currentItem, ...wrong]);
 
-    options.forEach((opt) => {
-        const btn = document.createElement("button");
-        btn.className = "choice-btn";
-        btn.dataset.letter = opt.letter;
-        if (opt.image) {
-            btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
-        } else {
-            btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
-        }
-        btn.onclick = () => handleChoice(btn, opt);
-        choicesEl.appendChild(btn);
-    });
+        const choicesEl = document.getElementById("choices");
+        choicesEl.innerHTML = "";
+        options.forEach((opt) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.dataset.letter = opt.letter;
+            btn.textContent = opt.letter;
+            btn.onclick = () => handleChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        // Normal mode: show letter, pick the image
+        letterDisplay.innerHTML = `
+            <div class="letter-label">What starts with</div>
+            <div id="big-letter">A</div>
+            <div class="letter-label">?</div>
+        `;
+        const bigLetter = document.getElementById("big-letter");
+        bigLetter.textContent = currentItem.letter;
+        bigLetter.style.animation = "none";
+        void bigLetter.offsetWidth;
+        bigLetter.style.animation = "popIn 0.4s ease-out";
 
-    // Render emoji as high-quality SVGs
-    if (window.twemoji) twemoji.parse(choicesEl, { folder: 'svg', ext: '.svg' });
+        speak(`What starts with ${currentItem.letter}?`);
+
+        const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
+        const options = shuffle([currentItem, ...wrong]);
+
+        const choicesEl = document.getElementById("choices");
+        choicesEl.innerHTML = "";
+        options.forEach((opt) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            btn.dataset.letter = opt.letter;
+            if (opt.image) {
+                btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
+            } else {
+                btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
+            }
+            btn.onclick = () => handleChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+
+        if (window.twemoji) twemoji.parse(choicesEl, { folder: 'svg', ext: '.svg' });
+    }
 
     // Update progress
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
@@ -498,6 +538,7 @@ function sendStats() {
         timestamp: new Date().toISOString(),
         deviceId: getDeviceId(),
         deviceName: getDeviceName(),
+        mode: gameMode,
         level: currentLevel,
         stars: stars,
         total: queue.length,
