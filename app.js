@@ -289,7 +289,7 @@ function loadRound() {
         void bigLetter.offsetWidth;
         bigLetter.style.animation = "popIn 0.4s ease-out";
 
-        speak(`${currentItem.letter}`);
+        speak(`${currentItem.letter.toLowerCase()}`);
 
         const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
         const options = shuffle([currentItem, ...wrong]);
