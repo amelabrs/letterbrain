@@ -383,11 +383,18 @@ let ytReady = false;
 let videoTimer = null;
 let videoShowing = false;
 
-// Cartoon rewards for perfect scores (sequential, resumable)
-const CARTOON_IDS = [
-    "WnRszxpNl7Q",
-    "X25hAtXVWIA",
-    "ArfU-68-ZwM"
+// Shorts rewards for perfect scores (sequential, resumable)
+const SHORTS_IDS = [
+    "-1fRlNP9KgY", "tbUS36NpM_M", "c1ZqkX3lZLY", "DE7h_dXmfNg", "z3BQTzydsVU",
+    "M0qRwvputkI", "eJNpH4jreDI", "SL29f5RzwbM", "P-TMxmIcph4", "GIYaY4LS2nc",
+    "-s-iHh7UAJY", "FcY4kzCaWyc", "Pyw0tmWhVCs", "aO1JRstVdgM", "L5LIrg4jyBw",
+    "yKS1oWO5ZeI", "NRId6E9N3f8", "gl8RJ_W9380", "l4OnYlpNdQ4", "diLZ53-PaJk",
+    "laL9K4MvH3o", "s5C-4roQZKM", "3H3qzqsChCA", "Ko5P0IVfywg", "7QS77Xcwye8",
+    "kLChOx3ZpbQ", "6ikIOgh1YSg", "OsZRnlSPszI", "QzW8EkGUNfg", "7gLabNol-Ao",
+    "haQVzonCAM8", "Vl58aEHPh0k", "5QQLKA30JDo", "36ba8fxuPdU", "i8BFf6CcnCo",
+    "4YuBTA5Ok3I", "y0oIfXMppdI", "yJRo6abVVzo", "hkFmDezafYo", "mUFdyCNaK5Q",
+    "rk5n55LBHmY", "AtUQLfh4CZY", "oXFCUw98cvI", "NmRj8Bw3yj0", "pwFsKOlYexQ",
+    "dWsMBuCqXrY", "t24Cd8kcOKA", "ABW46ztBJIA", "T0uAwnWqfcY", "I6X11muVoEM"
 ];
 const CARTOON_PLAY_DURATION = 5 * 60; // 5 minutes in seconds
 let cartoonTimer = null;
@@ -582,7 +589,7 @@ function showDone() {
 function playCartoonReward() {
     if (!ytReady) return;
     const state = getCartoonState();
-    const cartoonId = CARTOON_IDS[state.index % CARTOON_IDS.length];
+    const shortId = SHORTS_IDS[state.index % SHORTS_IDS.length];
 
     const overlay = document.getElementById("video-overlay");
     overlay.className = "video-overlay show";
@@ -590,7 +597,7 @@ function playCartoonReward() {
     videoShowing = true;
     isCartoonPlaying = true;
 
-    ytPlayer.loadVideoById(cartoonId, state.position);
+    ytPlayer.loadVideoById(shortId, state.position);
     ytPlayer.playVideo();
 
     // Stop after 5 minutes and save position
@@ -598,6 +605,7 @@ function playCartoonReward() {
     cartoonTimer = setTimeout(() => {
         if (!isCartoonPlaying) return;
         const pos = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
+        const state = getCartoonState();
         saveCartoonState(state.index, pos);
         isCartoonPlaying = false;
         videoShowing = false;
@@ -610,14 +618,14 @@ function playCartoonReward() {
 }
 
 function cartoonEnded() {
-    // Current cartoon finished — advance to next, reset position
+    // Current short finished — advance to next, reset position
     clearTimeout(cartoonTimer);
     const state = getCartoonState();
-    const nextIndex = (state.index + 1) % CARTOON_IDS.length;
+    const nextIndex = (state.index + 1) % SHORTS_IDS.length;
     saveCartoonState(nextIndex, 0);
 
     // Immediately start the next one (still within the 5-min window)
-    const nextId = CARTOON_IDS[nextIndex];
+    const nextId = SHORTS_IDS[nextIndex];
     ytPlayer.loadVideoById(nextId, 0);
     ytPlayer.playVideo();
 }
