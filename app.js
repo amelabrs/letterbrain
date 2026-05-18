@@ -81,7 +81,7 @@ function playChime(notes, duration) {
         const gain = audioCtx.createGain();
         osc.type = "sine";
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.25, audioCtx.currentTime + i * duration);
+        gain.gain.setValueAtTime(0.6, audioCtx.currentTime + i * duration);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (i + 1) * duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -254,7 +254,7 @@ function loadRound() {
     if (gameMode === "reverse") {
         // Reverse mode: show image, pick the letter
         letterDisplay.innerHTML = `
-            <div class="letter-label">What letter?</div>
+            <div class="letter-label">${currentItem.word}</div>
             <img id="big-image" class="big-quiz-image" src="${currentItem.image}" alt="?">
         `;
         const bigImg = document.getElementById("big-image");
@@ -262,7 +262,7 @@ function loadRound() {
         void bigImg.offsetWidth;
         bigImg.style.animation = "popIn 0.4s ease-out";
 
-        speak("What letter does this start with?");
+        speak(`${currentItem.word}`);
 
         // Pick 3 wrong letters + 1 correct, show as letter buttons
         const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
@@ -281,9 +281,7 @@ function loadRound() {
     } else {
         // Normal mode: show letter, pick the image
         letterDisplay.innerHTML = `
-            <div class="letter-label">What starts with</div>
             <div id="big-letter">A</div>
-            <div class="letter-label">?</div>
         `;
         const bigLetter = document.getElementById("big-letter");
         bigLetter.textContent = currentItem.letter;
@@ -291,7 +289,7 @@ function loadRound() {
         void bigLetter.offsetWidth;
         bigLetter.style.animation = "popIn 0.4s ease-out";
 
-        speak(`What starts with ${currentItem.letter}?`);
+        speak(`${currentItem.letter}`);
 
         const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
         const options = shuffle([currentItem, ...wrong]);
