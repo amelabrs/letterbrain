@@ -383,6 +383,13 @@ let ytReady = false;
 let videoTimer = null;
 let videoShowing = false;
 
+// Cartoon rewards for perfect scores
+const CARTOON_IDS = [
+    "WnRszxpNl7Q",
+    "X25hAtXVWIA",
+    "ArfU-68-ZwM"
+];
+
 // Called automatically by YouTube IFrame API
 function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player("yt-player", {
@@ -451,9 +458,21 @@ function hideVideoOverlay() {
     clearTimeout(safetyTimer);
     const overlay = document.getElementById("video-overlay");
     overlay.className = "video-overlay hidden";
+    document.getElementById("skip-cartoon").style.display = "none";
     if (ytPlayer) ytPlayer.pauseVideo();
+    // Reload the original video for per-letter rewards
+    if (ytReady) ytPlayer.cueVideoById(VIDEO_ID);
     currentIndex++;
     loadRound();
+}
+
+function skipCartoon() {
+    videoShowing = false;
+    const overlay = document.getElementById("video-overlay");
+    overlay.className = "video-overlay hidden";
+    document.getElementById("skip-cartoon").style.display = "none";
+    if (ytPlayer) ytPlayer.pauseVideo();
+    if (ytReady) ytPlayer.cueVideoById(VIDEO_ID);
 }
 
 // ── Feedback ────────────────────────────────────────────────────────
@@ -526,6 +545,24 @@ function showDone() {
     spawnConfetti();
     buildLevelGrid(); // refresh locked states
     sendStats();
+
+    // Cartoon reward for perfect score
+    if (stars === queue.length && videoEnabled) {
+        setTimeout(() => playCartoonReward(), 2500);
+    }
+}
+
+// ── Cartoon Reward (full video for perfect level) ───────────────────
+
+function playCartoonReward() {
+    if (!ytReady) return;
+    const cartoonId = CARTOON_IDS[Math.floor(Math.random() * CARTOON_IDS.length)];
+    const overlay = document.getElementById("video-overlay");
+    overlay.className = "video-overlay show";
+    document.getElementById("skip-cartoon").style.display = "block";
+    videoShowing = true;
+    ytPlayer.loadVideoById(cartoonId);
+    ytPlayer.playVideo();
 }
 
 // ── Send Stats to Google Sheet ──────────────────────────────────────
