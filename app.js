@@ -1,38 +1,43 @@
 /* ── LetterBrain — App Logic ─────────────────────────────────────── */
 
 const ALL_ITEMS = [
-    // Level 1: A–F
+    // Level 1: A–F (6 new)
     { letter: "A", word: "Apple",    image: "images/apple.png", level: 1, vidStart: 5,  vidEnd: 12 },
     { letter: "B", word: "Ball",     image: "images/ball.png", level: 1, vidStart: 12, vidEnd: 19 },
     { letter: "C", word: "Cat",      image: "images/cat.png", level: 1, vidStart: 24, vidEnd: 30 },
     { letter: "D", word: "Dog",      image: "images/dog.png", level: 1, vidStart: 30, vidEnd: 36 },
     { letter: "E", word: "Elephant", image: "images/elephant.png", level: 1, vidStart: 36, vidEnd: 43 },
     { letter: "F", word: "Fish",     image: "images/fish.png", level: 1, vidStart: 43, vidEnd: 50 },
-    // Level 2: G–J
+    // Level 2: G–H (2 new)
     { letter: "G", word: "Goat",     image: "images/goat.png", level: 2, vidStart: 56, vidEnd: 62 },
     { letter: "H", word: "Hen",      image: "images/hen.png", level: 2, vidStart: 62, vidEnd: 69 },
-    { letter: "I", word: "Igloo",    image: "images/igloo.png", level: 2, vidStart: 69, vidEnd: 76 },
-    { letter: "J", word: "Joker",    image: "images/joker.png", level: 2, vidStart: 75, vidEnd: 82 },
-    // Level 3: K–N
-    { letter: "K", word: "King",     image: "images/king.png", level: 3, vidStart: 87, vidEnd: 93 },
-    { letter: "L", word: "Lion",     image: "images/lion.png", level: 3, vidStart: 93, vidEnd: 99 },
-    { letter: "M", word: "Monkey",   image: "images/monkey.png", level: 3, vidStart: 99, vidEnd: 105 },
-    { letter: "N", word: "Nose",     image: "images/nose.png", level: 3, vidStart: 105, vidEnd: 111 },
-    // Level 4: O–R
-    { letter: "O", word: "Orange",   image: "images/orange.png", level: 4, vidStart: 118, vidEnd: 125 },
-    { letter: "P", word: "Parrot",   image: "images/parrot.png", level: 4, vidStart: 125, vidEnd: 132 },
-    { letter: "Q", word: "Queen",    image: "images/queen.png", level: 4, vidStart: 132, vidEnd: 139 },
-    { letter: "R", word: "Rabbit",   image: "images/rabbit.png", level: 4, vidStart: 139, vidEnd: 146 },
-    // Level 5: S–V
-    { letter: "S", word: "Snake",    image: "images/snake.png", level: 5, vidStart: 150, vidEnd: 157 },
-    { letter: "T", word: "Tiger",    image: "images/tiger.png", level: 5, vidStart: 157, vidEnd: 164 },
-    { letter: "U", word: "Uncle",    image: "images/uncle.png", level: 5, vidStart: 164, vidEnd: 171 },
-    { letter: "V", word: "Van",      image: "images/van.png", level: 5, vidStart: 171, vidEnd: 178 },
-    // Level 6: W–Z
-    { letter: "W", word: "Watch",    image: "images/watch.png", level: 6, vidStart: 182, vidEnd: 189 },
-    { letter: "X", word: "Xmas Tree",image: "images/xmastree.png", level: 6, vidStart: 189, vidEnd: 196 },
-    { letter: "Y", word: "Yacht",    image: "images/yacht.png", level: 6, vidStart: 196, vidEnd: 203 },
-    { letter: "Z", word: "Zebra",    image: "images/zebra.png", level: 6, vidStart: 203, vidEnd: 210 },
+    // Level 3: I–J (2 new)
+    { letter: "I", word: "Igloo",    image: "images/igloo.png", level: 3, vidStart: 69, vidEnd: 76 },
+    { letter: "J", word: "Joker",    image: "images/joker.png", level: 3, vidStart: 75, vidEnd: 82 },
+    // Level 4: K–L (2 new)
+    { letter: "K", word: "King",     image: "images/king.png", level: 4, vidStart: 87, vidEnd: 93 },
+    { letter: "L", word: "Lion",     image: "images/lion.png", level: 4, vidStart: 93, vidEnd: 99 },
+    // Level 5: M–N (2 new)
+    { letter: "M", word: "Monkey",   image: "images/monkey.png", level: 5, vidStart: 99, vidEnd: 105 },
+    { letter: "N", word: "Nose",     image: "images/nose.png", level: 5, vidStart: 105, vidEnd: 111 },
+    // Level 6: O–P (2 new)
+    { letter: "O", word: "Orange",   image: "images/orange.png", level: 6, vidStart: 118, vidEnd: 125 },
+    { letter: "P", word: "Parrot",   image: "images/parrot.png", level: 6, vidStart: 125, vidEnd: 132 },
+    // Level 7: Q–R (2 new)
+    { letter: "Q", word: "Queen",    image: "images/queen.png", level: 7, vidStart: 132, vidEnd: 139 },
+    { letter: "R", word: "Rabbit",   image: "images/rabbit.png", level: 7, vidStart: 139, vidEnd: 146 },
+    // Level 8: S–T (2 new)
+    { letter: "S", word: "Snake",    image: "images/snake.png", level: 8, vidStart: 150, vidEnd: 157 },
+    { letter: "T", word: "Tiger",    image: "images/tiger.png", level: 8, vidStart: 157, vidEnd: 164 },
+    // Level 9: U–V (2 new)
+    { letter: "U", word: "Uncle",    image: "images/uncle.png", level: 9, vidStart: 164, vidEnd: 171 },
+    { letter: "V", word: "Van",      image: "images/van.png", level: 9, vidStart: 171, vidEnd: 178 },
+    // Level 10: W–X (2 new)
+    { letter: "W", word: "Watch",    image: "images/watch.png", level: 10, vidStart: 182, vidEnd: 189 },
+    { letter: "X", word: "Xmas Tree",image: "images/xmastree.png", level: 10, vidStart: 189, vidEnd: 196 },
+    // Level 11: Y–Z (2 new)
+    { letter: "Y", word: "Yacht",    image: "images/yacht.png", level: 11, vidStart: 196, vidEnd: 203 },
+    { letter: "Z", word: "Zebra",    image: "images/zebra.png", level: 11, vidStart: 203, vidEnd: 210 },
 ];
 
 let currentLevel = 1;
@@ -245,7 +250,14 @@ document.getElementById("settings-btn").addEventListener("click", () => {
 function startGame(lvl) {
     currentLevel = lvl;
     videoEnabled = document.getElementById("video-toggle").checked;
-    levelItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
+
+    // New letters for this level
+    const newItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
+    // Review items from all previous levels
+    const reviewPool = ALL_ITEMS.filter((it) => it.level < currentLevel);
+    const reviewItems = shuffle(reviewPool).slice(0, 4);
+    // Combined: all new + up to 4 review
+    levelItems = [...newItems, ...reviewItems];
 
     queue = shuffle(levelItems);
     currentIndex = 0;
@@ -282,7 +294,7 @@ function loadRound() {
 
         speak(`${currentItem.word}`);
 
-        // Pick 3 wrong letters + 1 correct, show as letter buttons
+        // Pick 3 wrong letters from the round's pool (levelItems)
         const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
         const options = shuffle([currentItem, ...wrong]);
 
@@ -309,6 +321,7 @@ function loadRound() {
 
         speak(`${currentItem.letter.toLowerCase()}`);
 
+        // Pick 3 wrong choices from the round's pool (levelItems)
         const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
         const options = shuffle([currentItem, ...wrong]);
 
