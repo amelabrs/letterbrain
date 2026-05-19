@@ -42,7 +42,6 @@ const ALL_ITEMS = [
 
 let currentLevel = 1;
 let levelItems = [];
-let videoEnabled = true;
 let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
 const UNLOCK_THRESHOLD = 3; // stars needed to unlock next level
 
@@ -249,7 +248,6 @@ document.getElementById("settings-btn").addEventListener("click", () => {
 
 function startGame(lvl) {
     currentLevel = lvl;
-    videoEnabled = document.getElementById("video-toggle").checked;
 
     // New letters for this level
     const newItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
@@ -380,8 +378,8 @@ function handleChoice(btn, chosen) {
         showFeedback(true);
         spawnConfetti();
 
-        // Play video reward if enabled and this letter has a video clip
-        if (videoEnabled && currentItem.vidStart != null) {
+        // Always play video clip for this letter (finishing a round is joy enough)
+        if (currentItem.vidStart != null) {
             setTimeout(() => playVideoReward(), 1600);
             return; // Don't auto-advance — video will handle it
         }
