@@ -563,8 +563,8 @@ function showDone() {
     buildLevelGrid(); // refresh locked states
     sendStats();
 
-    // Shorts reward for perfect score (always plays, independent of per-letter video toggle)
-    if (stars === queue.length) {
+    // Shorts reward for 5+ stars
+    if (stars >= queue.length - 1) {
         setTimeout(() => playCartoonReward(), 2500);
     }
 }
