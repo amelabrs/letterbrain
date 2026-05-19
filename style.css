@@ -112,35 +112,6 @@ header h1 {
 
 /* ── Settings ────────────────────────────────────────────────────── */
 
-.mode-tabs {
-    display: flex;
-    gap: 0;
-    width: 100%;
-    max-width: 300px;
-    border-radius: 14px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.2);
-    margin-bottom: 4px;
-}
-
-.mode-tab {
-    flex: 1;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: bold;
-    padding: 10px 0;
-    border: none;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-
-.mode-tab.active {
-    background: rgba(255, 255, 255, 0.9);
-    color: #764ba2;
-}
-
 #level-grid {
     display: flex;
     flex-direction: column;

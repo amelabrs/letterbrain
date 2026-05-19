@@ -43,7 +43,15 @@ const ALL_ITEMS = [
 let currentLevel = 1;
 let levelItems = [];
 let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
-const UNLOCK_THRESHOLD = 3; // stars needed to unlock next level
+
+// ── Game levels: pairs of (normal, reverse) for each letter group ──
+const CONTENT_LEVELS = [...new Set(ALL_ITEMS.map(it => it.level))].sort((a, b) => a - b);
+const GAME_LEVELS = [];
+CONTENT_LEVELS.forEach((cl) => {
+    const pair = Math.ceil(GAME_LEVELS.length / 2) + 1;
+    GAME_LEVELS.push({ contentLevel: cl, mode: "normal", pair });
+    GAME_LEVELS.push({ contentLevel: cl, mode: "reverse", pair });
+});
 
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
@@ -174,27 +182,28 @@ function setDisableOld(val) {
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
-    const levels = [...new Set(ALL_ITEMS.map((it) => it.level))].sort();
-    const unlocked = getUnlockedLevel();
+    const unlockedPair = getUnlockedLevel(); // now stores pair number
     const disableOld = getDisableOld();
 
-    levels.forEach((lvl) => {
-        const items = ALL_ITEMS.filter((it) => it.level === lvl);
+    GAME_LEVELS.forEach((gl, idx) => {
+        const displayNum = idx + 1;
+        const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
-        const isLocked = lvl > unlocked;
-        const isOldDisabled = disableOld && lvl < unlocked;
+        const isLocked = gl.pair > unlockedPair;
+        const isOldDisabled = disableOld && gl.pair < unlockedPair;
         card.className = "level-card" + (isLocked ? " locked" : "") + (isOldDisabled ? " old-disabled" : "");
 
         if (!isLocked && !isOldDisabled) {
-            card.onclick = () => startGame(lvl);
+            card.onclick = () => startGame(idx);
         }
 
+        const modeIcon = gl.mode === "normal" ? "🔤" : "🖼️";
         const thumbs = items.map((it) =>
             `<img src="${it.image}" alt="${it.word}">`
         ).join("");
 
         card.innerHTML = `
-            <span class="level-number">${lvl}</span>
+            <span class="level-number">${displayNum} ${modeIcon}</span>
             <div class="level-thumbs">${thumbs}</div>
             <span class="level-go">${isLocked ? "🔒" : isOldDisabled ? "✅" : "▶"}</span>
         `;
@@ -213,14 +222,7 @@ disableOldToggle.addEventListener("change", () => {
     buildLevelGrid();
 });
 
-// ── Mode Tabs ──────────────────────────────────────────────────────────
-document.querySelectorAll(".mode-tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-        document.querySelectorAll(".mode-tab").forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        gameMode = tab.dataset.mode;
-    });
-});
+
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
 document.getElementById("settings-btn").addEventListener("click", () => {
@@ -246,8 +248,13 @@ document.getElementById("settings-btn").addEventListener("click", () => {
 
 // ── Game Flow ───────────────────────────────────────────────────────
 
-function startGame(lvl) {
-    currentLevel = lvl;
+let currentGameLevelIdx = 0; // index into GAME_LEVELS
+
+function startGame(gameLevelIdx) {
+    currentGameLevelIdx = gameLevelIdx;
+    const gl = GAME_LEVELS[gameLevelIdx];
+    currentLevel = gl.contentLevel;
+    gameMode = gl.mode;
 
     // New letters for this level (repeated 3x for reinforcement)
     const newItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
@@ -565,14 +572,15 @@ function showDone() {
     document.getElementById("final-total").textContent = queue.length;
     document.getElementById("final-stars").textContent = "⭐".repeat(stars) + "☆".repeat(queue.length - stars);
 
-    // Check if next level should unlock
-    const unlocked = getUnlockedLevel();
-    const nextLevel = currentLevel + 1;
-    const maxLevel = Math.max(...ALL_ITEMS.map((it) => it.level));
+    // Check if next pair should unlock (80% threshold)
+    const gl = GAME_LEVELS[currentGameLevelIdx];
+    const unlockedPair = getUnlockedLevel();
+    const maxPair = GAME_LEVELS[GAME_LEVELS.length - 1].pair;
+    const threshold = Math.ceil(queue.length * 0.8);
     let newUnlock = false;
 
-    if (stars === queue.length && currentLevel === unlocked && nextLevel <= maxLevel) {
-        setUnlockedLevel(nextLevel);
+    if (stars >= threshold && gl.pair === unlockedPair && gl.pair < maxPair) {
+        setUnlockedLevel(unlockedPair + 1);
         newUnlock = true;
     }
 
@@ -580,13 +588,13 @@ function showDone() {
 
     if (newUnlock) {
         document.getElementById("unlock-msg").style.display = "block";
-        speak(`Amazing! You unlocked Level ${nextLevel}!`);
-    } else if (stars === queue.length) {
+        speak(`Amazing! You unlocked new levels!`);
+    } else if (stars >= threshold) {
         document.getElementById("unlock-msg").style.display = "none";
-        speak("Amazing! You got them all right!");
+        speak("Great job!");
     } else {
         document.getElementById("unlock-msg").style.display = "none";
-        speak(`Good try! You got ${stars} out of ${queue.length}. Get all right to unlock the next level!`);
+        speak(`Good try! You got ${stars} out of ${queue.length}. Keep practicing!`);
     }
 
     spawnConfetti();
