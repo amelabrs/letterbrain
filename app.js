@@ -249,15 +249,16 @@ document.getElementById("settings-btn").addEventListener("click", () => {
 function startGame(lvl) {
     currentLevel = lvl;
 
-    // New letters for this level
+    // New letters for this level (repeated 3x for reinforcement)
     const newItems = ALL_ITEMS.filter((it) => it.level === currentLevel);
+    const repeatedNew = [...newItems, ...newItems, ...newItems]; // 3 reps each
     // Review items from all previous levels
     const reviewPool = ALL_ITEMS.filter((it) => it.level < currentLevel);
     const reviewItems = shuffle(reviewPool).slice(0, 4);
-    // Combined: all new + up to 4 review
+    // Combined pool for distractor selection
     levelItems = [...newItems, ...reviewItems];
-
-    queue = shuffle(levelItems);
+    // Queue: 3x new + review, shuffled
+    queue = shuffle([...repeatedNew, ...reviewItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
