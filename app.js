@@ -378,8 +378,8 @@ function handleChoice(btn, chosen) {
         showFeedback(true);
         spawnConfetti();
 
-        // Always play video clip for this letter (finishing a round is joy enough)
-        if (currentItem.vidStart != null) {
+        // Play video clip unless disabled
+        if (!document.getElementById("disable-video-toggle").checked && currentItem.vidStart != null) {
             setTimeout(() => playVideoReward(), 1600);
             return; // Don't auto-advance — video will handle it
         }
