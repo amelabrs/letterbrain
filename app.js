@@ -77,7 +77,7 @@ let roundWrongs = 0;       // wrong guesses for current letter
 let sessionStats = [];     // per-letter results for current level run
 
 function getUnlockedLevel() {
-    return parseInt(localStorage.getItem("lb_unlocked") || "1");
+    return parseInt(localStorage.getItem("lb_unlocked") || "2");
 }
 
 function setUnlockedLevel(lvl) {
