@@ -186,6 +186,9 @@ function buildLevelGrid() {
     const disableOld = getDisableOld();
 
     GAME_LEVELS.forEach((gl, idx) => {
+        // Hide levels more than 1 pair ahead
+        if (gl.pair > unlockedPair + 1) return;
+
         const displayNum = idx + 1;
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
