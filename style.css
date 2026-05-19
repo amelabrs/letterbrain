@@ -198,6 +198,12 @@ header h1 {
     pointer-events: none;
 }
 
+.level-card.old-disabled {
+    opacity: 0.35;
+    filter: grayscale(0.5);
+    pointer-events: none;
+}
+
 .unlock-msg {
     font-size: 1.3rem;
     font-weight: 900;

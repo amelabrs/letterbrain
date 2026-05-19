@@ -159,19 +159,29 @@ function speak(text) {
 
 // ── Build Level Cards ───────────────────────────────────────────────
 
+function getDisableOld() {
+    return localStorage.getItem("lb_disableOld") === "1";
+}
+
+function setDisableOld(val) {
+    localStorage.setItem("lb_disableOld", val ? "1" : "0");
+}
+
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
     const levels = [...new Set(ALL_ITEMS.map((it) => it.level))].sort();
     const unlocked = getUnlockedLevel();
+    const disableOld = getDisableOld();
 
     levels.forEach((lvl) => {
         const items = ALL_ITEMS.filter((it) => it.level === lvl);
         const card = document.createElement("div");
         const isLocked = lvl > unlocked;
-        card.className = "level-card" + (isLocked ? " locked" : "");
+        const isOldDisabled = disableOld && lvl < unlocked;
+        card.className = "level-card" + (isLocked ? " locked" : "") + (isOldDisabled ? " old-disabled" : "");
 
-        if (!isLocked) {
+        if (!isLocked && !isOldDisabled) {
             card.onclick = () => startGame(lvl);
         }
 
@@ -182,7 +192,7 @@ function buildLevelGrid() {
         card.innerHTML = `
             <span class="level-number">${lvl}</span>
             <div class="level-thumbs">${thumbs}</div>
-            <span class="level-go">${isLocked ? "🔒" : "▶"}</span>
+            <span class="level-go">${isLocked ? "🔒" : isOldDisabled ? "✅" : "▶"}</span>
         `;
         grid.appendChild(card);
     });
@@ -190,6 +200,14 @@ function buildLevelGrid() {
 
 // Build on load
 buildLevelGrid();
+
+// ── Disable Old Levels Toggle ──────────────────────────────────────
+const disableOldToggle = document.getElementById("disable-old-toggle");
+disableOldToggle.checked = getDisableOld();
+disableOldToggle.addEventListener("change", () => {
+    setDisableOld(disableOldToggle.checked);
+    buildLevelGrid();
+});
 
 // ── Mode Tabs ──────────────────────────────────────────────────────────
 document.querySelectorAll(".mode-tab").forEach((tab) => {
