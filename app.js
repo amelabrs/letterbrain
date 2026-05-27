@@ -9,7 +9,7 @@ const ALL_ITEMS = [
     { letter: "E", word: "Elephant", image: "images/elephant.png", level: 1, vidStart: 36, vidEnd: 43 },
     { letter: "F", word: "Fish",     image: "images/fish.png", level: 1, vidStart: 43, vidEnd: 50 },
     // Level 2: G–H (2 new)
-    { letter: "G", word: "Guitar",   image: "images/guitar.png", level: 2, vidStart: 56, vidEnd: 62 },
+    { letter: "G", word: "Guitar",   image: "images/guitar.png", level: 2, localVid: "videos/guitar.mp4" },
     { letter: "H", word: "House",    image: "images/house.png", level: 2, vidStart: 62, vidEnd: 69 },
     // Level 3: I–J (2 new)
     { letter: "I", word: "Ice Cream", image: "images/icecream.png", level: 3, vidStart: 69, vidEnd: 76 },
@@ -390,7 +390,7 @@ function handleChoice(btn, chosen) {
         spawnConfetti();
 
         // Play video clip unless disabled
-        if (!document.getElementById("disable-video-toggle").checked && currentItem.vidStart != null) {
+        if (!document.getElementById("disable-video-toggle").checked && (currentItem.vidStart != null || currentItem.localVid)) {
             setTimeout(() => playVideoReward(), 1600);
             return; // Don't auto-advance — video will handle it
         }
@@ -479,6 +479,32 @@ function onPlayerStateChange(e) {
 }
 
 function playVideoReward() {
+    // Local video takes priority
+    if (currentItem.localVid) {
+        const overlay = document.getElementById("video-overlay");
+        const localPlayer = document.getElementById("local-player");
+        const ytEl = document.getElementById("yt-player");
+        ytEl.style.display = "none";
+        localPlayer.style.display = "block";
+        localPlayer.src = currentItem.localVid;
+        overlay.className = "video-overlay show";
+        videoShowing = true;
+        localPlayer.play();
+        localPlayer.onended = () => {
+            localPlayer.style.display = "none";
+            ytEl.style.display = "block";
+            hideVideoOverlay();
+        };
+        // Safety timeout (30s max)
+        safetyTimer = setTimeout(() => {
+            localPlayer.pause();
+            localPlayer.style.display = "none";
+            ytEl.style.display = "block";
+            hideVideoOverlay();
+        }, 30000);
+        return;
+    }
+
     if (!ytReady) {
         currentIndex++;
         loadRound();
