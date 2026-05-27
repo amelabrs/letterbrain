@@ -29,3 +29,18 @@ To restore, change the I entry in `app.js` back to:
 ```
 
 And remove the `localVid` field (currently set to `"videos/icecream.mp4"`).
+
+## F (Fish)
+
+The original video reward for F used the shared YouTube ABC video:
+
+- **Video ID**: `a_DRSc0oZV0` (full URL: https://youtu.be/a_DRSc0oZV0)
+- **Start time**: 43 seconds
+- **End time**: 50 seconds
+
+To restore, change the F entry in `app.js` back to:
+```js
+{ letter: "F", word: "Fish", image: "images/fish.png", level: 1, vidStart: 43, vidEnd: 50 },
+```
+
+And remove the `localVid` field (currently set to `"videos/fensi.mp4"`).

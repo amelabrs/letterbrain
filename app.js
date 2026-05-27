@@ -7,7 +7,7 @@ const ALL_ITEMS = [
     { letter: "C", word: "Cat",      image: "images/cat.png", level: 1, vidStart: 24, vidEnd: 30 },
     { letter: "D", word: "Dog",      image: "images/dog.png", level: 1, vidStart: 30, vidEnd: 36 },
     { letter: "E", word: "Elephant", image: "images/elephant.png", level: 1, vidStart: 36, vidEnd: 43 },
-    { letter: "F", word: "Fish",     image: "images/fish.png", level: 1, vidStart: 43, vidEnd: 50 },
+    { letter: "F", word: "Fish",     image: "images/fish.png", level: 1, localVid: "videos/fensi.mp4" },
     // Level 2: G–H (2 new)
     { letter: "G", word: "Guitar",   image: "images/guitar.png", level: 2, localVid: "videos/guitar.mp4" },
     { letter: "H", word: "House",    image: "images/house.png", level: 2, vidStart: 62, vidEnd: 69 },
