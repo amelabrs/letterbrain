@@ -185,9 +185,11 @@ function buildLevelGrid() {
     const unlockedPair = getUnlockedLevel(); // now stores pair number
     const disableOld = getDisableOld();
 
+    const maxVisiblePair = Math.max(unlockedPair + 1, 4); // always show at least 8 levels
+
     GAME_LEVELS.forEach((gl, idx) => {
-        // Hide levels more than 1 pair ahead
-        if (gl.pair > unlockedPair + 1) return;
+        // Show current unlocked pairs + 1 locked pair ahead (8 visible at start)
+        if (gl.pair > maxVisiblePair) return;
 
         const displayNum = idx + 1;
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
