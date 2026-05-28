@@ -438,7 +438,8 @@ const PHONICS_TIMESTAMPS = {
 const PHONICS_LETTERS = Object.keys(PHONICS_TIMESTAMPS);
 
 function getPhoneticsMode() {
-    return localStorage.getItem("lb_phonetics") === "1";
+    const val = localStorage.getItem("lb_phonetics");
+    return val === null ? true : val === "1";
 }
 function setPhoneticsMode(val) {
     localStorage.setItem("lb_phonetics", val ? "1" : "0");
