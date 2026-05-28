@@ -227,6 +227,12 @@ disableOldToggle.addEventListener("change", () => {
     buildLevelGrid();
 });
 
+const phoneticsToggle = document.getElementById("phonetics-toggle");
+phoneticsToggle.checked = getPhoneticsMode();
+phoneticsToggle.addEventListener("change", () => {
+    setPhoneticsMode(phoneticsToggle.checked);
+});
+
 
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
@@ -420,6 +426,30 @@ function handleChoice(btn, chosen) {
 // ── YouTube Video Reward ────────────────────────────────────────────
 
 const VIDEO_ID = "a_DRSc0oZV0";
+
+// ── Phonics Mode ─────────────────────────────────────────────────────
+const PHONICS_VIDEO_ID = "svmmuYQPrI4";
+const PHONICS_TIMESTAMPS = {
+    "A":0,"B":13,"C":27,"D":40,"E":52,"F":64,"G":79,"H":93,
+    "I":106,"J":118,"K":131,"L":145,"M":157,"N":169,"O":182,
+    "P":196,"Q":211,"R":224,"S":238,"T":254,"U":268,"V":280,
+    "W":295,"X":309,"Y":323,"Z":337
+};
+const PHONICS_LETTERS = Object.keys(PHONICS_TIMESTAMPS);
+
+function getPhoneticsMode() {
+    return localStorage.getItem("lb_phonetics") === "1";
+}
+function setPhoneticsMode(val) {
+    localStorage.setItem("lb_phonetics", val ? "1" : "0");
+}
+function getPhonicsClip(letter) {
+    const idx = PHONICS_LETTERS.indexOf(letter);
+    const start = PHONICS_TIMESTAMPS[letter] ?? 0;
+    const nextLetter = PHONICS_LETTERS[idx + 1];
+    const end = nextLetter ? PHONICS_TIMESTAMPS[nextLetter] : start + 14;
+    return { start, end };
+}
 let ytPlayer = null;
 let ytReady = false;
 let videoTimer = null;
@@ -480,7 +510,32 @@ function onPlayerStateChange(e) {
     }
 }
 
+function playPhonicsClip() {
+    if (!ytReady) { currentIndex++; loadRound(); return; }
+    const { start, end } = getPhonicsClip(currentItem.letter);
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId: PHONICS_VIDEO_ID, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, (end - start + 2) * 1000);
+}
+
 function playVideoReward() {
+    if (getPhoneticsMode()) { playPhonicsClip(); return; }
     // Local video takes priority
     if (currentItem.localVid) {
         const overlay = document.getElementById("video-overlay");

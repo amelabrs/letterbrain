@@ -225,6 +225,17 @@ header h1 {
     accent-color: #f6d365;
 }
 
+.exp-badge {
+    font-size: 0.65rem;
+    font-weight: 900;
+    background: rgba(255, 200, 0, 0.85);
+    color: #333;
+    padding: 1px 5px;
+    border-radius: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.04em;
+}
+
 .start-btn {
     font-family: inherit;
     font-size: 1.5rem;
