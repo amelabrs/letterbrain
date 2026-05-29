@@ -1,0 +1,133 @@
+{
+  "video_id": "a_DRSc0oZV0",
+  "url": "https://youtu.be/a_DRSc0oZV0",
+  "letters": {
+    "A": {
+      "word": "Apple",
+      "vidStart": 5,
+      "vidEnd": 12
+    },
+    "B": {
+      "word": "Ball",
+      "vidStart": 12,
+      "vidEnd": 19
+    },
+    "C": {
+      "word": "Cat",
+      "vidStart": 24,
+      "vidEnd": 30
+    },
+    "D": {
+      "word": "Dog",
+      "vidStart": 30,
+      "vidEnd": 36
+    },
+    "E": {
+      "word": "Elephant",
+      "vidStart": 36,
+      "vidEnd": 43
+    },
+    "F": {
+      "word": "Fish",
+      "localVid": "videos/fensi.mp4"
+    },
+    "G": {
+      "word": "Guitar",
+      "localVid": "videos/guitar.mp4"
+    },
+    "H": {
+      "word": "House",
+      "vidStart": 62,
+      "vidEnd": 69
+    },
+    "I": {
+      "word": "Ice Cream",
+      "localVid": "videos/icecream.mp4"
+    },
+    "J": {
+      "word": "Joker",
+      "vidStart": 75,
+      "vidEnd": 82
+    },
+    "K": {
+      "word": "King",
+      "vidStart": 87,
+      "vidEnd": 93
+    },
+    "L": {
+      "word": "Lion",
+      "vidStart": 93,
+      "vidEnd": 99
+    },
+    "M": {
+      "word": "Monkey",
+      "vidStart": 99,
+      "vidEnd": 105
+    },
+    "N": {
+      "word": "Nose",
+      "vidStart": 105,
+      "vidEnd": 111
+    },
+    "O": {
+      "word": "Orange",
+      "vidStart": 118,
+      "vidEnd": 125
+    },
+    "P": {
+      "word": "Parrot",
+      "vidStart": 125,
+      "vidEnd": 132
+    },
+    "Q": {
+      "word": "Queen",
+      "vidStart": 132,
+      "vidEnd": 139
+    },
+    "R": {
+      "word": "Rabbit",
+      "vidStart": 139,
+      "vidEnd": 146
+    },
+    "S": {
+      "word": "Snake",
+      "vidStart": 150,
+      "vidEnd": 157
+    },
+    "T": {
+      "word": "Tiger",
+      "vidStart": 157,
+      "vidEnd": 164
+    },
+    "U": {
+      "word": "Uncle",
+      "vidStart": 164,
+      "vidEnd": 171
+    },
+    "V": {
+      "word": "Van",
+      "vidStart": 171,
+      "vidEnd": 178
+    },
+    "W": {
+      "word": "Watch",
+      "vidStart": 182,
+      "vidEnd": 189
+    },
+    "X": {
+      "word": "Xmas Tree",
+      "vidStart": 189,
+      "vidEnd": 196
+    },
+    "Y": {
+      "word": "Yacht",
+      "vidStart": 196,
+      "vidEnd": 203
+    },
+    "Z": {
+      "word": "Zebra",
+      "vidStart": 203,
+      "vidEnd": 210
+    }
+  }
+}
