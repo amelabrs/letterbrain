@@ -2,42 +2,42 @@
 
 const ALL_ITEMS = [
     // Level 1: A–F (6 new)
-    { letter: "A", word: "Apple",    image: "images/apple.png", level: 1, vidStart: 5,  vidEnd: 12 },
-    { letter: "B", word: "Ball",     image: "images/ball.png", level: 1, vidStart: 12, vidEnd: 19 },
-    { letter: "C", word: "Cat",      image: "images/cat.png", level: 1, vidStart: 24, vidEnd: 30 },
-    { letter: "D", word: "Dog",      image: "images/dog.png", level: 1, vidStart: 30, vidEnd: 36 },
-    { letter: "E", word: "Elephant", image: "images/elephant.png", level: 1, vidStart: 36, vidEnd: 43 },
-    { letter: "F", word: "Fish",     image: "images/fish.png", level: 1, localVid: "videos/fensi.mp4" },
+    { letter: "A", word: "Apple",     image: "images/apple.png",    level: 1 },
+    { letter: "B", word: "Ball",      image: "images/ball.png",     level: 1 },
+    { letter: "C", word: "Cat",       image: "images/cat.png",      level: 1 },
+    { letter: "D", word: "Dog",       image: "images/dog.png",      level: 1 },
+    { letter: "E", word: "Elephant",  image: "images/elephant.png", level: 1 },
+    { letter: "F", word: "Fish",      image: "images/fish.png",     level: 1 },
     // Level 2: G–H (2 new)
-    { letter: "G", word: "Guitar",   image: "images/guitar.png", level: 2, localVid: "videos/guitar.mp4" },
-    { letter: "H", word: "House",    image: "images/house.png", level: 2, vidStart: 62, vidEnd: 69 },
+    { letter: "G", word: "Guitar",    image: "images/guitar.png",   level: 2 },
+    { letter: "H", word: "House",     image: "images/house.png",    level: 2 },
     // Level 3: I–J (2 new)
-    { letter: "I", word: "Ice Cream", image: "images/icecream.png", level: 3, localVid: "videos/icecream.mp4" },
-    { letter: "J", word: "Joker",    image: "images/joker.png", level: 3, vidStart: 75, vidEnd: 82 },
+    { letter: "I", word: "Ice Cream", image: "images/icecream.png", level: 3 },
+    { letter: "J", word: "Joker",     image: "images/joker.png",    level: 3 },
     // Level 4: K–L (2 new)
-    { letter: "K", word: "King",     image: "images/king.png", level: 4, vidStart: 87, vidEnd: 93 },
-    { letter: "L", word: "Lion",     image: "images/lion.png", level: 4, vidStart: 93, vidEnd: 99 },
+    { letter: "K", word: "King",      image: "images/king.png",     level: 4 },
+    { letter: "L", word: "Lion",      image: "images/lion.png",     level: 4 },
     // Level 5: M–N (2 new)
-    { letter: "M", word: "Monkey",   image: "images/monkey.png", level: 5, vidStart: 99, vidEnd: 105 },
-    { letter: "N", word: "Nose",     image: "images/nose.png", level: 5, vidStart: 105, vidEnd: 111 },
+    { letter: "M", word: "Monkey",    image: "images/monkey.png",   level: 5 },
+    { letter: "N", word: "Nose",      image: "images/nose.png",     level: 5 },
     // Level 6: O–P (2 new)
-    { letter: "O", word: "Orange",   image: "images/orange.png", level: 6, vidStart: 118, vidEnd: 125 },
-    { letter: "P", word: "Parrot",   image: "images/parrot.png", level: 6, vidStart: 125, vidEnd: 132 },
+    { letter: "O", word: "Orange",    image: "images/orange.png",   level: 6 },
+    { letter: "P", word: "Parrot",    image: "images/parrot.png",   level: 6 },
     // Level 7: Q–R (2 new)
-    { letter: "Q", word: "Queen",    image: "images/queen.png", level: 7, vidStart: 132, vidEnd: 139 },
-    { letter: "R", word: "Rabbit",   image: "images/rabbit.png", level: 7, vidStart: 139, vidEnd: 146 },
+    { letter: "Q", word: "Queen",     image: "images/queen.png",    level: 7 },
+    { letter: "R", word: "Rabbit",    image: "images/rabbit.png",   level: 7 },
     // Level 8: S–T (2 new)
-    { letter: "S", word: "Snake",    image: "images/snake.png", level: 8, vidStart: 150, vidEnd: 157 },
-    { letter: "T", word: "Tiger",    image: "images/tiger.png", level: 8, vidStart: 157, vidEnd: 164 },
+    { letter: "S", word: "Snake",     image: "images/snake.png",    level: 8 },
+    { letter: "T", word: "Tiger",     image: "images/tiger.png",    level: 8 },
     // Level 9: U–V (2 new)
-    { letter: "U", word: "Uncle",    image: "images/uncle.png", level: 9, vidStart: 164, vidEnd: 171 },
-    { letter: "V", word: "Van",      image: "images/van.png", level: 9, vidStart: 171, vidEnd: 178 },
+    { letter: "U", word: "Uncle",     image: "images/uncle.png",    level: 9 },
+    { letter: "V", word: "Van",       image: "images/van.png",      level: 9 },
     // Level 10: W–X (2 new)
-    { letter: "W", word: "Watch",    image: "images/watch.png", level: 10, vidStart: 182, vidEnd: 189 },
-    { letter: "X", word: "Xmas Tree",image: "images/xmastree.png", level: 10, vidStart: 189, vidEnd: 196 },
+    { letter: "W", word: "Watch",     image: "images/watch.png",    level: 10 },
+    { letter: "X", word: "Xmas Tree", image: "images/xmastree.png", level: 10 },
     // Level 11: Y–Z (2 new)
-    { letter: "Y", word: "Yacht",    image: "images/yacht.png", level: 11, vidStart: 196, vidEnd: 203 },
-    { letter: "Z", word: "Zebra",    image: "images/zebra.png", level: 11, vidStart: 203, vidEnd: 210 },
+    { letter: "Y", word: "Yacht",     image: "images/yacht.png",    level: 11 },
+    { letter: "Z", word: "Zebra",     image: "images/zebra.png",    level: 11 },
 ];
 
 let currentLevel = 1;
@@ -216,8 +216,24 @@ function buildLevelGrid() {
     });
 }
 
-// Build on load
-buildLevelGrid();
+// Load WordVideos.json, merge video data into ALL_ITEMS, then build grid
+async function initWordVideos() {
+    try {
+        const res = await fetch("WordVideos.json");
+        const data = await res.json();
+        if (data.video_id) VIDEO_ID = data.video_id;
+        ALL_ITEMS.forEach(item => {
+            const v = data.letters[item.letter];
+            if (!v) return;
+            if (v.localVid)  { item.localVid = v.localVid; }
+            else             { item.vidStart = v.vidStart; item.vidEnd = v.vidEnd; }
+        });
+    } catch (e) {
+        console.warn("Could not load WordVideos.json — videos disabled", e);
+    }
+    buildLevelGrid();
+}
+initWordVideos();
 
 // ── Disable Old Levels Toggle ──────────────────────────────────────
 const disableOldToggle = document.getElementById("disable-old-toggle");
@@ -425,7 +441,7 @@ function handleChoice(btn, chosen) {
 
 // ── YouTube Video Reward ────────────────────────────────────────────
 
-const VIDEO_ID = "a_DRSc0oZV0";
+let VIDEO_ID = "a_DRSc0oZV0";
 
 // ── Phonics Mode ─────────────────────────────────────────────────────
 const PHONICS_VIDEO_ID = "svmmuYQPrI4";
