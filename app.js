@@ -271,6 +271,11 @@ Object.entries(videoModeToggles).forEach(([key, t]) => {
 
 const beFunnyToggle = videoModeToggles.beFunny.el;
 
+// On load: if no video mode is active, default to Phonetics
+if (!Object.values(videoModeToggles).some(t => t.get())) {
+    activateVideoMode('phonetics');
+}
+
 
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
