@@ -445,11 +445,8 @@ function setPhoneticsMode(val) {
     localStorage.setItem("lb_phonetics", val ? "1" : "0");
 }
 function getPhonicsClip(letter) {
-    const idx = PHONICS_LETTERS.indexOf(letter);
     const start = PHONICS_TIMESTAMPS[letter] ?? 0;
-    const nextLetter = PHONICS_LETTERS[idx + 1];
-    const end = nextLetter ? PHONICS_TIMESTAMPS[nextLetter] : start + 14;
-    return { start, end };
+    return { start, end: start + 5 };
 }
 let ytPlayer = null;
 let ytReady = false;
