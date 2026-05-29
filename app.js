@@ -246,23 +246,30 @@ disableOldToggle.addEventListener("change", () => {
 
 const phoneticsToggle = document.getElementById("phonetics-toggle");
 phoneticsToggle.checked = getPhoneticsMode();
-const beFunnyToggle = document.getElementById("be-funny-toggle");
-beFunnyToggle.checked = getBeFunny();
-beFunnyToggle.addEventListener("change", () => {
-    setBeFunny(beFunnyToggle.checked);
-    if (beFunnyToggle.checked) {
-        setPhoneticsMode(false);
-        phoneticsToggle.checked = false;
-    }
+// ── Video mode toggles (mutually exclusive) ─────────────────────────
+const videoModeToggles = {
+    phonetics:  { el: phoneticsToggle,                          get: getPhoneticsMode, set: setPhoneticsMode },
+    beFunny:    { el: document.getElementById("be-funny-toggle"),   get: getBeFunny,       set: setBeFunny },
+    wordVideo:  { el: document.getElementById("word-video-toggle"), get: getWordVideoMode, set: setWordVideoMode },
+};
+
+function activateVideoMode(activeKey) {
+    Object.entries(videoModeToggles).forEach(([key, t]) => {
+        const on = key === activeKey;
+        t.set(on);
+        t.el.checked = on;
+    });
+}
+
+Object.entries(videoModeToggles).forEach(([key, t]) => {
+    t.el.checked = t.get();
+    t.el.addEventListener("change", () => {
+        if (t.el.checked) activateVideoMode(key);
+        else { t.set(false); }
+    });
 });
-// Make phonetics toggle turn off Be Funny
-phoneticsToggle.addEventListener("change", () => {
-    setPhoneticsMode(phoneticsToggle.checked);
-    if (phoneticsToggle.checked) {
-        setBeFunny(false);
-        beFunnyToggle.checked = false;
-    }
-});
+
+const beFunnyToggle = videoModeToggles.beFunny.el;
 
 
 
@@ -474,6 +481,12 @@ function getBeFunny() {
 function setBeFunny(val) {
     localStorage.setItem("lb_beFunny", val ? "1" : "0");
 }
+function getWordVideoMode() {
+    return localStorage.getItem("lb_wordVideo") === "1";
+}
+function setWordVideoMode(val) {
+    localStorage.setItem("lb_wordVideo", val ? "1" : "0");
+}
 
 function getPhoneticsMode() {
     const val = localStorage.getItem("lb_phonetics");
@@ -583,7 +596,7 @@ function playFunnyShort() {
     safetyTimer = setTimeout(() => {
         clearInterval(videoTimer);
         hideVideoOverlay();
-    }, 20000);
+    }, 5000);
 }
 
 function playVideoReward() {

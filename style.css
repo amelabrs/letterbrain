@@ -225,6 +225,16 @@ header h1 {
     accent-color: #f6d365;
 }
 
+.settings-group-label {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 8px;
+    margin-bottom: 2px;
+}
+
 .exp-badge {
     font-size: 0.65rem;
     font-weight: 900;
