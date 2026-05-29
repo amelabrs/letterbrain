@@ -227,7 +227,7 @@ async function initWordVideos() {
             if (!v) return;
             if (v.localVid)   { item.localVid = v.localVid; }
             else              { item.vidStart = v.vidStart; item.vidEnd = v.vidEnd; }
-            if (v.funnyShort) { item.funnyShort = v.funnyShort; }
+            if (v.funnyShort) { item.funnyShort = v.funnyShort; item.funnyStart = v.funnyStart ?? 0; }
         });
     } catch (e) {
         console.warn("Could not load WordVideos.json — videos disabled", e);
@@ -592,7 +592,7 @@ function playFunnyShort() {
     ytEl.style.display = "block";
     overlay.className = "video-overlay show";
     videoShowing = true;
-    ytPlayer.loadVideoById({ videoId: currentItem.funnyShort, startSeconds: 0 });
+    ytPlayer.loadVideoById({ videoId: currentItem.funnyShort, startSeconds: currentItem.funnyStart ?? 0 });
     safetyTimer = setTimeout(() => {
         clearInterval(videoTimer);
         hideVideoOverlay();
