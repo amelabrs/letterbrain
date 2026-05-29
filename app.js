@@ -250,6 +250,12 @@ phoneticsToggle.addEventListener("change", () => {
     setPhoneticsMode(phoneticsToggle.checked);
 });
 
+const noFunnyToggle = document.getElementById("no-funny-toggle");
+noFunnyToggle.checked = getDontBeFunny();
+noFunnyToggle.addEventListener("change", () => {
+    setDontBeFunny(noFunnyToggle.checked);
+});
+
 
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
@@ -454,6 +460,13 @@ const PHONICS_TIMESTAMPS = {
 };
 const PHONICS_LETTERS = Object.keys(PHONICS_TIMESTAMPS);
 
+function getDontBeFunny() {
+    return localStorage.getItem("lb_noFunny") === "1";
+}
+function setDontBeFunny(val) {
+    localStorage.setItem("lb_noFunny", val ? "1" : "0");
+}
+
 function getPhoneticsMode() {
     const val = localStorage.getItem("lb_phonetics");
     return val === null ? true : val === "1";
@@ -567,7 +580,7 @@ function playFunnyShort() {
 
 function playVideoReward() {
     if (getPhoneticsMode()) { playPhonicsClip(); return; }
-    if (currentItem.funnyShort) { playFunnyShort(); return; }
+    if (currentItem.funnyShort && !getDontBeFunny()) { playFunnyShort(); return; }
     // Local video takes priority
     if (currentItem.localVid) {
         const overlay = document.getElementById("video-overlay");
