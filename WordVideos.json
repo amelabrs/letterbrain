@@ -5,27 +5,32 @@
     "A": {
       "word": "Apple",
       "vidStart": 5,
-      "vidEnd": 12
+      "vidEnd": 12,
+      "funnyShort": "AkPv9ohAUWw"
     },
     "B": {
       "word": "Ball",
       "vidStart": 12,
-      "vidEnd": 19
+      "vidEnd": 19,
+      "funnyShort": "tzBoE0ipsYU"
     },
     "C": {
       "word": "Cat",
       "vidStart": 24,
-      "vidEnd": 30
+      "vidEnd": 30,
+      "funnyShort": "z4OC3pYuOUw"
     },
     "D": {
       "word": "Dog",
       "vidStart": 30,
-      "vidEnd": 36
+      "vidEnd": 36,
+      "funnyShort": "XkwS5l157GA"
     },
     "E": {
       "word": "Elephant",
       "vidStart": 36,
-      "vidEnd": 43
+      "vidEnd": 43,
+      "funnyShort": "0tczXVZ4C-s"
     },
     "F": {
       "word": "Fish",
@@ -38,7 +43,8 @@
     "H": {
       "word": "House",
       "vidStart": 62,
-      "vidEnd": 69
+      "vidEnd": 69,
+      "funnyShort": "UHHrjoxeZWw"
     },
     "I": {
       "word": "Ice Cream",
@@ -47,17 +53,20 @@
     "J": {
       "word": "Joker",
       "vidStart": 75,
-      "vidEnd": 82
+      "vidEnd": 82,
+      "funnyShort": "Eojxofb7tUA"
     },
     "K": {
       "word": "King",
       "vidStart": 87,
-      "vidEnd": 93
+      "vidEnd": 93,
+      "funnyShort": "NssKVMttrQs"
     },
     "L": {
       "word": "Lion",
       "vidStart": 93,
-      "vidEnd": 99
+      "vidEnd": 99,
+      "funnyShort": "k3ZM9Z9LXoc"
     },
     "M": {
       "word": "Monkey",

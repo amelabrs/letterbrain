@@ -225,8 +225,9 @@ async function initWordVideos() {
         ALL_ITEMS.forEach(item => {
             const v = data.letters[item.letter];
             if (!v) return;
-            if (v.localVid)  { item.localVid = v.localVid; }
-            else             { item.vidStart = v.vidStart; item.vidEnd = v.vidEnd; }
+            if (v.localVid)   { item.localVid = v.localVid; }
+            else              { item.vidStart = v.vidStart; item.vidEnd = v.vidEnd; }
+            if (v.funnyShort) { item.funnyShort = v.funnyShort; }
         });
     } catch (e) {
         console.warn("Could not load WordVideos.json — videos disabled", e);
@@ -548,8 +549,25 @@ function playPhonicsClip() {
     }, (end - start + 2) * 1000);
 }
 
+function playFunnyShort() {
+    if (!ytReady) { currentIndex++; loadRound(); return; }
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId: currentItem.funnyShort, startSeconds: 0 });
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, 20000);
+}
+
 function playVideoReward() {
     if (getPhoneticsMode()) { playPhonicsClip(); return; }
+    if (currentItem.funnyShort) { playFunnyShort(); return; }
     // Local video takes priority
     if (currentItem.localVid) {
         const overlay = document.getElementById("video-overlay");
