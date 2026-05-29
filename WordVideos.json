@@ -6,7 +6,8 @@
       "word": "Apple",
       "vidStart": 5,
       "vidEnd": 12,
-      "funnyShort": "AkPv9ohAUWw"
+      "funnyShort": "AkPv9ohAUWw",
+      "funnyStart": 3
     },
     "B": {
       "word": "Ball",
@@ -18,13 +19,15 @@
       "word": "Cat",
       "vidStart": 24,
       "vidEnd": 30,
-      "funnyShort": "z4OC3pYuOUw"
+      "funnyShort": "z4OC3pYuOUw",
+      "funnyStart": 3
     },
     "D": {
       "word": "Dog",
       "vidStart": 30,
       "vidEnd": 36,
-      "funnyShort": "XkwS5l157GA"
+      "funnyShort": "XkwS5l157GA",
+      "funnyStart": 3
     },
     "E": {
       "word": "Elephant",
@@ -38,7 +41,7 @@
     },
     "G": {
       "word": "Guitar",
-      "localVid": "videos/guitar.mp4"
+      "localVid": "videos/guitar.mp4",
     },
     "H": {
       "word": "House",
@@ -54,7 +57,7 @@
       "word": "Joker",
       "vidStart": 75,
       "vidEnd": 82,
-      "funnyShort": "Eojxofb7tUA"
+      "funnyShort": "wJhoWiJqdvk"
     },
     "K": {
       "word": "King",
