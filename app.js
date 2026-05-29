@@ -580,7 +580,7 @@ function playPhonicsClip() {
     safetyTimer = setTimeout(() => {
         clearInterval(videoTimer);
         hideVideoOverlay();
-    }, (end - start + 2) * 1000);
+    }, 5000);
 }
 
 function playFunnyShort() {
@@ -624,7 +624,7 @@ function playVideoReward() {
             localPlayer.style.display = "none";
             ytEl.style.display = "block";
             hideVideoOverlay();
-        }, 30000);
+        }, 5000);
         return;
     }
 
