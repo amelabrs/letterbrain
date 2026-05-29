@@ -246,14 +246,22 @@ disableOldToggle.addEventListener("change", () => {
 
 const phoneticsToggle = document.getElementById("phonetics-toggle");
 phoneticsToggle.checked = getPhoneticsMode();
-phoneticsToggle.addEventListener("change", () => {
-    setPhoneticsMode(phoneticsToggle.checked);
-});
-
 const beFunnyToggle = document.getElementById("be-funny-toggle");
 beFunnyToggle.checked = getBeFunny();
 beFunnyToggle.addEventListener("change", () => {
     setBeFunny(beFunnyToggle.checked);
+    if (beFunnyToggle.checked) {
+        setPhoneticsMode(false);
+        phoneticsToggle.checked = false;
+    }
+});
+// Make phonetics toggle turn off Be Funny
+phoneticsToggle.addEventListener("change", () => {
+    setPhoneticsMode(phoneticsToggle.checked);
+    if (phoneticsToggle.checked) {
+        setBeFunny(false);
+        beFunnyToggle.checked = false;
+    }
 });
 
 
@@ -461,8 +469,7 @@ const PHONICS_TIMESTAMPS = {
 const PHONICS_LETTERS = Object.keys(PHONICS_TIMESTAMPS);
 
 function getBeFunny() {
-    const val = localStorage.getItem("lb_beFunny");
-    return val === null ? true : val === "1";
+    return localStorage.getItem("lb_beFunny") === "1";
 }
 function setBeFunny(val) {
     localStorage.setItem("lb_beFunny", val ? "1" : "0");
