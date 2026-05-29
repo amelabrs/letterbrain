@@ -250,10 +250,10 @@ phoneticsToggle.addEventListener("change", () => {
     setPhoneticsMode(phoneticsToggle.checked);
 });
 
-const noFunnyToggle = document.getElementById("no-funny-toggle");
-noFunnyToggle.checked = getDontBeFunny();
-noFunnyToggle.addEventListener("change", () => {
-    setDontBeFunny(noFunnyToggle.checked);
+const beFunnyToggle = document.getElementById("be-funny-toggle");
+beFunnyToggle.checked = getBeFunny();
+beFunnyToggle.addEventListener("change", () => {
+    setBeFunny(beFunnyToggle.checked);
 });
 
 
@@ -460,11 +460,12 @@ const PHONICS_TIMESTAMPS = {
 };
 const PHONICS_LETTERS = Object.keys(PHONICS_TIMESTAMPS);
 
-function getDontBeFunny() {
-    return localStorage.getItem("lb_noFunny") === "1";
+function getBeFunny() {
+    const val = localStorage.getItem("lb_beFunny");
+    return val === null ? true : val === "1";
 }
-function setDontBeFunny(val) {
-    localStorage.setItem("lb_noFunny", val ? "1" : "0");
+function setBeFunny(val) {
+    localStorage.setItem("lb_beFunny", val ? "1" : "0");
 }
 
 function getPhoneticsMode() {
@@ -580,7 +581,7 @@ function playFunnyShort() {
 
 function playVideoReward() {
     if (getPhoneticsMode()) { playPhonicsClip(); return; }
-    if (currentItem.funnyShort && !getDontBeFunny()) { playFunnyShort(); return; }
+    if (currentItem.funnyShort && getBeFunny()) { playFunnyShort(); return; }
     // Local video takes priority
     if (currentItem.localVid) {
         const overlay = document.getElementById("video-overlay");
