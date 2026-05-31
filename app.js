@@ -441,7 +441,7 @@ function handleChoice(btn, chosen) {
         spawnConfetti();
 
         // Play video clip unless disabled
-        if (!document.getElementById("disable-video-toggle").checked && (currentItem.vidStart != null || currentItem.localVid)) {
+        if (!document.getElementById("disable-video-toggle").checked && (currentItem.vidStart != null || currentItem.localVid || currentItem.funnyShort || getPhoneticsMode())) {
             setTimeout(() => playVideoReward(), 1600);
             return; // Don't auto-advance — video will handle it
         }
@@ -661,7 +661,7 @@ function playVideoReward() {
     safetyTimer = setTimeout(() => {
         clearInterval(videoTimer);
         hideVideoOverlay();
-    }, (end - start + 2) * 1000);
+    }, 5000);
 }
 
 let safetyTimer = null;
