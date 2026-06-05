@@ -79,6 +79,74 @@ let sayItWrongs = 0;
 let recognitionTimeout = null;
 let currentAppMode = localStorage.getItem("lb_mode") || "quiz";
 
+// ── Speech Debug Log ─────────────────────────────────────────────────
+const SPEECH_LOG_KEY = "lb_speech_log";
+const SPEECH_LOG_MAX = 300;
+
+function appendSpeechLog(entry) {
+    let log;
+    try { log = JSON.parse(localStorage.getItem(SPEECH_LOG_KEY) || "[]"); } catch(e) { log = []; }
+    log.push(entry);
+    if (log.length > SPEECH_LOG_MAX) log = log.slice(-SPEECH_LOG_MAX);
+    try { localStorage.setItem(SPEECH_LOG_KEY, JSON.stringify(log)); } catch(e) {}
+}
+
+function getSpeechLog() {
+    try { return JSON.parse(localStorage.getItem(SPEECH_LOG_KEY) || "[]"); } catch(e) { return []; }
+}
+
+function clearSpeechLog() {
+    localStorage.removeItem(SPEECH_LOG_KEY);
+}
+
+function showSpeechLog() {
+    const existing = document.getElementById("speech-log-overlay");
+    if (existing) { existing.remove(); return; }
+
+    const log = getSpeechLog();
+    const overlay = document.createElement("div");
+    overlay.id = "speech-log-overlay";
+    overlay.className = "speech-log-overlay";
+
+    let rows = "";
+    if (log.length === 0) {
+        rows = "<p style='color:#999;text-align:center'>No entries yet — play a Words or Letters round first.</p>";
+    } else {
+        rows = log.slice().reverse().map(e => {
+            const tick = e.matched ? "✅" : "❌";
+            const alts = (e.alts || [e.heard]).join(" / ");
+            return `<tr class="${e.matched ? "log-ok" : "log-fail"}">
+                <td>${tick}</td>
+                <td><strong>${e.letter}</strong></td>
+                <td>${e.word}</td>
+                <td>${e.mode === "sayletters" ? "Letters" : "Words"}</td>
+                <td class="log-heard">${alts || "—"}</td>
+            </tr>`;
+        }).join("");
+        rows = `<table class="log-table"><thead>
+            <tr><th></th><th>Letter</th><th>Word</th><th>Tab</th><th>Heard</th></tr>
+        </thead><tbody>${rows}</tbody></table>`;
+    }
+
+    const copyText = log.slice().reverse().map(e =>
+        `${e.matched?"OK":"MISS"} | ${e.letter} (${e.word}) | ${e.mode} | heard: ${(e.alts||[e.heard]).join(" / ")}`
+    ).join("\n");
+
+    overlay.innerHTML = `
+        <div class="speech-log-box">
+            <h3>🎙️ Speech Recognition Log</h3>
+            <p class="log-hint">Share this with your developer to improve matching for this child's voice.</p>
+            <div class="log-scroll">${rows}</div>
+            <div class="log-actions">
+                <button onclick="navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>this.textContent='Copied!').catch(()=>alert('Copy failed'))">📋 Copy Log</button>
+                <button onclick="clearSpeechLog();document.getElementById('speech-log-overlay').remove()">🗑️ Clear</button>
+                <button onclick="document.getElementById('speech-log-overlay').remove()">✖ Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
 function getUnlockedLevel() {
     return parseInt(localStorage.getItem("lb_unlocked") || "3");
 }
@@ -1030,6 +1098,14 @@ function handleSayItTap() {
         clearTimeout(recognitionTimeout);
         const alts = Array.from(event.results[0]).map(r => r.transcript);
         const matched = alts.some(a => isSayItMatch(a, currentItem));
+        appendSpeechLog({
+            t: new Date().toISOString(),
+            mode: currentAppMode,
+            letter: currentItem.letter,
+            word: currentItem.word,
+            alts,
+            matched
+        });
         handleSayItResult(matched, alts[0]);
     };
 

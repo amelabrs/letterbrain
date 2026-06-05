@@ -677,3 +677,108 @@ header h1 {
     cursor: pointer;
     backdrop-filter: blur(4px);
 }
+
+/* ── Speech Log ─────────────────────────────────────────────────── */
+.log-btn {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    border: 2px solid #764ba2;
+    border-radius: 20px;
+    background: #f5f0ff;
+    color: #764ba2;
+    cursor: pointer;
+    margin-top: 8px;
+    display: block;
+    width: 100%;
+}
+.log-btn:hover { background: #ede5ff; }
+
+.speech-log-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.speech-log-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    width: min(96vw, 560px);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: monospace;
+}
+
+.speech-log-box h3 {
+    font-family: "Comic Sans MS", sans-serif;
+    color: #764ba2;
+    font-size: 1.1rem;
+}
+
+.log-hint {
+    font-family: "Comic Sans MS", sans-serif;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.log-scroll {
+    overflow-y: auto;
+    flex: 1;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 0.78rem;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.log-table th {
+    text-align: left;
+    padding: 4px 6px;
+    background: #f5f5f5;
+    font-size: 0.75rem;
+    color: #555;
+    position: sticky;
+    top: 0;
+}
+
+.log-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+}
+
+.log-ok td { color: #2a7a2a; }
+.log-fail td { color: #b00; }
+.log-heard { word-break: break-all; color: #333 !important; font-style: italic; }
+
+.log-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.log-actions button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    background: #f9f9f9;
+    cursor: pointer;
+}
+
+.log-actions button:first-child { border-color: #764ba2; color: #764ba2; }
+.log-actions button:nth-child(2) { border-color: #c00; color: #c00; }
