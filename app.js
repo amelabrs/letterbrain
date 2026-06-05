@@ -10,7 +10,7 @@ const ALL_ITEMS = [
     { letter: "F", word: "Fish",      image: "images/fish.png",     level: 1 },
     // Level 2: G–H (2 new)
     { letter: "G", word: "Guitar",    image: "images/guitar.png",   level: 2 },
-    { letter: "H", word: "House",     image: "images/house.png",    level: 2 },
+    { letter: "H", word: "House",     image: "images/house.png",    level: 2, boost: true },
     // Level 3: I–J (2 new)
     { letter: "I", word: "Ice Cream", image: "images/icecream.png", level: 3 },
     { letter: "J", word: "Joker",     image: "images/joker.png",    level: 3 },
@@ -75,6 +75,9 @@ function setDeviceName(name) {
 
 let roundWrongs = 0;       // wrong guesses for current letter
 let sessionStats = [];     // per-letter results for current level run
+let sayItWrongs = 0;
+let recognitionTimeout = null;
+let currentAppMode = localStorage.getItem("lb_mode") || "quiz";
 
 function getUnlockedLevel() {
     return parseInt(localStorage.getItem("lb_unlocked") || "3");
@@ -190,8 +193,10 @@ function buildLevelGrid() {
     GAME_LEVELS.forEach((gl, idx) => {
         // Show current unlocked pairs + 1 locked pair ahead (8 visible at start)
         if (gl.pair > maxVisiblePair) return;
+        // Say It mode shows one card per content level (no normal/reverse split)
+        if (currentAppMode === "sayit" && gl.mode === "reverse") return;
 
-        const displayNum = idx + 1;
+        const displayNum = currentAppMode === "sayit" ? gl.contentLevel : idx + 1;
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
         const isLocked = gl.pair > unlockedPair;
@@ -199,10 +204,10 @@ function buildLevelGrid() {
         card.className = "level-card" + (isLocked ? " locked" : "") + (isOldDisabled ? " old-disabled" : "");
 
         if (!isLocked && !isOldDisabled) {
-            card.onclick = () => startGame(idx);
+            card.onclick = () => currentAppMode === "sayit" ? startSayIt(idx) : startGame(idx);
         }
 
-        const modeIcon = gl.mode === "normal" ? "🔤" : "🖼️";
+        const modeIcon = currentAppMode === "sayit" ? "🎤" : (gl.mode === "normal" ? "🔤" : "🖼️");
         const thumbs = items.map((it) =>
             `<img src="${it.image}" alt="${it.word}">`
         ).join("");
@@ -338,6 +343,7 @@ function loadRound() {
     roundClean = true;
     roundWrongs = 0;
     currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
 
     const letterDisplay = document.getElementById("letter-display");
 
@@ -460,10 +466,7 @@ function handleChoice(btn, chosen) {
     }
 
     // Advance after delay (correct without video)
-    setTimeout(() => {
-        currentIndex++;
-        loadRound();
-    }, 2200);
+    setTimeout(advanceRound, 2200);
 }
 
 // ── YouTube Video Reward ────────────────────────────────────────────
@@ -565,7 +568,7 @@ function onPlayerStateChange(e) {
 }
 
 function playPhonicsClip() {
-    if (!ytReady) { currentIndex++; loadRound(); return; }
+    if (!ytReady) { advanceRound(); return; }
     const { start, end } = getPhonicsClip(currentItem.letter);
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
@@ -589,7 +592,7 @@ function playPhonicsClip() {
 }
 
 function playFunnyShort() {
-    if (!ytReady) { currentIndex++; loadRound(); return; }
+    if (!ytReady) { advanceRound(); return; }
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
@@ -634,8 +637,7 @@ function playVideoReward() {
     }
 
     if (!ytReady) {
-        currentIndex++;
-        loadRound();
+        advanceRound();
         return;
     }
 
@@ -677,8 +679,7 @@ function hideVideoOverlay() {
     if (ytPlayer) ytPlayer.pauseVideo();
     // Reload the original video for per-letter rewards
     if (ytReady) ytPlayer.cueVideoById(VIDEO_ID);
-    currentIndex++;
-    loadRound();
+    advanceRound();
 }
 
 function skipCartoon() {
@@ -801,6 +802,321 @@ function hideShorts() {
     const overlay = document.getElementById("shorts-overlay");
     overlay.className = "video-overlay hidden";
     document.getElementById("shorts-iframe").src = "";
+}
+
+// ── Advance helper (mode-aware) ──────────────────────────────────────
+function advanceRound() {
+    currentIndex++;
+    if (currentAppMode === "sayit") loadSayItRound();
+    else loadRound();
+}
+
+// ── Mode Tabs ─────────────────────────────────────────────────────────
+document.getElementById("tab-quiz").addEventListener("click", () => {
+    currentAppMode = "quiz";
+    localStorage.setItem("lb_mode", "quiz");
+    document.getElementById("tab-quiz").classList.add("active");
+    document.getElementById("tab-sayit").classList.remove("active");
+    buildLevelGrid();
+});
+document.getElementById("tab-sayit").addEventListener("click", () => {
+    currentAppMode = "sayit";
+    localStorage.setItem("lb_mode", "sayit");
+    document.getElementById("tab-sayit").classList.add("active");
+    document.getElementById("tab-quiz").classList.remove("active");
+    buildLevelGrid();
+});
+// Reflect persisted tab on load
+if (currentAppMode === "sayit") {
+    document.getElementById("tab-quiz").classList.remove("active");
+    document.getElementById("tab-sayit").classList.add("active");
+}
+
+// ── Speech Recognition ────────────────────────────────────────────────
+// Letter name alternatives including Indian English variants (e.g. "haitch" for H)
+const LETTER_SOUNDS = {
+    A: ["a","ay","ae","eh"],
+    B: ["b","bee","be"],
+    C: ["c","see","sea","si","ce"],
+    D: ["d","dee","de","di"],
+    E: ["e","ee","eeh","yi"],
+    F: ["f","ef","eff","ph"],
+    G: ["g","jee","gee","ge","ji"],
+    H: ["h","aitch","haitch","ach","ache","hh"],
+    I: ["i","eye","ai","aye"],
+    J: ["j","jay","jae","ja"],
+    K: ["k","kay","kae","ka"],
+    L: ["l","el","elle","al"],
+    M: ["m","em","am"],
+    N: ["n","en","an"],
+    O: ["o","oh","ow","eau"],
+    P: ["p","pee","pe","pi"],
+    Q: ["q","cue","queue","kew","ku"],
+    R: ["r","ar","are","arr"],
+    S: ["s","es","ess","ass"],
+    T: ["t","tee","te","ti"],
+    U: ["u","you","yew","yu","oo"],
+    V: ["v","vee","ve","vi"],
+    W: ["w","double you","double-you","doubleyou"],
+    X: ["x","ex","eks","ix"],
+    Y: ["y","why","wai","wi","yy"],
+    Z: ["z","zee","zed","sed","ze"],
+};
+
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let currentRecognition = null; // active instance, for aborting
+
+function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = [];
+    for (let i = 0; i <= m; i++) {
+        dp[i] = [i];
+        for (let j = 1; j <= n; j++) {
+            dp[i][j] = i === 0 ? j :
+                a[i-1] === b[j-1] ? dp[i-1][j-1] :
+                1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+        }
+    }
+    return dp[m][n];
+}
+
+function isLetterMatch(recognized, letter) {
+    const r = recognized.toLowerCase().trim().replace(/[^a-z\s-]/g, "");
+    const targets = LETTER_SOUNDS[letter] || [letter.toLowerCase()];
+    const words = r.split(/\s+/);
+    for (const target of targets) {
+        if (r === target || r.includes(target)) return true;
+        for (const w of words) {
+            if (!w) continue;
+            if (w === target) return true;
+            if (target.length >= 3) {
+                const threshold = target.length < 5 ? 1 : 2;
+                if (levenshtein(w, target) <= threshold) return true;
+            }
+        }
+    }
+    return false;
+}
+
+// ── Say It Game ───────────────────────────────────────────────────────
+
+function startSayIt(gameLevelIdx) {
+    currentGameLevelIdx = gameLevelIdx;
+    const gl = GAME_LEVELS[gameLevelIdx];
+    currentLevel = gl.contentLevel;
+    gameMode = "normal";
+
+    const newItems = ALL_ITEMS.filter(it => it.level === currentLevel);
+    const reviewPool = ALL_ITEMS.filter(it => it.level < currentLevel);
+    const reviewItems = shuffle(reviewPool).slice(0, 2);
+    // Boosted letters (H) get 6 reps; others get 4
+    const repeatedNew = newItems.flatMap(it => Array(it.boost ? 6 : 4).fill(it));
+    queue = shuffle([...repeatedNew, ...reviewItems]);
+    currentIndex = 0;
+    stars = 0;
+    sayItWrongs = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    loadSayItRound();
+}
+
+function loadSayItRound() {
+    if (currentIndex >= queue.length) {
+        showDone();
+        return;
+    }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    sayItWrongs = 0;
+    currentItem = queue[currentIndex];
+
+    const letterDisplay = document.getElementById("letter-display");
+    letterDisplay.innerHTML = `
+        <div id="big-letter">${currentItem.letter}</div>
+        <img class="sayit-hint-img" src="${currentItem.image}" alt="${currentItem.word}">
+        <div class="sayit-hint-label">${currentItem.word}</div>
+    `;
+    const bigLetter = document.getElementById("big-letter");
+    bigLetter.style.animation = "none";
+    void bigLetter.offsetWidth;
+    bigLetter.style.animation = "popIn 0.4s ease-out";
+
+    speak(currentItem.letter);
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.className = "sayit-mode";
+    choicesEl.innerHTML = `
+        <button id="sayit-btn" class="sayit-btn" onclick="handleSayItTap()">
+            🎤 Say <strong>${currentItem.letter}</strong>!
+        </button>
+        <div id="sayit-status" class="sayit-status"></div>
+    `;
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleSayItTap() {
+    if (answered) return;
+
+    if (!SpeechRecognitionAPI) {
+        handleSayItResult(true, null);
+        return;
+    }
+
+    // Abort any previous attempt and start a fresh instance
+    try { currentRecognition?.abort(); } catch(e) {}
+
+    const rec = new SpeechRecognitionAPI();
+    rec.lang = "en-IN";
+    rec.maxAlternatives = 5;
+    rec.interimResults = false;
+    rec.continuous = false;
+    currentRecognition = rec;
+
+    const btn = document.getElementById("sayit-btn");
+    const status = document.getElementById("sayit-status");
+    btn.className = "sayit-btn listening";
+    btn.textContent = "👂 Listening...";
+    status.textContent = "";
+
+    clearTimeout(recognitionTimeout);
+    recognitionTimeout = setTimeout(() => {
+        try { rec.abort(); } catch(e) {}
+        resetSayItBtn();
+        status.textContent = "Couldn't hear you — tap to try again";
+        sayItWrongs++;
+        if (sayItWrongs >= 2) showSayItSkip();
+    }, 6000);
+
+    rec.onresult = (event) => {
+        clearTimeout(recognitionTimeout);
+        const alts = Array.from(event.results[0]).map(r => r.transcript);
+        const matched = alts.some(a => isLetterMatch(a, currentItem.letter));
+        handleSayItResult(matched, alts[0]);
+    };
+
+    rec.onerror = (event) => {
+        clearTimeout(recognitionTimeout);
+        if (event.error === "aborted") return;
+        resetSayItBtn();
+        if (event.error === "not-allowed") {
+            status.textContent = "🎙️ Mic blocked — see below";
+            showMicHelp();
+            return;
+        }
+        status.textContent = `Mic error: ${event.error} — tap to try again`;
+        sayItWrongs++;
+        if (sayItWrongs >= 2) showSayItSkip();
+    };
+
+    rec.onnomatch = () => {
+        clearTimeout(recognitionTimeout);
+        resetSayItBtn();
+        status.textContent = "Didn't catch that — tap to try again";
+        sayItWrongs++;
+        if (sayItWrongs >= 2) showSayItSkip();
+    };
+
+    try {
+        rec.start();
+    } catch(e) {
+        clearTimeout(recognitionTimeout);
+        resetSayItBtn();
+        status.textContent = `Could not start mic: ${e.message}`;
+    }
+}
+
+function resetSayItBtn() {
+    const btn = document.getElementById("sayit-btn");
+    if (!btn) return;
+    btn.className = "sayit-btn";
+    btn.innerHTML = `🎤 Say <strong>${currentItem.letter}</strong>!`;
+}
+
+function showSayItSkip() {
+    if (document.getElementById("sayit-skip")) return;
+    const skip = document.createElement("button");
+    skip.id = "sayit-skip";
+    skip.className = "sayit-skip-btn";
+    skip.textContent = "Skip →";
+    skip.onclick = () => {
+        if (answered) return;
+        answered = true;
+        try { currentRecognition?.abort(); } catch(e) {}
+        clearTimeout(recognitionTimeout);
+        setTimeout(advanceRound, 400);
+    };
+    document.getElementById("choices").appendChild(skip);
+}
+
+function showMicHelp() {
+    if (document.getElementById("mic-help")) return;
+    const help = document.createElement("div");
+    help.id = "mic-help";
+    help.className = "mic-help";
+    help.innerHTML = `
+        <strong>Microphone is blocked.</strong><br>
+        Fix it in Chrome:<br>
+        1. Click the 🔒 lock icon in the address bar<br>
+        2. Set <em>Microphone</em> → Allow<br>
+        3. Reload the page<br><br>
+        On Mac, also check:<br>
+        System Settings → Privacy → Microphone → enable Chrome
+    `;
+    document.getElementById("choices").appendChild(help);
+    showSayItSkip();
+}
+
+function handleSayItResult(success, recognized) {
+    if (answered) return;
+    try { currentRecognition?.abort(); } catch(e) {}
+    clearTimeout(recognitionTimeout);
+
+    const btn = document.getElementById("sayit-btn");
+    const status = document.getElementById("sayit-status");
+
+    if (success) {
+        answered = true;
+        stars++;
+        document.getElementById("stars").textContent = stars;
+
+        sessionStats.push({
+            letter: currentItem.letter,
+            word: currentItem.word,
+            firstTry: sayItWrongs === 0,
+            wrongs: sayItWrongs
+        });
+
+        btn.className = "sayit-btn success";
+        btn.innerHTML = `✅ ${currentItem.letter} for ${currentItem.word}!`;
+        if (recognized) status.textContent = `I heard: "${recognized}"`;
+
+        playCorrectSound();
+        spawnConfetti();
+        showFeedback(true);
+
+        const hasVideo = currentItem.vidStart != null || currentItem.localVid ||
+                         currentItem.funnyShort || getPhoneticsMode();
+        if (!document.getElementById("disable-video-toggle").checked && hasVideo) {
+            setTimeout(() => playVideoReward(), 1600);
+        } else {
+            setTimeout(advanceRound, 2200);
+        }
+    } else {
+        roundClean = false;
+        sayItWrongs++;
+        playWrongSound();
+        status.textContent = recognized
+            ? `I heard "${recognized}" — try again!`
+            : "Try again!";
+        resetSayItBtn();
+        setTimeout(() => speak(currentItem.letter), 400);
+        if (sayItWrongs >= 2) showSayItSkip();
+    }
 }
 
 // ── Send Stats to Google Sheet ──────────────────────────────────────
