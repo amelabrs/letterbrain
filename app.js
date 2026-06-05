@@ -810,7 +810,8 @@ function hideShorts() {
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
-    if (currentAppMode === "sayit") loadSayItRound();
+    const isSayMode = currentAppMode === "saywords" || currentAppMode === "sayletters";
+    if (isSayMode) loadSayItRound();
     else loadRound();
 }
 
