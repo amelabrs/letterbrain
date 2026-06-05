@@ -944,19 +944,45 @@ function loadSayItRound() {
     void bigLetter.offsetWidth;
     bigLetter.style.animation = "popIn 0.4s ease-out";
 
-    speak(currentItem.letter);
+    speak(`${currentItem.letter}... ${currentItem.word}`);
 
     const choicesEl = document.getElementById("choices");
     choicesEl.className = "sayit-mode";
     choicesEl.innerHTML = `
         <button id="sayit-btn" class="sayit-btn" onclick="handleSayItTap()">
-            🎤 Say <strong>${currentItem.letter}</strong>!
+            🎤 Say <strong>${currentItem.word}</strong>!
         </button>
         <div id="sayit-status" class="sayit-status"></div>
     `;
 
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+
+    // Auto-start listening after TTS finishes
+    setTimeout(() => { if (!answered) handleSayItTap(); }, 1800);
+}
+
+function isSayItMatch(recognized, item) {
+    const r = recognized.toLowerCase().trim();
+    // Accept the word (House, Apple…) — most reliable
+    if (isWordMatch(r, item.word)) return true;
+    // Also accept the letter name (aitch, bee…)
+    if (isLetterMatch(r, item.letter)) return true;
+    // Very lenient fallback: any recognized word starts with the same letter
+    return r.split(/\s+/).some(w => w[0] === item.letter.toLowerCase());
+}
+
+function isWordMatch(recognized, target) {
+    const r = recognized.toLowerCase().trim().replace(/[^a-z\s]/g, "");
+    const t = target.toLowerCase().trim();
+    if (r === t || r.includes(t) || t.includes(r)) return true;
+    const words = r.split(/\s+/);
+    for (const w of words) {
+        if (!w) continue;
+        const threshold = t.length < 4 ? 1 : 2;
+        if (levenshtein(w, t) <= threshold) return true;
+    }
+    return false;
 }
 
 function handleSayItTap() {
@@ -967,11 +993,10 @@ function handleSayItTap() {
         return;
     }
 
-    // Abort any previous attempt and start a fresh instance
     try { currentRecognition?.abort(); } catch(e) {}
 
     const rec = new SpeechRecognitionAPI();
-    rec.lang = "en-IN";
+    rec.lang = "en-US";   // broader model, handles Indian English well
     rec.maxAlternatives = 5;
     rec.interimResults = false;
     rec.continuous = false;
@@ -980,43 +1005,58 @@ function handleSayItTap() {
     const btn = document.getElementById("sayit-btn");
     const status = document.getElementById("sayit-status");
     btn.className = "sayit-btn listening";
-    btn.textContent = "👂 Listening...";
+    btn.innerHTML = `👂 Say <strong>${currentItem.word}</strong>...`;
     status.textContent = "";
 
     clearTimeout(recognitionTimeout);
     recognitionTimeout = setTimeout(() => {
         try { rec.abort(); } catch(e) {}
         resetSayItBtn();
-        status.textContent = "Couldn't hear you — tap to try again";
+        status.textContent = "Tap the button and try again!";
         sayItWrongs++;
         if (sayItWrongs >= 2) showSayItSkip();
-    }, 6000);
+    }, 7000);
 
     rec.onresult = (event) => {
         clearTimeout(recognitionTimeout);
         const alts = Array.from(event.results[0]).map(r => r.transcript);
-        const matched = alts.some(a => isLetterMatch(a, currentItem.letter));
+        const matched = alts.some(a => isSayItMatch(a, currentItem));
         handleSayItResult(matched, alts[0]);
     };
 
     rec.onerror = (event) => {
         clearTimeout(recognitionTimeout);
         if (event.error === "aborted") return;
-        resetSayItBtn();
         if (event.error === "not-allowed") {
+            resetSayItBtn();
             status.textContent = "🎙️ Mic blocked — see below";
             showMicHelp();
             return;
         }
-        status.textContent = `Mic error: ${event.error} — tap to try again`;
+        // Silent auto-retry once on transient errors
+        if (sayItWrongs === 0) {
+            resetSayItBtn();
+            setTimeout(() => { if (!answered) handleSayItTap(); }, 800);
+            return;
+        }
+        resetSayItBtn();
+        status.textContent = "Tap the button and try again!";
         sayItWrongs++;
         if (sayItWrongs >= 2) showSayItSkip();
     };
 
     rec.onnomatch = () => {
         clearTimeout(recognitionTimeout);
+        // Silent auto-retry once before showing feedback
+        if (sayItWrongs === 0) {
+            resetSayItBtn();
+            status.textContent = "Try saying it louder 🔊";
+            sayItWrongs++;
+            setTimeout(() => { if (!answered) handleSayItTap(); }, 1200);
+            return;
+        }
         resetSayItBtn();
-        status.textContent = "Didn't catch that — tap to try again";
+        status.textContent = "Tap the button and try again!";
         sayItWrongs++;
         if (sayItWrongs >= 2) showSayItSkip();
     };
@@ -1026,7 +1066,7 @@ function handleSayItTap() {
     } catch(e) {
         clearTimeout(recognitionTimeout);
         resetSayItBtn();
-        status.textContent = `Could not start mic: ${e.message}`;
+        status.textContent = "Tap the button to try again!";
     }
 }
 
@@ -1034,7 +1074,7 @@ function resetSayItBtn() {
     const btn = document.getElementById("sayit-btn");
     if (!btn) return;
     btn.className = "sayit-btn";
-    btn.innerHTML = `🎤 Say <strong>${currentItem.letter}</strong>!`;
+    btn.innerHTML = `🎤 Say <strong>${currentItem.word}</strong>!`;
 }
 
 function showSayItSkip() {
