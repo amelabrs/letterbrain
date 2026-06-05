@@ -888,11 +888,12 @@ function isLetterMatch(recognized, letter) {
     const targets = LETTER_SOUNDS[letter] || [letter.toLowerCase()];
     const words = r.split(/\s+/);
     for (const target of targets) {
-        if (r === target || r.includes(target)) return true;
+        // Multi-word targets like "double you" — full string match only
+        if (target.includes(" ")) { if (r === target) return true; continue; }
         for (const w of words) {
             if (!w) continue;
-            if (w === target) return true;
-            if (target.length >= 3) {
+            if (w === target) return true;  // exact word match
+            if (target.length >= 3) {       // fuzzy only for longer targets (aitch, haitch…)
                 const threshold = target.length < 5 ? 1 : 2;
                 if (levenshtein(w, target) <= threshold) return true;
             }
@@ -968,25 +969,25 @@ function loadSayItRound() {
 function isSayItMatch(recognized, item) {
     const r = recognized.toLowerCase().trim();
     if (currentAppMode === "sayletters") {
-        if (isLetterMatch(r, item.letter)) return true;
-        if (isWordMatch(r, item.word)) return true;
-    } else {
-        if (isWordMatch(r, item.word)) return true;
-        if (isLetterMatch(r, item.letter)) return true;
+        // Letters mode: only accept the letter name — word fallback would let
+        // "A for Elephant" pass when shown E (wrong letter, right word)
+        return isLetterMatch(r, item.letter);
     }
-    // Lenient fallback: any recognized word starts with the right letter
-    return r.split(/\s+/).some(w => w[0] === item.letter.toLowerCase());
+    // Words mode: accept the word first, then letter name as fallback
+    if (isWordMatch(r, item.word)) return true;
+    return isLetterMatch(r, item.letter);
 }
 
 function isWordMatch(recognized, target) {
     const r = recognized.toLowerCase().trim().replace(/[^a-z\s]/g, "");
     const t = target.toLowerCase().trim();
-    if (r === t || r.includes(t) || t.includes(r)) return true;
+    if (r === t || r.includes(t)) return true;
     const words = r.split(/\s+/);
+    const tFirst = t.split(/\s+/)[0]; // first word of target (e.g. "ice" from "ice cream")
     for (const w of words) {
-        if (!w) continue;
-        const threshold = t.length < 4 ? 1 : 2;
-        if (levenshtein(w, t) <= threshold) return true;
+        if (!w || w[0] !== tFirst[0]) continue; // must start with same letter before fuzzy
+        const threshold = tFirst.length < 4 ? 1 : 2;
+        if (levenshtein(w, tFirst) <= threshold) return true;
     }
     return false;
 }
