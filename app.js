@@ -193,10 +193,11 @@ function buildLevelGrid() {
     GAME_LEVELS.forEach((gl, idx) => {
         // Show current unlocked pairs + 1 locked pair ahead (8 visible at start)
         if (gl.pair > maxVisiblePair) return;
-        // Say It mode shows one card per content level (no normal/reverse split)
-        if (currentAppMode === "sayit" && gl.mode === "reverse") return;
+        // Say modes show one card per content level (no normal/reverse split)
+        const isSayMode = currentAppMode === "saywords" || currentAppMode === "sayletters";
+        if (isSayMode && gl.mode === "reverse") return;
 
-        const displayNum = currentAppMode === "sayit" ? gl.contentLevel : idx + 1;
+        const displayNum = isSayMode ? gl.contentLevel : idx + 1;
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
         const isLocked = gl.pair > unlockedPair;
@@ -204,10 +205,12 @@ function buildLevelGrid() {
         card.className = "level-card" + (isLocked ? " locked" : "") + (isOldDisabled ? " old-disabled" : "");
 
         if (!isLocked && !isOldDisabled) {
-            card.onclick = () => currentAppMode === "sayit" ? startSayIt(idx) : startGame(idx);
+            card.onclick = () => isSayMode ? startSayIt(idx) : startGame(idx);
         }
 
-        const modeIcon = currentAppMode === "sayit" ? "🎤" : (gl.mode === "normal" ? "🔤" : "🖼️");
+        const modeIcon = currentAppMode === "saywords" ? "🗣️"
+            : currentAppMode === "sayletters" ? "🎤"
+            : (gl.mode === "normal" ? "🔤" : "🖼️");
         const thumbs = items.map((it) =>
             `<img src="${it.image}" alt="${it.word}">`
         ).join("");
@@ -812,25 +815,25 @@ function advanceRound() {
 }
 
 // ── Mode Tabs ─────────────────────────────────────────────────────────
-document.getElementById("tab-quiz").addEventListener("click", () => {
-    currentAppMode = "quiz";
-    localStorage.setItem("lb_mode", "quiz");
-    document.getElementById("tab-quiz").classList.add("active");
-    document.getElementById("tab-sayit").classList.remove("active");
+function setActiveTab(mode) {
+    currentAppMode = mode;
+    localStorage.setItem("lb_mode", mode);
+    ["quiz", "saywords", "sayletters"].forEach(m => {
+        const el = document.getElementById(`tab-${m}`);
+        if (el) el.classList.toggle("active", m === mode);
+    });
     buildLevelGrid();
-});
-document.getElementById("tab-sayit").addEventListener("click", () => {
-    currentAppMode = "sayit";
-    localStorage.setItem("lb_mode", "sayit");
-    document.getElementById("tab-sayit").classList.add("active");
-    document.getElementById("tab-quiz").classList.remove("active");
-    buildLevelGrid();
-});
-// Reflect persisted tab on load
-if (currentAppMode === "sayit") {
-    document.getElementById("tab-quiz").classList.remove("active");
-    document.getElementById("tab-sayit").classList.add("active");
 }
+document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
+document.getElementById("tab-saywords").addEventListener("click", () => setActiveTab("saywords"));
+document.getElementById("tab-sayletters").addEventListener("click", () => setActiveTab("sayletters"));
+// Backward compat: old stored "sayit" value → "saywords"
+if (currentAppMode === "sayit") currentAppMode = "saywords";
+// Set initial tab highlight (grid is built by initWordVideos below)
+["quiz", "saywords", "sayletters"].forEach(m => {
+    const el = document.getElementById(`tab-${m}`);
+    if (el) el.classList.toggle("active", m === currentAppMode);
+});
 
 // ── Speech Recognition ────────────────────────────────────────────────
 // Letter name alternatives including Indian English variants (e.g. "haitch" for H)
@@ -944,13 +947,13 @@ function loadSayItRound() {
     void bigLetter.offsetWidth;
     bigLetter.style.animation = "popIn 0.4s ease-out";
 
-    speak(`${currentItem.letter}... ${currentItem.word}`);
+    const sayPrompt = currentAppMode === "sayletters" ? currentItem.letter : currentItem.word;
 
     const choicesEl = document.getElementById("choices");
     choicesEl.className = "sayit-mode";
     choicesEl.innerHTML = `
         <button id="sayit-btn" class="sayit-btn" onclick="handleSayItTap()">
-            🎤 Say <strong>${currentItem.word}</strong>!
+            🎤 Say <strong>${sayPrompt}</strong>!
         </button>
         <div id="sayit-status" class="sayit-status"></div>
     `;
@@ -958,17 +961,20 @@ function loadSayItRound() {
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 
-    // Auto-start listening after TTS finishes
-    setTimeout(() => { if (!answered) handleSayItTap(); }, 1800);
+    // Auto-start listening after child has had a moment to look at the card
+    setTimeout(() => { if (!answered) handleSayItTap(); }, 1200);
 }
 
 function isSayItMatch(recognized, item) {
     const r = recognized.toLowerCase().trim();
-    // Accept the word (House, Apple…) — most reliable
-    if (isWordMatch(r, item.word)) return true;
-    // Also accept the letter name (aitch, bee…)
-    if (isLetterMatch(r, item.letter)) return true;
-    // Very lenient fallback: any recognized word starts with the same letter
+    if (currentAppMode === "sayletters") {
+        if (isLetterMatch(r, item.letter)) return true;
+        if (isWordMatch(r, item.word)) return true;
+    } else {
+        if (isWordMatch(r, item.word)) return true;
+        if (isLetterMatch(r, item.letter)) return true;
+    }
+    // Lenient fallback: any recognized word starts with the right letter
     return r.split(/\s+/).some(w => w[0] === item.letter.toLowerCase());
 }
 
@@ -1004,8 +1010,9 @@ function handleSayItTap() {
 
     const btn = document.getElementById("sayit-btn");
     const status = document.getElementById("sayit-status");
+    const listenTarget = currentAppMode === "sayletters" ? currentItem.letter : currentItem.word;
     btn.className = "sayit-btn listening";
-    btn.innerHTML = `👂 Say <strong>${currentItem.word}</strong>...`;
+    btn.innerHTML = `👂 Say <strong>${listenTarget}</strong>...`;
     status.textContent = "";
 
     clearTimeout(recognitionTimeout);
@@ -1074,7 +1081,8 @@ function resetSayItBtn() {
     const btn = document.getElementById("sayit-btn");
     if (!btn) return;
     btn.className = "sayit-btn";
-    btn.innerHTML = `🎤 Say <strong>${currentItem.word}</strong>!`;
+    const t = currentAppMode === "sayletters" ? currentItem.letter : currentItem.word;
+    btn.innerHTML = `🎤 Say <strong>${t}</strong>!`;
 }
 
 function showSayItSkip() {
@@ -1154,7 +1162,6 @@ function handleSayItResult(success, recognized) {
             ? `I heard "${recognized}" — try again!`
             : "Try again!";
         resetSayItBtn();
-        setTimeout(() => speak(currentItem.letter), 400);
         if (sayItWrongs >= 2) showSayItSkip();
     }
 }
