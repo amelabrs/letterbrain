@@ -253,19 +253,33 @@ function setDisableOld(val) {
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
+
+    if (currentAppMode === "saynumbers") {
+        [
+            { label: "1 🔢", thumbs: "<span>⚽</span><span>⚽⚽</span><span>⚽⚽⚽</span>", mode: "reverse" },
+            { label: "2 ⚽", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", mode: "normal" },
+        ].forEach(({ label, thumbs, mode }) => {
+            const card = document.createElement("div");
+            card.className = "level-card";
+            card.onclick = () => startNumbers(mode);
+            card.innerHTML = `
+                <span class="level-number">${label}</span>
+                <div class="level-thumbs number-level-preview">${thumbs}</div>
+                <span class="level-go">▶</span>
+            `;
+            grid.appendChild(card);
+        });
+        return;
+    }
+
     const unlockedPair = getUnlockedLevel(); // now stores pair number
     const disableOld = getDisableOld();
 
     const maxVisiblePair = Math.max(unlockedPair + 1, 4); // always show at least 8 levels
 
     GAME_LEVELS.forEach((gl, idx) => {
-        // Show current unlocked pairs + 1 locked pair ahead (8 visible at start)
         if (gl.pair > maxVisiblePair) return;
-        // Say modes show one card per content level (no normal/reverse split)
-        const isSayMode = currentAppMode === "saywords" || currentAppMode === "sayletters";
-        if (isSayMode && gl.mode === "reverse") return;
 
-        const displayNum = isSayMode ? gl.contentLevel : idx + 1;
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
         const isLocked = gl.pair > unlockedPair;
@@ -273,18 +287,16 @@ function buildLevelGrid() {
         card.className = "level-card" + (isLocked ? " locked" : "") + (isOldDisabled ? " old-disabled" : "");
 
         if (!isLocked && !isOldDisabled) {
-            card.onclick = () => isSayMode ? startSayIt(idx) : startGame(idx);
+            card.onclick = () => startGame(idx);
         }
 
-        const modeIcon = currentAppMode === "saywords" ? "🗣️"
-            : currentAppMode === "sayletters" ? "🎤"
-            : (gl.mode === "normal" ? "🔤" : "🖼️");
+        const modeIcon = gl.mode === "normal" ? "🔤" : "🖼️";
         const thumbs = items.map((it) =>
             `<img src="${it.image}" alt="${it.word}">`
         ).join("");
 
         card.innerHTML = `
-            <span class="level-number">${displayNum} ${modeIcon}</span>
+            <span class="level-number">${idx + 1} ${modeIcon}</span>
             <div class="level-thumbs">${thumbs}</div>
             <span class="level-go">${isLocked ? "🔒" : isOldDisabled ? "✅" : "▶"}</span>
         `;
@@ -878,28 +890,33 @@ function hideShorts() {
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
-    const isSayMode = currentAppMode === "saywords" || currentAppMode === "sayletters";
-    if (isSayMode) loadSayItRound();
-    else loadRound();
+    if (currentAppMode === "saynumbers") {
+        if (gameMode === "reverse") loadNumberRoundReverse();
+        else loadNumberRound();
+    } else {
+        loadRound();
+    }
 }
 
 // ── Mode Tabs ─────────────────────────────────────────────────────────
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "saywords", "sayletters"].forEach(m => {
+    ["quiz", "saynumbers"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === mode);
     });
     buildLevelGrid();
 }
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
-document.getElementById("tab-saywords").addEventListener("click", () => setActiveTab("saywords"));
-document.getElementById("tab-sayletters").addEventListener("click", () => setActiveTab("sayletters"));
-// Backward compat: old stored "sayit" value → "saywords"
-if (currentAppMode === "sayit") currentAppMode = "saywords";
+document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
+// Reset any stored mode from removed tabs
+if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
+    currentAppMode = "quiz";
+    localStorage.setItem("lb_mode", "quiz");
+}
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "saywords", "sayletters"].forEach(m => {
+["quiz", "saynumbers"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
 });
@@ -1242,6 +1259,151 @@ function handleSayItResult(success, recognized) {
         resetSayItBtn();
         if (sayItWrongs >= 2) showSayItSkip();
     }
+}
+
+// ── Numbers Game ──────────────────────────────────────────────────────
+
+function startNumbers(mode = "normal") {
+    gameMode = mode;
+    queue = Array.from({ length: 10 }, () => Math.floor(Math.random() * 4) + 1);
+    currentIndex = 0;
+    stars = 0;
+    answered = false;
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    if (gameMode === "reverse") loadNumberRoundReverse();
+    else loadNumberRound();
+}
+
+function loadNumberRound() {
+    if (currentIndex >= queue.length) {
+        showNumbersDone();
+        return;
+    }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    const count = queue[currentIndex];
+
+    const balls = Array(count).fill('<div class="number-ball"></div>').join('');
+    document.getElementById("letter-display").innerHTML = `<div class="number-balls">${balls}</div>`;
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.className = "";
+    choicesEl.innerHTML = "";
+    [1, 2, 3, 4].forEach(n => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-number-btn";
+        btn.textContent = n;
+        btn.onclick = () => handleNumberChoice(btn, n, count);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleNumberChoice(btn, chosen, count) {
+    if (answered) return;
+
+    if (chosen === count) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        if (roundClean) {
+            stars++;
+            document.getElementById("stars").textContent = stars;
+        }
+        playCorrectSound();
+        spawnConfetti();
+        speak(String(count));
+        setTimeout(() => speak(String(count)), 1200);
+
+        const fb = document.getElementById("feedback");
+        fb.className = "feedback show correct-fb";
+        document.getElementById("feedback-emoji").textContent = "🌟";
+        document.getElementById("feedback-text").textContent = `${count}!`;
+        setTimeout(() => { fb.className = "feedback hidden"; }, 1800);
+
+        setTimeout(advanceRound, 2200);
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+    }
+}
+
+function loadNumberRoundReverse() {
+    if (currentIndex >= queue.length) {
+        showNumbersDone();
+        return;
+    }
+
+    answered = false;
+    const count = queue[currentIndex];
+    let tapped = 0;
+
+    const letterDisplay = document.getElementById("letter-display");
+    letterDisplay.innerHTML = `<div id="big-letter">${count}</div>`;
+    const bigLetter = document.getElementById("big-letter");
+    bigLetter.style.animation = "none";
+    void bigLetter.offsetWidth;
+    bigLetter.style.animation = "popIn 0.4s ease-out";
+
+    speak(String(count));
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.className = "number-tap-grid";
+    choicesEl.innerHTML = "";
+
+    for (let i = 0; i < 4; i++) {
+        const ball = document.createElement("div");
+        ball.className = "number-tap-ball";
+        ball.onclick = () => {
+            if (answered || ball.classList.contains("tapped")) return;
+            ball.classList.add("tapped");
+            tapped++;
+            if (tapped === count) {
+                answered = true;
+                stars++;
+                document.getElementById("stars").textContent = stars;
+                playCorrectSound();
+                spawnConfetti();
+                speak(String(count));
+                setTimeout(() => speak(String(count)), 1200);
+
+                const fb = document.getElementById("feedback");
+                fb.className = "feedback show correct-fb";
+                document.getElementById("feedback-emoji").textContent = "🌟";
+                document.getElementById("feedback-text").textContent = `${count}!`;
+                setTimeout(() => { fb.className = "feedback hidden"; }, 1800);
+
+                setTimeout(advanceRound, 2200);
+            }
+        };
+        choicesEl.appendChild(ball);
+    }
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function showNumbersDone() {
+    document.getElementById("progress-fill").style.width = "100%";
+    document.getElementById("final-score").textContent = stars;
+    document.getElementById("final-total").textContent = queue.length;
+    document.getElementById("final-stars").textContent = "⭐".repeat(stars) + "☆".repeat(queue.length - stars);
+    document.getElementById("unlock-msg").style.display = "none";
+    showScreen("done-screen");
+    const msg = stars >= 8 ? "Amazing! You got almost everything right!"
+        : stars >= 5 ? "Great job!"
+        : `Good try! You got ${stars} out of ${queue.length}. Keep practicing!`;
+    speak(msg);
+    spawnConfetti();
 }
 
 // ── Send Stats to Google Sheet ──────────────────────────────────────
