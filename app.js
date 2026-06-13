@@ -1295,13 +1295,13 @@ function loadNumberRound() {
     const choicesEl = document.getElementById("choices");
     choicesEl.className = "";
     choicesEl.innerHTML = "";
-    for (let n = numberRange[0]; n <= numberRange[1]; n++) {
+    [1, 2, 3, 4].forEach(n => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
         btn.textContent = n;
         btn.onclick = () => handleNumberChoice(btn, n, count);
         choicesEl.appendChild(btn);
-    }
+    });
 
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
