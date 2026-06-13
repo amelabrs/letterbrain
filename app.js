@@ -43,6 +43,7 @@ const ALL_ITEMS = [
 let currentLevel = 1;
 let levelItems = [];
 let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
+let numberRange = [1, 4]; // active range for Numbers levels
 
 // ── Game levels: pairs of (normal, reverse) for each letter group ──
 const CONTENT_LEVELS = [...new Set(ALL_ITEMS.map(it => it.level))].sort((a, b) => a - b);
@@ -256,12 +257,13 @@ function buildLevelGrid() {
 
     if (currentAppMode === "saynumbers") {
         [
-            { label: "1 🔢", thumbs: "<span>⚽</span><span>⚽⚽</span><span>⚽⚽⚽</span>", mode: "reverse" },
-            { label: "2 ⚽", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", mode: "normal" },
-        ].forEach(({ label, thumbs, mode }) => {
+            { label: "1 🔢", thumbs: "<span>⚽</span><span>⚽⚽</span><span>⚽⚽⚽</span>", mode: "reverse", range: [1, 4] },
+            { label: "2 ⚽", thumbs: "<span>1</span><span>2</span>",                       mode: "normal", range: [1, 2] },
+            { label: "3 ⚽", thumbs: "<span>3</span><span>4</span>",                       mode: "normal", range: [3, 4] },
+        ].forEach(({ label, thumbs, mode, range }) => {
             const card = document.createElement("div");
             card.className = "level-card";
-            card.onclick = () => startNumbers(mode);
+            card.onclick = () => startNumbers(mode, range);
             card.innerHTML = `
                 <span class="level-number">${label}</span>
                 <div class="level-thumbs number-level-preview">${thumbs}</div>
@@ -1263,9 +1265,10 @@ function handleSayItResult(success, recognized) {
 
 // ── Numbers Game ──────────────────────────────────────────────────────
 
-function startNumbers(mode = "normal") {
+function startNumbers(mode = "normal", range = [1, 4]) {
     gameMode = mode;
-    queue = Array.from({ length: 10 }, () => Math.floor(Math.random() * 4) + 1);
+    numberRange = range;
+    queue = Array.from({ length: 10 }, () => range[0] + Math.floor(Math.random() * (range[1] - range[0] + 1)));
     currentIndex = 0;
     stars = 0;
     answered = false;
@@ -1292,13 +1295,13 @@ function loadNumberRound() {
     const choicesEl = document.getElementById("choices");
     choicesEl.className = "";
     choicesEl.innerHTML = "";
-    [1, 2, 3, 4].forEach(n => {
+    for (let n = numberRange[0]; n <= numberRange[1]; n++) {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
         btn.textContent = n;
         btn.onclick = () => handleNumberChoice(btn, n, count);
         choicesEl.appendChild(btn);
-    });
+    }
 
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
