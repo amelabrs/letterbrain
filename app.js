@@ -314,7 +314,7 @@ function buildLevelGrid() {
         KANNADA_LEVELS.forEach(({ label, letters, isTest }) => {
             const card = document.createElement("div");
             card.className = "level-card" + (isTest ? " exam-card" : "");
-            card.onclick = () => startKannadaGame(letters);
+            card.onclick = () => startKannadaGame(letters, "hear");
             const thumbs = letters.map(l =>
                 `<span class="caps-pair" style="font-family:serif">${l}</span>`
             ).join("");
