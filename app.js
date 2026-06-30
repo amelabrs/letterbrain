@@ -82,10 +82,10 @@ function setCapsUnlockedLevel(lvl) {
 
 // ── Kannada ───────────────────────────────────────────────────────────
 const KANNADA_ITEMS = [
-    { letter: "ಅ", roman: "a" },
-    { letter: "ಆ", roman: "aa" },
-    { letter: "ಇ", roman: "i" },
-    { letter: "ಈ", roman: "ii" },
+    { letter: "ಅ", roman: "a",  start: 0 },
+    { letter: "ಆ", roman: "aa", start: 3 },
+    { letter: "ಇ", roman: "i",  start: 6 },
+    { letter: "ಈ", roman: "ii", start: 9 },
 ];
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -1065,23 +1065,20 @@ function handleCapsChoice(btn, chosen) {
 
 let kannadaMode = "see"; // "see" = show letter→pick sound | "hear" = play sound→pick letter
 
-function speakKannada(text) {
-    if (!("speechSynthesis" in window)) return;
-    const voices = speechSynthesis.getVoices();
-    const kv = voices.find(v => v.lang.startsWith("kn"));
-    if (kv) {
-        speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = "kn-IN";
-        utter.rate = 0.75;
-        utter.pitch = 1.2;
-        utter.voice = kv;
-        speechSynthesis.speak(utter);
-    } else {
-        // No Kannada voice — speak the romanized sound in English
-        const item = KANNADA_ITEMS.find(it => it.letter === text);
-        if (item) speak(item.roman);
+let _kannadaAudio = null;
+let _kannadaClipTimer = null;
+
+function playKannadaClip(letter) {
+    const item = KANNADA_ITEMS.find(it => it.letter === letter);
+    if (!item) return;
+    if (!_kannadaAudio) {
+        _kannadaAudio = new Audio("audio/kannada.mp3");
     }
+    clearTimeout(_kannadaClipTimer);
+    _kannadaAudio.pause();
+    _kannadaAudio.currentTime = item.start;
+    _kannadaAudio.play().catch(() => {});
+    _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), 2500);
 }
 
 function startKannadaGame(mode = "see") {
@@ -1119,8 +1116,8 @@ function loadKannadaRound() {
             <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
             <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
         `;
-        document.getElementById("kannada-hear-btn").addEventListener("click", () => speakKannada(currentItem.letter));
-        setTimeout(() => speakKannada(currentItem.letter), 400);
+        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
+        setTimeout(() => playKannadaClip(currentItem.letter), 400);
 
         // Choices: Kannada letters
         shuffle([...KANNADA_ITEMS]).forEach(opt => {
@@ -1138,7 +1135,7 @@ function loadKannadaRound() {
         bigLetter.style.animation = "none";
         void bigLetter.offsetWidth;
         bigLetter.style.animation = "popIn 0.4s ease-out";
-        speakKannada(currentItem.letter);
+        playKannadaClip(currentItem.letter);
 
         shuffle([...KANNADA_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
