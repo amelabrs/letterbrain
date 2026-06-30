@@ -304,17 +304,21 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "kannada") {
-        const card = document.createElement("div");
-        card.className = "level-card";
-        card.onclick = () => startKannadaGame();
-        card.innerHTML = `
-            <span class="level-number">1</span>
-            <div class="level-thumbs caps-preview">
-                ${KANNADA_ITEMS.map(it => `<span class="caps-pair">${it.letter}</span>`).join("")}
-            </div>
-            <span class="level-go">▶</span>
-        `;
-        grid.appendChild(card);
+        const kannadaThumbs = KANNADA_ITEMS.map(it => `<span class="caps-pair" style="font-family:serif">${it.letter}</span>`).join("");
+        [
+            { label: "1 👁️", mode: "see", desc: kannadaThumbs },
+            { label: "2 🔊", mode: "hear", desc: kannadaThumbs },
+        ].forEach(({ label, mode, desc }) => {
+            const card = document.createElement("div");
+            card.className = "level-card";
+            card.onclick = () => startKannadaGame(mode);
+            card.innerHTML = `
+                <span class="level-number">${label}</span>
+                <div class="level-thumbs caps-preview">${desc}</div>
+                <span class="level-go">▶</span>
+            `;
+            grid.appendChild(card);
+        });
         return;
     }
 
@@ -1059,11 +1063,27 @@ function handleCapsChoice(btn, chosen) {
 
 // ── Kannada Game ─────────────────────────────────────────────────────
 
-function startKannadaGame() {
+let kannadaMode = "see"; // "see" = show letter→pick sound | "hear" = play sound→pick letter
+
+function speakKannada(text) {
+    if (!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "kn-IN";
+    utter.rate = 0.75;
+    utter.pitch = 1.2;
+    const voices = speechSynthesis.getVoices();
+    const kv = voices.find(v => v.lang.startsWith("kn"));
+    if (kv) utter.voice = kv;
+    speechSynthesis.speak(utter);
+}
+
+function startKannadaGame(mode = "see") {
+    kannadaMode = mode;
     isExamMode = false;
     currentGameLevelIdx = -1;
     gameMode = "kannada";
-    queue = shuffle([...KANNADA_ITEMS, ...KANNADA_ITEMS, ...KANNADA_ITEMS]); // 3x each
+    queue = shuffle([...KANNADA_ITEMS, ...KANNADA_ITEMS, ...KANNADA_ITEMS]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -1085,22 +1105,43 @@ function loadKannadaRound() {
     document.getElementById("choices").className = "";
 
     const letterDisplay = document.getElementById("letter-display");
-    letterDisplay.innerHTML = `<div id="big-letter" style="font-family:serif">${currentItem.letter}</div>`;
-    const bigLetter = document.getElementById("big-letter");
-    bigLetter.style.animation = "none";
-    void bigLetter.offsetWidth;
-    bigLetter.style.animation = "popIn 0.4s ease-out";
-
     const choicesEl = document.getElementById("choices");
     choicesEl.innerHTML = "";
-    const options = shuffle([...KANNADA_ITEMS]);
-    options.forEach(opt => {
-        const btn = document.createElement("button");
-        btn.className = "choice-btn choice-letter-btn";
-        btn.textContent = opt.roman;
-        btn.onclick = () => handleKannadaChoice(btn, opt);
-        choicesEl.appendChild(btn);
-    });
+
+    if (kannadaMode === "hear") {
+        // Play sound, show nothing — just a replay button
+        letterDisplay.innerHTML = `
+            <div class="kannada-listen-btn" onclick="speakKannada('${currentItem.letter}')">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+        `;
+        setTimeout(() => speakKannada(currentItem.letter), 400);
+
+        // Choices: Kannada letters
+        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.fontFamily = "serif";
+            btn.textContent = opt.letter;
+            btn.onclick = () => handleKannadaChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        // Show Kannada letter, choices are roman sounds
+        letterDisplay.innerHTML = `<div id="big-letter" style="font-family:serif">${currentItem.letter}</div>`;
+        const bigLetter = document.getElementById("big-letter");
+        bigLetter.style.animation = "none";
+        void bigLetter.offsetWidth;
+        bigLetter.style.animation = "popIn 0.4s ease-out";
+        speakKannada(currentItem.letter);
+
+        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.textContent = opt.roman;
+            btn.onclick = () => handleKannadaChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    }
 
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
