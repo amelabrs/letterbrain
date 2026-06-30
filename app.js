@@ -1115,11 +1115,11 @@ function loadKannadaRound() {
     choicesEl.innerHTML = "";
 
     if (kannadaMode === "hear") {
-        // Play sound, show nothing — just a replay button
         letterDisplay.innerHTML = `
-            <div class="kannada-listen-btn" onclick="speakKannada('${currentItem.letter}')">🔊</div>
+            <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
             <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
         `;
+        document.getElementById("kannada-hear-btn").addEventListener("click", () => speakKannada(currentItem.letter));
         setTimeout(() => speakKannada(currentItem.letter), 400);
 
         // Choices: Kannada letters
