@@ -89,6 +89,12 @@ const KANNADA_ITEMS = [
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
+const KANNADA_LEVELS = [
+    { label: "1", letters: ["ಅ", "ಆ"] },
+    { label: "2", letters: ["ಇ", "ಈ"] },
+    { label: "3", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], isTest: true },
+];
+
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
 
@@ -305,17 +311,16 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "kannada") {
-        const kannadaThumbs = KANNADA_ITEMS.map(it => `<span class="caps-pair" style="font-family:serif">${it.letter}</span>`).join("");
-        [
-            { label: "1 👁️", mode: "see", desc: kannadaThumbs },
-            { label: "2 🔊", mode: "hear", desc: kannadaThumbs },
-        ].forEach(({ label, mode, desc }) => {
+        KANNADA_LEVELS.forEach(({ label, letters, isTest }) => {
             const card = document.createElement("div");
-            card.className = "level-card";
-            card.onclick = () => startKannadaGame(mode);
+            card.className = "level-card" + (isTest ? " exam-card" : "");
+            card.onclick = () => startKannadaGame(letters);
+            const thumbs = letters.map(l =>
+                `<span class="caps-pair" style="font-family:serif">${l}</span>`
+            ).join("");
             card.innerHTML = `
-                <span class="level-number">${label}</span>
-                <div class="level-thumbs caps-preview">${desc}</div>
+                <span class="level-number">${label}${isTest ? " ⭐" : ""}</span>
+                <div class="level-thumbs caps-preview">${thumbs}</div>
                 <span class="level-go">▶</span>
             `;
             grid.appendChild(card);
@@ -1090,7 +1095,8 @@ function handleCapsChoice(btn, chosen) {
 
 // ── Kannada Game ─────────────────────────────────────────────────────
 
-let kannadaMode = "see"; // "see" = show letter→pick sound | "hear" = play sound→pick letter
+let kannadaMode = "see";
+let kannadaActiveItems = KANNADA_ITEMS;
 
 let _kannadaAudio = null;
 let _kannadaClipTimer = null;
@@ -1108,12 +1114,13 @@ function playKannadaClip(letter) {
     _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), 2500);
 }
 
-function startKannadaGame(mode = "see") {
+function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "see") {
     kannadaMode = mode;
+    kannadaActiveItems = KANNADA_ITEMS.filter(it => letters.includes(it.letter));
     isExamMode = false;
     currentGameLevelIdx = -1;
     gameMode = "kannada";
-    queue = shuffle([...KANNADA_ITEMS, ...KANNADA_ITEMS, ...KANNADA_ITEMS]);
+    queue = shuffle([...kannadaActiveItems, ...kannadaActiveItems, ...kannadaActiveItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -1147,7 +1154,7 @@ function loadKannadaRound() {
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
 
         // Choices: Kannada letters
-        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+        shuffle([...kannadaActiveItems]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.style.fontFamily = "serif";
@@ -1164,7 +1171,7 @@ function loadKannadaRound() {
         bigLetter.style.animation = "popIn 0.4s ease-out";
         playKannadaClip(currentItem.letter);
 
-        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+        shuffle([...kannadaActiveItems]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.textContent = opt.roman;
