@@ -54,6 +54,21 @@ CONTENT_LEVELS.forEach((cl) => {
     GAME_LEVELS.push({ contentLevel: cl, mode: "reverse", pair });
 });
 
+// ── Caps Match Levels ─────────────────────────────────────────────────
+const CAPS_LEVELS = [];
+CONTENT_LEVELS.forEach((cl) => {
+    const pair = Math.ceil(CAPS_LEVELS.length / 2) + 1;
+    CAPS_LEVELS.push({ contentLevel: cl, mode: "caps-normal",  pair }); // uppercase → pick lowercase
+    CAPS_LEVELS.push({ contentLevel: cl, mode: "caps-reverse", pair }); // lowercase → pick uppercase
+});
+
+function getCapsUnlockedLevel() {
+    return parseInt(localStorage.getItem("lb_caps_unlocked") || "3");
+}
+function setCapsUnlockedLevel(lvl) {
+    localStorage.setItem("lb_caps_unlocked", String(lvl));
+}
+
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
 
@@ -243,27 +258,21 @@ function speak(text) {
 
 // ── Build Level Cards ───────────────────────────────────────────────
 
-function getDisableOld() {
-    return localStorage.getItem("lb_disableOld") === "1";
-}
-
-function setDisableOld(val) {
-    localStorage.setItem("lb_disableOld", val ? "1" : "0");
-}
-
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
 
     if (currentAppMode === "saynumbers") {
         [
-            { label: "1 🔢", thumbs: "<span>⚽</span><span>⚽⚽</span><span>⚽⚽⚽</span>", mode: "reverse", range: [1, 4] },
-            { label: "2 ⚽", thumbs: "<span>1</span><span>2</span>",                       mode: "normal", range: [1, 2] },
-            { label: "3 ⚽", thumbs: "<span>3</span><span>4</span>",                       mode: "normal", range: [3, 4] },
-        ].forEach(({ label, thumbs, mode, range }) => {
+            { label: "1", thumbs: "<span>1</span><span>2</span>",             range: [1, 2] },
+            { label: "2", thumbs: "<span>3</span><span>4</span>",             range: [3, 4] },
+            { label: "3", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4] },
+            { label: "4", thumbs: "<span>5</span><span>6</span>",                         range: [5, 6] },
+            { label: "5", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6] },
+        ].forEach(({ label, thumbs, range }) => {
             const card = document.createElement("div");
             card.className = "level-card";
-            card.onclick = () => startNumbers(mode, range);
+            card.onclick = () => startNumbers("normal", range);
             card.innerHTML = `
                 <span class="level-number">${label}</span>
                 <div class="level-thumbs number-level-preview">${thumbs}</div>
@@ -274,8 +283,31 @@ function buildLevelGrid() {
         return;
     }
 
-    const unlockedPair = getUnlockedLevel(); // now stores pair number
-    const disableOld = getDisableOld();
+    if (currentAppMode === "matchcaps") {
+        const unlockedPair = getCapsUnlockedLevel();
+        const maxVisiblePair = Math.max(unlockedPair + 1, 4);
+        CAPS_LEVELS.forEach((gl, idx) => {
+            if (gl.pair > maxVisiblePair) return;
+            const items = ALL_ITEMS.filter(it => it.level === gl.contentLevel);
+            const card = document.createElement("div");
+            const isLocked = gl.pair > unlockedPair;
+            card.className = "level-card" + (isLocked ? " locked" : "");
+            if (!isLocked) card.onclick = () => startCapsGame(idx);
+            const modeIcon = gl.mode === "caps-normal" ? "🔠" : "🔡";
+            const thumbs = items.map(it =>
+                `<span class="caps-pair">${it.letter}${it.letter.toLowerCase()}</span>`
+            ).join("");
+            card.innerHTML = `
+                <span class="level-number">${idx + 1} ${modeIcon}</span>
+                <div class="level-thumbs caps-preview">${thumbs}</div>
+                <span class="level-go">${isLocked ? "🔒" : "▶"}</span>
+            `;
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    const unlockedPair = getUnlockedLevel();
 
     const maxVisiblePair = Math.max(unlockedPair + 1, 4); // always show at least 8 levels
 
@@ -285,10 +317,9 @@ function buildLevelGrid() {
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
         const isLocked = gl.pair > unlockedPair;
-        const isOldDisabled = disableOld && gl.pair < unlockedPair;
-        card.className = "level-card" + (isLocked ? " locked" : "") + (isOldDisabled ? " old-disabled" : "");
+        card.className = "level-card" + (isLocked ? " locked" : "");
 
-        if (!isLocked && !isOldDisabled) {
+        if (!isLocked) {
             card.onclick = () => startGame(idx);
         }
 
@@ -300,7 +331,24 @@ function buildLevelGrid() {
         card.innerHTML = `
             <span class="level-number">${idx + 1} ${modeIcon}</span>
             <div class="level-thumbs">${thumbs}</div>
-            <span class="level-go">${isLocked ? "🔒" : isOldDisabled ? "✅" : "▶"}</span>
+            <span class="level-go">${isLocked ? "🔒" : "▶"}</span>
+        `;
+        grid.appendChild(card);
+    });
+
+    // A–Z exam cards — always unlocked
+    const examThumbs = [ALL_ITEMS[0], ALL_ITEMS[8], ALL_ITEMS[12], ALL_ITEMS[25]]
+        .map(it => `<img src="${it.image}" alt="${it.word}">`).join("");
+
+    ["normal", "reverse"].forEach(mode => {
+        const card = document.createElement("div");
+        card.className = "level-card exam-card";
+        card.onclick = () => startExam(mode);
+        const modeIcon = mode === "normal" ? "🔤" : "🖼️";
+        card.innerHTML = `
+            <span class="level-number">A–Z ${modeIcon}</span>
+            <div class="level-thumbs">${examThumbs}</div>
+            <span class="level-go">▶</span>
         `;
         grid.appendChild(card);
     });
@@ -326,45 +374,10 @@ async function initWordVideos() {
 }
 initWordVideos();
 
-// ── Disable Old Levels Toggle ──────────────────────────────────────
-const disableOldToggle = document.getElementById("disable-old-toggle");
-disableOldToggle.checked = getDisableOld();
-disableOldToggle.addEventListener("change", () => {
-    setDisableOld(disableOldToggle.checked);
-    buildLevelGrid();
-});
-
-const phoneticsToggle = document.getElementById("phonetics-toggle");
-phoneticsToggle.checked = getPhoneticsMode();
-// ── Video mode toggles (mutually exclusive) ─────────────────────────
-const videoModeToggles = {
-    phonetics:  { el: phoneticsToggle,                          get: getPhoneticsMode, set: setPhoneticsMode },
-    beFunny:    { el: document.getElementById("be-funny-toggle"),   get: getBeFunny,       set: setBeFunny },
-    wordVideo:  { el: document.getElementById("word-video-toggle"), get: getWordVideoMode, set: setWordVideoMode },
-};
-
-function activateVideoMode(activeKey) {
-    Object.entries(videoModeToggles).forEach(([key, t]) => {
-        const on = key === activeKey;
-        t.set(on);
-        t.el.checked = on;
-    });
-}
-
-Object.entries(videoModeToggles).forEach(([key, t]) => {
-    t.el.checked = t.get();
-    t.el.addEventListener("change", () => {
-        if (t.el.checked) activateVideoMode(key);
-        else { t.set(false); }
-    });
-});
-
-const beFunnyToggle = videoModeToggles.beFunny.el;
-
-// On load: if no video mode is active, default to Phonetics
-if (!Object.values(videoModeToggles).some(t => t.get())) {
-    activateVideoMode('phonetics');
-}
+// ── Phonetics toggle ─────────────────────────────────────────────────
+const phoneticsRealToggle = document.getElementById("phonetics-real-toggle");
+phoneticsRealToggle.checked = getPhoneticMode();
+phoneticsRealToggle.addEventListener("change", () => setPhoneticMode(phoneticsRealToggle.checked));
 
 
 
@@ -393,8 +406,28 @@ document.getElementById("settings-btn").addEventListener("click", () => {
 // ── Game Flow ───────────────────────────────────────────────────────
 
 let currentGameLevelIdx = 0; // index into GAME_LEVELS
+let isExamMode = false;
+
+const EXAM_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWX".split("");
+
+function startExam(mode) {
+    isExamMode = true;
+    currentGameLevelIdx = -1;
+    gameMode = mode;
+    currentLevel = 0;
+    const examItems = ALL_ITEMS.filter(it => EXAM_LETTERS.includes(it.letter));
+    levelItems = [...examItems];
+    queue = shuffle([...examItems]); // 1x each, no repeats
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    loadRound();
+}
 
 function startGame(gameLevelIdx) {
+    isExamMode = false;
     currentGameLevelIdx = gameLevelIdx;
     const gl = GAME_LEVELS[gameLevelIdx];
     currentLevel = gl.contentLevel;
@@ -531,11 +564,8 @@ function handleChoice(btn, chosen) {
         showFeedback(true);
         spawnConfetti();
 
-        // Play video clip unless disabled
-        if (!document.getElementById("disable-video-toggle").checked && (currentItem.vidStart != null || currentItem.localVid || currentItem.funnyShort || getPhoneticsMode())) {
-            setTimeout(() => playVideoReward(), 1600);
-            return; // Don't auto-advance — video will handle it
-        }
+        setTimeout(() => playVideoReward(), 1600);
+        return;
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
@@ -545,20 +575,16 @@ function handleChoice(btn, chosen) {
         playWrongSound();
         setTimeout(() => speak("Try again!"), 400);
 
-        // Let the child keep trying — don't advance, don't reveal answer
         answered = false;
         return;
     }
-
-    // Advance after delay (correct without video)
-    setTimeout(advanceRound, 2200);
 }
 
 // ── YouTube Video Reward ────────────────────────────────────────────
 
 let VIDEO_ID = "a_DRSc0oZV0";
 
-// ── Phonics Mode ─────────────────────────────────────────────────────
+// ── Letter Video (letter-name pronunciation) ──────────────────────────
 const PHONICS_VIDEO_ID = "svmmuYQPrI4";
 const PHONICS_TIMESTAMPS = {
     "A":0,"B":13,"C":27,"D":40,"E":52,"F":64,"G":79,"H":93,
@@ -566,28 +592,25 @@ const PHONICS_TIMESTAMPS = {
     "P":196,"Q":211,"R":224,"S":238,"T":254,"U":268,"V":280,
     "W":295,"X":309,"Y":323,"Z":337
 };
-const PHONICS_LETTERS = Object.keys(PHONICS_TIMESTAMPS);
 
-function getBeFunny() {
-    return localStorage.getItem("lb_beFunny") === "1";
+// ── Phonetics Video (phonetic sounds) — MbO6vGBkx48, 3:06 total ──
+// A-I verified manually; J-Z extrapolated at ~7s per letter
+const PHONETICS_VIDEO_ID = "MbO6vGBkx48";
+const PHONETICS_TIMESTAMPS = {
+    "A":0,  "B":7,  "C":16, "D":23, "E":31, "F":39, "G":46, "H":53,
+    "I":60, "J":66, "K":74, "L":81, "M":88, "N":95, "O":102,"P":109,
+    "Q":116,"R":123,"S":130,"T":137,"U":144,"V":151,"W":158,"X":165,
+    "Y":172,"Z":179
+};
+
+// Phonetics toggle — ON: plays phonetic-sound video (MbO6vGBkx48), OFF: plays letter video (svmmuYQPrI4)
+function getPhoneticMode() {
+    return localStorage.getItem("lb_phonetic") === "1";
 }
-function setBeFunny(val) {
-    localStorage.setItem("lb_beFunny", val ? "1" : "0");
-}
-function getWordVideoMode() {
-    return localStorage.getItem("lb_wordVideo") === "1";
-}
-function setWordVideoMode(val) {
-    localStorage.setItem("lb_wordVideo", val ? "1" : "0");
+function setPhoneticMode(val) {
+    localStorage.setItem("lb_phonetic", val ? "1" : "0");
 }
 
-function getPhoneticsMode() {
-    const val = localStorage.getItem("lb_phonetics");
-    return val === null ? true : val === "1";
-}
-function setPhoneticsMode(val) {
-    localStorage.setItem("lb_phonetics", val ? "1" : "0");
-}
 function getPhonicsClip(letter) {
     const start = PHONICS_TIMESTAMPS[letter] ?? 0;
     return { start, end: start + 5 };
@@ -676,8 +699,10 @@ function playPhonicsClip() {
     }, 5000);
 }
 
-function playFunnyShort() {
+function playPhoneticClip() {
     if (!ytReady) { advanceRound(); return; }
+    const start = PHONETICS_TIMESTAMPS[currentItem.letter] ?? 50;
+    const end = start + 5;
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
@@ -685,57 +710,7 @@ function playFunnyShort() {
     ytEl.style.display = "block";
     overlay.className = "video-overlay show";
     videoShowing = true;
-    ytPlayer.loadVideoById({ videoId: currentItem.funnyShort, startSeconds: currentItem.funnyStart ?? 0 });
-    safetyTimer = setTimeout(() => {
-        clearInterval(videoTimer);
-        hideVideoOverlay();
-    }, 5000);
-}
-
-function playVideoReward() {
-    if (getPhoneticsMode()) { playPhonicsClip(); return; }
-    if (currentItem.funnyShort && getBeFunny()) { playFunnyShort(); return; }
-    // Local video takes priority
-    if (currentItem.localVid) {
-        const overlay = document.getElementById("video-overlay");
-        const localPlayer = document.getElementById("local-player");
-        const ytEl = document.getElementById("yt-player");
-        ytEl.style.display = "none";
-        localPlayer.style.display = "block";
-        localPlayer.src = currentItem.localVid;
-        overlay.className = "video-overlay show";
-        videoShowing = true;
-        localPlayer.play();
-        localPlayer.onended = () => {
-            localPlayer.style.display = "none";
-            ytEl.style.display = "block";
-            hideVideoOverlay();
-        };
-        // Safety timeout (30s max)
-        safetyTimer = setTimeout(() => {
-            localPlayer.pause();
-            localPlayer.style.display = "none";
-            ytEl.style.display = "block";
-            hideVideoOverlay();
-        }, 5000);
-        return;
-    }
-
-    if (!ytReady) {
-        advanceRound();
-        return;
-    }
-
-    const start = currentItem.vidStart;
-    const end = currentItem.vidEnd;
-
-    const overlay = document.getElementById("video-overlay");
-    overlay.className = "video-overlay show";
-    videoShowing = true;
-    ytPlayer.seekTo(start, true);
-    ytPlayer.playVideo();
-
-    // Monitor playback and stop at the end timestamp
+    ytPlayer.loadVideoById({ videoId: PHONETICS_VIDEO_ID, startSeconds: start });
     clearInterval(videoTimer);
     videoTimer = setInterval(() => {
         if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
@@ -743,12 +718,15 @@ function playVideoReward() {
             hideVideoOverlay();
         }
     }, 200);
-
-    // Safety timeout
     safetyTimer = setTimeout(() => {
         clearInterval(videoTimer);
         hideVideoOverlay();
     }, 5000);
+}
+
+function playVideoReward() {
+    if (getPhoneticMode()) { playPhoneticClip(); return; }
+    playPhonicsClip();
 }
 
 let safetyTimer = null;
@@ -762,8 +740,6 @@ function hideVideoOverlay() {
     overlay.className = "video-overlay hidden";
     document.getElementById("skip-cartoon").style.display = "none";
     if (ytPlayer) ytPlayer.pauseVideo();
-    // Reload the original video for per-letter rewards
-    if (ytReady) ytPlayer.cueVideoById(VIDEO_ID);
     advanceRound();
 }
 
@@ -781,9 +757,15 @@ function showFeedback(correct) {
 
     fb.className = "feedback show " + (correct ? "correct-fb" : "wrong-fb");
     emoji.textContent = correct ? "🌟" : "😊";
-    text.textContent = correct
-        ? `${currentItem.letter} for ${currentItem.word}!`
-        : `It's ${currentItem.word}!`;
+    if (currentAppMode === "matchcaps") {
+        text.textContent = correct
+            ? `${currentItem.letter} = ${currentItem.letter.toLowerCase()}!`
+            : `It's ${currentItem.letter} / ${currentItem.letter.toLowerCase()}!`;
+    } else {
+        text.textContent = correct
+            ? `${currentItem.letter} for ${currentItem.word}!`
+            : `It's ${currentItem.word}!`;
+    }
 
     setTimeout(() => {
         fb.className = "feedback hidden";
@@ -815,29 +797,52 @@ function showDone() {
     document.getElementById("final-total").textContent = queue.length;
     document.getElementById("final-stars").textContent = "⭐".repeat(stars) + "☆".repeat(queue.length - stars);
 
-    // Check if next pair should unlock (80% threshold)
-    const gl = GAME_LEVELS[currentGameLevelIdx];
-    const unlockedPair = getUnlockedLevel();
-    const maxPair = GAME_LEVELS[GAME_LEVELS.length - 1].pair;
-    const threshold = Math.ceil(queue.length * 0.8);
-    let newUnlock = false;
-
-    if (stars >= threshold && gl.pair === unlockedPair && gl.pair < maxPair) {
-        setUnlockedLevel(unlockedPair + 1);
-        newUnlock = true;
-    }
-
     showScreen("done-screen");
+    document.getElementById("unlock-msg").style.display = "none";
 
-    if (newUnlock) {
-        document.getElementById("unlock-msg").style.display = "block";
-        speak(`Amazing! You unlocked new levels!`);
-    } else if (stars >= threshold) {
-        document.getElementById("unlock-msg").style.display = "none";
-        speak("Great job!");
+    if (isExamMode) {
+        speak(stars === queue.length
+            ? "Perfect score! Amazing!"
+            : `You got ${stars} out of ${queue.length}. Keep it up!`);
+    } else if (currentAppMode === "matchcaps") {
+        const gl = CAPS_LEVELS[currentGameLevelIdx];
+        const unlockedPair = getCapsUnlockedLevel();
+        const maxPair = CAPS_LEVELS[CAPS_LEVELS.length - 1].pair;
+        const threshold = Math.ceil(queue.length * 0.8);
+        let newUnlock = false;
+        if (stars >= threshold && gl.pair === unlockedPair && gl.pair < maxPair) {
+            setCapsUnlockedLevel(unlockedPair + 1);
+            newUnlock = true;
+        }
+        if (newUnlock) {
+            document.getElementById("unlock-msg").style.display = "block";
+            speak("Amazing! You unlocked new levels!");
+        } else if (stars >= threshold) {
+            speak("Great job!");
+        } else {
+            speak(`Good try! You got ${stars} out of ${queue.length}. Keep practicing!`);
+        }
     } else {
-        document.getElementById("unlock-msg").style.display = "none";
-        speak(`Good try! You got ${stars} out of ${queue.length}. Keep practicing!`);
+        // Check if next pair should unlock (80% threshold)
+        const gl = GAME_LEVELS[currentGameLevelIdx];
+        const unlockedPair = getUnlockedLevel();
+        const maxPair = GAME_LEVELS[GAME_LEVELS.length - 1].pair;
+        const threshold = Math.ceil(queue.length * 0.8);
+        let newUnlock = false;
+
+        if (stars >= threshold && gl.pair === unlockedPair && gl.pair < maxPair) {
+            setUnlockedLevel(unlockedPair + 1);
+            newUnlock = true;
+        }
+
+        if (newUnlock) {
+            document.getElementById("unlock-msg").style.display = "block";
+            speak(`Amazing! You unlocked new levels!`);
+        } else if (stars >= threshold) {
+            speak("Great job!");
+        } else {
+            speak(`Good try! You got ${stars} out of ${queue.length}. Keep practicing!`);
+        }
     }
 
     spawnConfetti();
@@ -889,12 +894,118 @@ function hideShorts() {
     document.getElementById("shorts-iframe").src = "";
 }
 
+// ── Caps Match Game ───────────────────────────────────────────────────
+
+function startCapsGame(capsLevelIdx) {
+    isExamMode = false;
+    currentGameLevelIdx = capsLevelIdx;
+    const gl = CAPS_LEVELS[capsLevelIdx];
+    currentLevel = gl.contentLevel;
+    gameMode = gl.mode;
+
+    const newItems = ALL_ITEMS.filter(it => it.level === currentLevel);
+    const repeatedNew = [...newItems, ...newItems, ...newItems];
+    const reviewPool = ALL_ITEMS.filter(it => it.level < currentLevel);
+    const reviewItems = shuffle(reviewPool).slice(0, 4);
+    levelItems = [...newItems, ...reviewItems];
+    queue = shuffle([...repeatedNew, ...reviewItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    loadCapsRound();
+}
+
+function loadCapsRound() {
+    if (currentIndex >= queue.length) {
+        showDone();
+        return;
+    }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+
+    const isNormal = gameMode === "caps-normal";
+    const displayLetter = isNormal ? currentItem.letter : currentItem.letter.toLowerCase();
+
+    const letterDisplay = document.getElementById("letter-display");
+    letterDisplay.innerHTML = `<div id="big-letter">${displayLetter}</div>`;
+    const bigLetter = document.getElementById("big-letter");
+    bigLetter.style.animation = "none";
+    void bigLetter.offsetWidth;
+    bigLetter.style.animation = "popIn 0.4s ease-out";
+
+    speak(displayLetter);
+
+    const wrong = shuffle(levelItems.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
+    const options = shuffle([currentItem, ...wrong]);
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+    options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-letter-btn";
+        btn.dataset.letter = opt.letter;
+        btn.textContent = isNormal ? opt.letter.toLowerCase() : opt.letter;
+        btn.onclick = () => handleCapsChoice(btn, opt);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleCapsChoice(btn, chosen) {
+    if (answered) return;
+
+    const isCorrect = chosen.letter === currentItem.letter;
+
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        if (roundClean) {
+            stars++;
+            document.getElementById("stars").textContent = stars;
+        }
+
+        sessionStats.push({
+            letter: currentItem.letter,
+            word: currentItem.word,
+            firstTry: roundClean,
+            wrongs: roundWrongs
+        });
+
+        playCorrectSound();
+        setTimeout(() => speak(`${currentItem.letter} and ${currentItem.letter.toLowerCase()}!`), 500);
+        showFeedback(true);
+        spawnConfetti();
+
+        setTimeout(() => playVideoReward(), 1600);
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        setTimeout(() => speak("Try again!"), 400);
+        answered = false;
+    }
+}
+
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
     if (currentAppMode === "saynumbers") {
         if (gameMode === "reverse") loadNumberRoundReverse();
         else loadNumberRound();
+    } else if (currentAppMode === "matchcaps") {
+        loadCapsRound();
     } else {
         loadRound();
     }
@@ -904,13 +1015,14 @@ function advanceRound() {
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "saynumbers"].forEach(m => {
+    ["quiz", "matchcaps", "saynumbers"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === mode);
     });
     buildLevelGrid();
 }
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
+document.getElementById("tab-matchcaps").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 // Reset any stored mode from removed tabs
 if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
@@ -918,7 +1030,7 @@ if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
     localStorage.setItem("lb_mode", "quiz");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "saynumbers"].forEach(m => {
+["quiz", "matchcaps", "saynumbers"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
 });
@@ -1244,13 +1356,7 @@ function handleSayItResult(success, recognized) {
         spawnConfetti();
         showFeedback(true);
 
-        const hasVideo = currentItem.vidStart != null || currentItem.localVid ||
-                         currentItem.funnyShort || getPhoneticsMode();
-        if (!document.getElementById("disable-video-toggle").checked && hasVideo) {
-            setTimeout(() => playVideoReward(), 1600);
-        } else {
-            setTimeout(advanceRound, 2200);
-        }
+        setTimeout(() => playVideoReward(), 1600);
     } else {
         roundClean = false;
         sayItWrongs++;
@@ -1295,7 +1401,14 @@ function loadNumberRound() {
     const choicesEl = document.getElementById("choices");
     choicesEl.className = "";
     choicesEl.innerHTML = "";
-    [1, 2, 3, 4].forEach(n => {
+
+    // Build 3 distractors from nearby numbers, then shuffle with the correct answer
+    const pool = [];
+    for (let n = Math.max(1, count - 3); n <= count + 3; n++) {
+        if (n !== count) pool.push(n);
+    }
+    const choices = shuffle([count, ...shuffle(pool).slice(0, 3)]);
+    choices.forEach(n => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
         btn.textContent = n;

@@ -169,10 +169,32 @@ header h1 {
     pointer-events: none;
 }
 
-.level-card.old-disabled {
-    opacity: 0.35;
-    filter: grayscale(0.5);
-    pointer-events: none;
+.caps-preview {
+    flex-wrap: wrap;
+    gap: 4px !important;
+    justify-content: center;
+}
+
+.caps-pair {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #764ba2;
+    letter-spacing: -1px;
+}
+
+.level-card.exam-card {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    border-color: #f6a623;
+    box-shadow: 0 4px 20px rgba(246, 166, 35, 0.4);
+}
+
+.level-card.exam-card .level-number {
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.level-card.exam-card .level-go {
+    color: #fff;
 }
 
 .unlock-msg {
