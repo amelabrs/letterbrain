@@ -85,7 +85,7 @@ const KANNADA_ITEMS = [
     { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14 },
     { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31 },
     { letter: "ಇ", roman: "i",  start: 6,  vidStart: 44 },
-    { letter: "ಈ", roman: "ii", start: 9,  vidStart: null },
+    { letter: "ಈ", roman: "ii", start: 9,  vidStart: 34, vidId: "Ydiwd_4M88I" },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -773,9 +773,10 @@ function playVideoReward() {
 }
 
 function playKannadaVideo() {
-    if (!ytReady || currentItem.vidStart === null) { advanceRound(); return; }
+    if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
     const start = currentItem.vidStart;
     const end = start + 8;
+    const videoId = currentItem.vidId || KANNADA_VIDEO_ID;
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
@@ -783,7 +784,7 @@ function playKannadaVideo() {
     ytEl.style.display = "block";
     overlay.className = "video-overlay show";
     videoShowing = true;
-    ytPlayer.loadVideoById({ videoId: KANNADA_VIDEO_ID, startSeconds: start });
+    ytPlayer.loadVideoById({ videoId, startSeconds: start });
     clearInterval(videoTimer);
     videoTimer = setInterval(() => {
         if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
