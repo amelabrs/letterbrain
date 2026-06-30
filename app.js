@@ -968,7 +968,14 @@ function loadCapsRound() {
 
     speak(currentItem.letter.toLowerCase());
 
-    const wrong = shuffle(levelItems.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
+    // Adjacent window of 4: target biased toward end (e.g. F → C,D,E,F)
+    const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const idx = ALPHA.indexOf(currentItem.letter);
+    const start = Math.max(0, Math.min(idx - 3, ALPHA.length - 4));
+    const poolLetters = ALPHA.slice(start, start + 4).split('');
+    const wrong = poolLetters
+        .filter(l => l !== currentItem.letter)
+        .map(l => ALL_ITEMS.find(it => it.letter === l));
     const options = shuffle([currentItem, ...wrong]);
 
     const choicesEl = document.getElementById("choices");
