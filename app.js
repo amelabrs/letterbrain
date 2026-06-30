@@ -1153,8 +1153,8 @@ function loadKannadaRound() {
         document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
 
-        // Choices: Kannada letters
-        shuffle([...kannadaActiveItems]).forEach(opt => {
+        // Choices: all 4 Kannada letters always
+        shuffle([...KANNADA_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.style.fontFamily = "serif";
@@ -1163,7 +1163,7 @@ function loadKannadaRound() {
             choicesEl.appendChild(btn);
         });
     } else {
-        // Show Kannada letter, choices are roman sounds
+        // Show Kannada letter, choices are all 4 roman sounds
         letterDisplay.innerHTML = `<div id="big-letter" style="font-family:serif">${currentItem.letter}</div>`;
         const bigLetter = document.getElementById("big-letter");
         bigLetter.style.animation = "none";
@@ -1171,7 +1171,7 @@ function loadKannadaRound() {
         bigLetter.style.animation = "popIn 0.4s ease-out";
         playKannadaClip(currentItem.letter);
 
-        shuffle([...kannadaActiveItems]).forEach(opt => {
+        shuffle([...KANNADA_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.textContent = opt.roman;
