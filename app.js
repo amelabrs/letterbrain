@@ -82,11 +82,12 @@ function setCapsUnlockedLevel(lvl) {
 
 // ── Kannada ───────────────────────────────────────────────────────────
 const KANNADA_ITEMS = [
-    { letter: "ಅ", roman: "a",  start: 0 },
-    { letter: "ಆ", roman: "aa", start: 3 },
-    { letter: "ಇ", roman: "i",  start: 6 },
-    { letter: "ಈ", roman: "ii", start: 9 },
+    { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14 },
+    { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31 },
+    { letter: "ಇ", roman: "i",  start: 6,  vidStart: 44 },
+    { letter: "ಈ", roman: "ii", start: 9,  vidStart: null },
 ];
+const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
@@ -771,6 +772,31 @@ function playVideoReward() {
     playPhonicsClip();
 }
 
+function playKannadaVideo() {
+    if (!ytReady || currentItem.vidStart === null) { advanceRound(); return; }
+    const start = currentItem.vidStart;
+    const end = start + 8;
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId: KANNADA_VIDEO_ID, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, 10000);
+}
+
 let safetyTimer = null;
 
 function hideVideoOverlay() {
@@ -1167,7 +1193,7 @@ function handleKannadaChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        setTimeout(advanceRound, 2200);
+        setTimeout(() => playKannadaVideo(), 1600);
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
