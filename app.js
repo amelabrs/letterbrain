@@ -73,7 +73,8 @@ CAPS_GROUPS.forEach((group, i) => {
 });
 
 function getCapsUnlockedLevel() {
-    return parseInt(localStorage.getItem("lb_caps_unlocked") || "1");
+    const maxPair = CAPS_LEVELS[CAPS_LEVELS.length - 1].pair;
+    return parseInt(localStorage.getItem("lb_caps_unlocked") || String(maxPair));
 }
 function setCapsUnlockedLevel(lvl) {
     localStorage.setItem("lb_caps_unlocked", String(lvl));
@@ -296,9 +297,7 @@ function buildLevelGrid() {
 
     if (currentAppMode === "matchcaps") {
         const unlockedPair = getCapsUnlockedLevel();
-        const maxVisiblePair = Math.max(unlockedPair + 1, 2);
         CAPS_LEVELS.forEach((gl, idx) => {
-            if (gl.pair > maxVisiblePair) return;
             const card = document.createElement("div");
             const isLocked = gl.pair > unlockedPair;
             const isTest = gl.mode === "caps-test";
