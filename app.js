@@ -80,6 +80,14 @@ function setCapsUnlockedLevel(lvl) {
     localStorage.setItem("lb_caps_unlocked", String(lvl));
 }
 
+// ── Kannada ───────────────────────────────────────────────────────────
+const KANNADA_ITEMS = [
+    { letter: "ಅ", roman: "a" },
+    { letter: "ಆ", roman: "aa" },
+    { letter: "ಇ", roman: "i" },
+    { letter: "ಈ", roman: "ii" },
+];
+
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
 
@@ -292,6 +300,21 @@ function buildLevelGrid() {
             `;
             grid.appendChild(card);
         });
+        return;
+    }
+
+    if (currentAppMode === "kannada") {
+        const card = document.createElement("div");
+        card.className = "level-card";
+        card.onclick = () => startKannadaGame();
+        card.innerHTML = `
+            <span class="level-number">1</span>
+            <div class="level-thumbs caps-preview">
+                ${KANNADA_ITEMS.map(it => `<span class="caps-pair">${it.letter}</span>`).join("")}
+            </div>
+            <span class="level-go">▶</span>
+        `;
+        grid.appendChild(card);
         return;
     }
 
@@ -776,6 +799,10 @@ function showFeedback(correct) {
         text.textContent = correct
             ? `${currentItem.letter} = ${currentItem.letter.toLowerCase()}!`
             : `It's ${currentItem.letter} / ${currentItem.letter.toLowerCase()}!`;
+    } else if (currentAppMode === "kannada") {
+        text.textContent = correct
+            ? `${currentItem.letter} = ${currentItem.roman}!`
+            : `It's ${currentItem.roman}!`;
     } else {
         text.textContent = correct
             ? `${currentItem.letter} for ${currentItem.word}!`
@@ -1030,6 +1057,83 @@ function handleCapsChoice(btn, chosen) {
     }
 }
 
+// ── Kannada Game ─────────────────────────────────────────────────────
+
+function startKannadaGame() {
+    isExamMode = false;
+    currentGameLevelIdx = -1;
+    gameMode = "kannada";
+    queue = shuffle([...KANNADA_ITEMS, ...KANNADA_ITEMS, ...KANNADA_ITEMS]); // 3x each
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    loadKannadaRound();
+}
+
+function loadKannadaRound() {
+    if (currentIndex >= queue.length) {
+        showDone();
+        return;
+    }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+
+    const letterDisplay = document.getElementById("letter-display");
+    letterDisplay.innerHTML = `<div id="big-letter" style="font-family:serif">${currentItem.letter}</div>`;
+    const bigLetter = document.getElementById("big-letter");
+    bigLetter.style.animation = "none";
+    void bigLetter.offsetWidth;
+    bigLetter.style.animation = "popIn 0.4s ease-out";
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+    const options = shuffle([...KANNADA_ITEMS]);
+    options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-letter-btn";
+        btn.textContent = opt.roman;
+        btn.onclick = () => handleKannadaChoice(btn, opt);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleKannadaChoice(btn, chosen) {
+    if (answered) return;
+
+    const isCorrect = chosen.letter === currentItem.letter;
+
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        if (roundClean) {
+            stars++;
+            document.getElementById("stars").textContent = stars;
+        }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        setTimeout(advanceRound, 2200);
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        answered = false;
+    }
+}
+
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
@@ -1038,6 +1142,8 @@ function advanceRound() {
         else loadNumberRound();
     } else if (currentAppMode === "matchcaps") {
         loadCapsRound();
+    } else if (currentAppMode === "kannada") {
+        loadKannadaRound();
     } else {
         loadRound();
     }
@@ -1047,7 +1153,7 @@ function advanceRound() {
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "matchcaps", "saynumbers"].forEach(m => {
+    ["quiz", "matchcaps", "kannada", "saynumbers"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === mode);
     });
@@ -1055,6 +1161,7 @@ function setActiveTab(mode) {
 }
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("tab-matchcaps").addEventListener("click", () => setActiveTab("matchcaps"));
+document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 // Reset any stored mode from removed tabs
 if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
@@ -1062,7 +1169,7 @@ if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
     localStorage.setItem("lb_mode", "quiz");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "matchcaps", "saynumbers"].forEach(m => {
+["quiz", "matchcaps", "kannada", "saynumbers"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
 });
