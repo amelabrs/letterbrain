@@ -922,7 +922,7 @@ function startCapsGame(capsLevelIdx) {
 
     if (gl.mode === "caps-test") {
         // Both directions, 1x each, shuffled together
-        levelItems = [...cumItems];
+        levelItems = [...ALL_ITEMS]; // full alphabet for distractor pool
         queue = shuffle([
             ...cumItems.map(item => ({ ...item, capsDirection: "caps-normal" })),
             ...cumItems.map(item => ({ ...item, capsDirection: "caps-reverse" }))
@@ -931,7 +931,7 @@ function startCapsGame(capsLevelIdx) {
         const targetItems = gl.letters.map(l => ALL_ITEMS.find(it => it.letter === l));
         const priorItems = cumItems.filter(it => !gl.letters.includes(it.letter));
         const reviewItems = shuffle(priorItems).slice(0, 4);
-        levelItems = [...cumItems];
+        levelItems = [...ALL_ITEMS]; // full alphabet for distractor pool
         queue = shuffle([...targetItems, ...targetItems, ...targetItems, ...reviewItems]);
     }
 
