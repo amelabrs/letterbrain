@@ -1067,15 +1067,21 @@ let kannadaMode = "see"; // "see" = show letter→pick sound | "hear" = play sou
 
 function speakKannada(text) {
     if (!("speechSynthesis" in window)) return;
-    speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "kn-IN";
-    utter.rate = 0.75;
-    utter.pitch = 1.2;
     const voices = speechSynthesis.getVoices();
     const kv = voices.find(v => v.lang.startsWith("kn"));
-    if (kv) utter.voice = kv;
-    speechSynthesis.speak(utter);
+    if (kv) {
+        speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "kn-IN";
+        utter.rate = 0.75;
+        utter.pitch = 1.2;
+        utter.voice = kv;
+        speechSynthesis.speak(utter);
+    } else {
+        // No Kannada voice — speak the romanized sound in English
+        const item = KANNADA_ITEMS.find(it => it.letter === text);
+        if (item) speak(item.roman);
+    }
 }
 
 function startKannadaGame(mode = "see") {
