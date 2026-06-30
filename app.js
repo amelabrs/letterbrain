@@ -55,15 +55,25 @@ CONTENT_LEVELS.forEach((cl) => {
 });
 
 // ── Caps Match Levels ─────────────────────────────────────────────────
+const CAPS_GROUPS = [
+    ["A","B"], ["C","D"], ["E","F"], ["G","H"], ["I","J"],
+    ["K","L"], ["M","N"], ["O","P"], ["Q","R"], ["S","T"],
+    ["U","V"], ["W","X"], ["Y","Z"]
+];
+
 const CAPS_LEVELS = [];
-CONTENT_LEVELS.forEach((cl) => {
-    const pair = Math.ceil(CAPS_LEVELS.length / 2) + 1;
-    CAPS_LEVELS.push({ contentLevel: cl, mode: "caps-normal",  pair }); // uppercase → pick lowercase
-    CAPS_LEVELS.push({ contentLevel: cl, mode: "caps-reverse", pair }); // lowercase → pick uppercase
+let _capsRunning = [];
+CAPS_GROUPS.forEach((group, i) => {
+    const pair = i + 1;
+    _capsRunning = [..._capsRunning, ...group];
+    const cumulative = [..._capsRunning];
+    CAPS_LEVELS.push({ letters: group, mode: "caps-normal",  pair, cumulative });
+    CAPS_LEVELS.push({ letters: group, mode: "caps-reverse", pair, cumulative });
+    CAPS_LEVELS.push({ letters: group, mode: "caps-test",    pair, cumulative });
 });
 
 function getCapsUnlockedLevel() {
-    return parseInt(localStorage.getItem("lb_caps_unlocked") || "3");
+    return parseInt(localStorage.getItem("lb_caps_unlocked") || "1");
 }
 function setCapsUnlockedLevel(lvl) {
     localStorage.setItem("lb_caps_unlocked", String(lvl));
@@ -164,7 +174,8 @@ function showSpeechLog() {
 }
 
 function getUnlockedLevel() {
-    return parseInt(localStorage.getItem("lb_unlocked") || "3");
+    const maxPair = GAME_LEVELS[GAME_LEVELS.length - 1].pair;
+    return parseInt(localStorage.getItem("lb_unlocked") || String(maxPair));
 }
 
 function setUnlockedLevel(lvl) {
@@ -285,18 +296,26 @@ function buildLevelGrid() {
 
     if (currentAppMode === "matchcaps") {
         const unlockedPair = getCapsUnlockedLevel();
-        const maxVisiblePair = Math.max(unlockedPair + 1, 4);
+        const maxVisiblePair = Math.max(unlockedPair + 1, 2);
         CAPS_LEVELS.forEach((gl, idx) => {
             if (gl.pair > maxVisiblePair) return;
-            const items = ALL_ITEMS.filter(it => it.level === gl.contentLevel);
             const card = document.createElement("div");
             const isLocked = gl.pair > unlockedPair;
-            card.className = "level-card" + (isLocked ? " locked" : "");
+            const isTest = gl.mode === "caps-test";
+            card.className = "level-card" + (isLocked ? " locked" : "") + (isTest ? " exam-card" : "");
             if (!isLocked) card.onclick = () => startCapsGame(idx);
-            const modeIcon = gl.mode === "caps-normal" ? "🔠" : "🔡";
-            const thumbs = items.map(it =>
-                `<span class="caps-pair">${it.letter}${it.letter.toLowerCase()}</span>`
-            ).join("");
+
+            let modeIcon, thumbs;
+            if (isTest) {
+                modeIcon = "⭐";
+                const range = `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`;
+                thumbs = `<span class="caps-pair" style="font-size:1.3rem">TEST ${range}</span>`;
+            } else {
+                modeIcon = gl.mode === "caps-normal" ? "🔠" : "🔡";
+                thumbs = gl.letters.map(l =>
+                    `<span class="caps-pair">${l}${l.toLowerCase()}</span>`
+                ).join("");
+            }
             card.innerHTML = `
                 <span class="level-number">${idx + 1} ${modeIcon}</span>
                 <div class="level-thumbs caps-preview">${thumbs}</div>
@@ -309,10 +328,7 @@ function buildLevelGrid() {
 
     const unlockedPair = getUnlockedLevel();
 
-    const maxVisiblePair = Math.max(unlockedPair + 1, 4); // always show at least 8 levels
-
     GAME_LEVELS.forEach((gl, idx) => {
-        if (gl.pair > maxVisiblePair) return;
 
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const card = document.createElement("div");
@@ -598,8 +614,8 @@ const PHONICS_TIMESTAMPS = {
 const PHONETICS_VIDEO_ID = "MbO6vGBkx48";
 const PHONETICS_TIMESTAMPS = {
     "A":0,  "B":7,  "C":16, "D":23, "E":31, "F":39, "G":46, "H":53,
-    "I":60, "J":66, "K":74, "L":81, "M":88, "N":95, "O":102,"P":109,
-    "Q":116,"R":123,"S":130,"T":137,"U":144,"V":151,"W":158,"X":165,
+    "I":60, "J":66, "K":74, "L":80, "M":88, "N":94, "O":100,"P":107,
+    "Q":113,"R":122,"S":130,"T":138,"U":145,"V":152,"W":158,"X":166,
     "Y":172,"Z":179
 };
 
@@ -810,7 +826,7 @@ function showDone() {
         const maxPair = CAPS_LEVELS[CAPS_LEVELS.length - 1].pair;
         const threshold = Math.ceil(queue.length * 0.8);
         let newUnlock = false;
-        if (stars >= threshold && gl.pair === unlockedPair && gl.pair < maxPair) {
+        if (stars >= threshold && gl.mode === "caps-test" && gl.pair === unlockedPair && gl.pair < maxPair) {
             setCapsUnlockedLevel(unlockedPair + 1);
             newUnlock = true;
         }
@@ -900,15 +916,25 @@ function startCapsGame(capsLevelIdx) {
     isExamMode = false;
     currentGameLevelIdx = capsLevelIdx;
     const gl = CAPS_LEVELS[capsLevelIdx];
-    currentLevel = gl.contentLevel;
     gameMode = gl.mode;
 
-    const newItems = ALL_ITEMS.filter(it => it.level === currentLevel);
-    const repeatedNew = [...newItems, ...newItems, ...newItems];
-    const reviewPool = ALL_ITEMS.filter(it => it.level < currentLevel);
-    const reviewItems = shuffle(reviewPool).slice(0, 4);
-    levelItems = [...newItems, ...reviewItems];
-    queue = shuffle([...repeatedNew, ...reviewItems]);
+    const cumItems = gl.cumulative.map(l => ALL_ITEMS.find(it => it.letter === l));
+
+    if (gl.mode === "caps-test") {
+        // Both directions, 1x each, shuffled together
+        levelItems = [...cumItems];
+        queue = shuffle([
+            ...cumItems.map(item => ({ ...item, capsDirection: "caps-normal" })),
+            ...cumItems.map(item => ({ ...item, capsDirection: "caps-reverse" }))
+        ]);
+    } else {
+        const targetItems = gl.letters.map(l => ALL_ITEMS.find(it => it.letter === l));
+        const priorItems = cumItems.filter(it => !gl.letters.includes(it.letter));
+        const reviewItems = shuffle(priorItems).slice(0, 4);
+        levelItems = [...cumItems];
+        queue = shuffle([...targetItems, ...targetItems, ...targetItems, ...reviewItems]);
+    }
+
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -929,7 +955,8 @@ function loadCapsRound() {
     currentItem = queue[currentIndex];
     document.getElementById("choices").className = "";
 
-    const isNormal = gameMode === "caps-normal";
+    const dir = currentItem.capsDirection || gameMode;
+    const isNormal = dir === "caps-normal";
     const displayLetter = isNormal ? currentItem.letter : currentItem.letter.toLowerCase();
 
     const letterDisplay = document.getElementById("letter-display");
@@ -939,7 +966,7 @@ function loadCapsRound() {
     void bigLetter.offsetWidth;
     bigLetter.style.animation = "popIn 0.4s ease-out";
 
-    speak(displayLetter);
+    speak(currentItem.letter.toLowerCase());
 
     const wrong = shuffle(levelItems.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
     const options = shuffle([currentItem, ...wrong]);
@@ -982,11 +1009,10 @@ function handleCapsChoice(btn, chosen) {
         });
 
         playCorrectSound();
-        setTimeout(() => speak(`${currentItem.letter} and ${currentItem.letter.toLowerCase()}!`), 500);
         showFeedback(true);
         spawnConfetti();
-
-        setTimeout(() => playVideoReward(), 1600);
+        // Always play phonetics video in Case tab, regardless of toggle
+        setTimeout(() => playPhoneticClip(), 1600);
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
