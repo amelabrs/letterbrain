@@ -808,7 +808,13 @@ function playKannadaVideo() {
     }
 
     if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
-    const start = currentItem.vidStart;
+    const start = currentItem.letter === "ಅ"
+        ? 18
+        : currentItem.letter === "ಆ"
+            ? 32
+            : currentItem.letter === "ಇ"
+                ? 47
+                : currentItem.vidStart;
     const end = start + 8;
     const videoId = currentItem.vidId || KANNADA_VIDEO_ID;
     localPlayer.style.display = "none";
@@ -1132,7 +1138,7 @@ let kannadaActiveItems = KANNADA_ITEMS;
 let _kannadaAudio = null;
 let _kannadaClipTimer = null;
 
-function playKannadaClip(letter) {
+function playKannadaClip(letter, options = {}) {
     const item = KANNADA_ITEMS.find(it => it.letter === letter);
     if (!item) return;
     if (!_kannadaAudio) {
@@ -1142,7 +1148,12 @@ function playKannadaClip(letter) {
     _kannadaAudio.pause();
     _kannadaAudio.currentTime = item.start;
     _kannadaAudio.play().catch(() => {});
-    _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), 2500);
+    const duration = options.duration ?? 2500;
+    _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), duration);
+}
+
+function shouldPlayKannadaDoubleCue(letter) {
+    return ["ಅ", "ಆ", "ಇ", "ಈ"].includes(letter);
 }
 
 function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "see") {
@@ -1201,6 +1212,9 @@ function loadKannadaRound() {
         void bigLetter.offsetWidth;
         bigLetter.style.animation = "popIn 0.4s ease-out";
         playKannadaClip(currentItem.letter);
+        if (shouldPlayKannadaDoubleCue(currentItem.letter)) {
+            setTimeout(() => playKannadaClip(currentItem.letter, { duration: 1800 }), 900);
+        }
 
         shuffle([...KANNADA_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
@@ -1232,7 +1246,12 @@ function handleKannadaChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        setTimeout(() => playKannadaVideo(), 1600);
+        if (shouldPlayKannadaDoubleCue(currentItem.letter)) {
+            playKannadaClip(currentItem.letter, { duration: 1800 });
+            setTimeout(() => playKannadaVideo(), 1900);
+        } else {
+            setTimeout(() => playKannadaVideo(), 1600);
+        }
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
