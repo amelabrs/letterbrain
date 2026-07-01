@@ -84,8 +84,12 @@ function setCapsUnlockedLevel(lvl) {
 const KANNADA_ITEMS = [
     { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14 },
     { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31 },
-    { letter: "ಇ", roman: "i",  start: 6,  vidStart: 44 },
+    { letter: "ಇ", roman: "i",  start: 6,  vidStart: 96 },
     { letter: "ಈ", roman: "ii", start: 9,  vidStart: null },
+    { letter: "ಉ", roman: "u",  start: 13, vidStart: 79 },
+    { letter: "ಊ", roman: "uu", start: 17, vidStart: 94 },
+    { letter: "ಋ", roman: "ru", start: 20, vidStart: 109 },
+    { letter: "ಎ", roman: "e",  start: 24, vidStart: 125 },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -93,6 +97,9 @@ const KANNADA_LEVELS = [
     { label: "1", letters: ["ಅ", "ಆ"] },
     { label: "2", letters: ["ಇ", "ಈ"] },
     { label: "3", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], isTest: true },
+    { label: "4", letters: ["ಉ", "ಊ"] },
+    { label: "5", letters: ["ಋ", "ಎ"] },
+    { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], isTest: true },
 ];
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -311,10 +318,10 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "kannada") {
-        KANNADA_LEVELS.forEach(({ label, letters, isTest }) => {
+        KANNADA_LEVELS.forEach(({ label, letters, isTest }, idx) => {
             const card = document.createElement("div");
             card.className = "level-card" + (isTest ? " exam-card" : "");
-            card.onclick = () => startKannadaGame(letters, "hear");
+            card.onclick = () => startKannadaGame(letters, "hear", isTest, idx);
             const thumbs = letters.map(l =>
                 `<span class="caps-pair" style="font-family:serif">${l}</span>`
             ).join("");
@@ -1153,12 +1160,38 @@ function playKannadaClip(letter, options = {}) {
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
-    return ["ಅ", "ಆ", "ಇ", "ಈ"].includes(letter);
+    return ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"].includes(letter);
 }
 
-function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "see") {
+function getKannadaOptions(correctLetter, levelLetters = [], isTest = false, levelIndex = 0) {
+    const levelLetterSet = (levelLetters || []).filter(Boolean);
+    const allowFirstVowel = levelIndex === 0 || isTest;
+    const correct = correctLetter;
+    const distractorPool = KANNADA_ITEMS
+        .map(item => item.letter)
+        .filter(letter => {
+            if (letter === "ಅ" && !allowFirstVowel) return false;
+            return letter !== correct && !levelLetterSet.includes(letter);
+        });
+
+    const options = [correct];
+    const remaining = shuffle([...levelLetterSet.filter(letter => letter !== correct), ...distractorPool]);
+    while (options.length < 4 && remaining.length) {
+        const next = remaining.shift();
+        if (next && !options.includes(next)) options.push(next);
+    }
+
+    return shuffle(options).slice(0, 4);
+}
+
+let kannadaLevelIndex = 0;
+let kannadaLevelIsTest = false;
+
+function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "see", isTest = false, levelIndex = 0) {
     kannadaMode = mode;
     kannadaActiveItems = KANNADA_ITEMS.filter(it => letters.includes(it.letter));
+    kannadaLevelIndex = levelIndex;
+    kannadaLevelIsTest = isTest;
     isExamMode = false;
     currentGameLevelIdx = -1;
     gameMode = "kannada";
@@ -1195,8 +1228,14 @@ function loadKannadaRound() {
         document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
 
-        // Choices: all 4 Kannada letters always
-        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+        const optionLetters = getKannadaOptions(
+            currentItem.letter,
+            kannadaActiveItems.map(it => it.letter),
+            kannadaLevelIsTest,
+            kannadaLevelIndex
+        );
+        optionLetters.forEach(letter => {
+            const opt = KANNADA_ITEMS.find(it => it.letter === letter);
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.style.fontFamily = "serif";
@@ -1216,7 +1255,14 @@ function loadKannadaRound() {
             setTimeout(() => playKannadaClip(currentItem.letter, { duration: 1800 }), 900);
         }
 
-        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+        const optionLetters = getKannadaOptions(
+            currentItem.letter,
+            kannadaActiveItems.map(it => it.letter),
+            kannadaLevelIsTest,
+            kannadaLevelIndex
+        );
+        optionLetters.forEach(letter => {
+            const opt = KANNADA_ITEMS.find(it => it.letter === letter);
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.textContent = opt.roman;
