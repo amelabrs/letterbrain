@@ -778,13 +778,39 @@ function playVideoReward() {
 }
 
 function playKannadaVideo() {
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+
+    if (currentItem.letter === "ಈ") {
+        localPlayer.src = "videos/only ee.mp4";
+        localPlayer.load();
+        localPlayer.currentTime = 0;
+        localPlayer.style.display = "block";
+        ytEl.style.display = "none";
+        overlay.className = "video-overlay show";
+        videoShowing = true;
+        clearInterval(videoTimer);
+        localPlayer.play().catch(() => {
+            advanceRound();
+        });
+        videoTimer = setInterval(() => {
+            if (localPlayer.duration && localPlayer.currentTime >= localPlayer.duration - 0.2) {
+                clearInterval(videoTimer);
+                hideVideoOverlay();
+            }
+        }, 200);
+        safetyTimer = setTimeout(() => {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }, 10000);
+        return;
+    }
+
     if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
     const start = currentItem.vidStart;
     const end = start + 8;
     const videoId = currentItem.vidId || KANNADA_VIDEO_ID;
-    const overlay = document.getElementById("video-overlay");
-    const localPlayer = document.getElementById("local-player");
-    const ytEl = document.getElementById("yt-player");
     localPlayer.style.display = "none";
     ytEl.style.display = "block";
     overlay.className = "video-overlay show";
@@ -811,8 +837,13 @@ function hideVideoOverlay() {
     clearInterval(videoTimer);
     clearTimeout(safetyTimer);
     const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
     overlay.className = "video-overlay hidden";
     document.getElementById("skip-cartoon").style.display = "none";
+    if (localPlayer) {
+        localPlayer.pause();
+        localPlayer.currentTime = 0;
+    }
     if (ytPlayer) ytPlayer.pauseVideo();
     advanceRound();
 }
