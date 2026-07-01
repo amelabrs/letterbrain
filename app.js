@@ -85,7 +85,7 @@ const KANNADA_ITEMS = [
     { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14 },
     { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31 },
     { letter: "ಇ", roman: "i",  start: 6,  vidStart: 44 },
-    { letter: "ಈ", roman: "ii", start: 9,  vidStart: 34, vidId: "Ydiwd_4M88I" },
+    { letter: "ಈ", roman: "ii", start: 9,  vidStart: null },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
