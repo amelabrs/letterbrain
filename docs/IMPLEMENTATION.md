@@ -11,14 +11,16 @@ LetterBrain is a **vanilla JS PWA** (no framework) that teaches young children t
 ```
 letterbrain/
 ├── index.html              — Single HTML shell; all screens live here as hidden divs
-├── app.js                  — All game logic (~828 lines)
+├── app.js                  — All game logic (~1700 lines)
 ├── style.css               — All styling; Comic Sans / child-friendly palette
 ├── manifest.json           — PWA install metadata
 ├── WordVideos.json         — Video reward data (loaded at runtime via fetch)
 │
-├── images/                 — 35 PNG assets (one per letter A-Z + PWA icons)
+├── images/                 — PNG assets (A-Z letters + Kannada: prince, elephant, rat, fly)
 ├── videos/                 — Local mp4 overrides: fensi.mp4 (F), guitar.mp4 (G), icecream.mp4 (I)
-├── audio/                  — Reference phonics mp3 (not used in-game)
+├── audio/
+│   ├── kannada.mp3         — Kannada vowel pronunciation audio (used in-game)
+│   └── Phonics A-Z Mouth Shapes.mp3  — Reference only
 │
 ├── docs/                   — Documentation
 │   ├── IMPLEMENTATION.md   — This file
@@ -104,14 +106,109 @@ Each content level generates **2 game levels** (one per mode), so there are 22 t
 
 ---
 
+## Tabs
+
+The start screen has four mode tabs (in order):
+
+| Tab | ID | Description |
+|-----|----|-------------|
+| 📝 Quiz | `tab-quiz` | Main A–Z alphabet quiz |
+| 🔠 Case | `tab-matchcaps` | Uppercase ↔ lowercase matching |
+| ಕನ್ನಡ | `tab-kannada` | Kannada vowel recognition |
+| 🔢 Numbers | `tab-saynumbers` | Number recognition 1–6 |
+
+Active tab is tracked in `currentAppMode`. Switching calls `setActiveTab(mode)` and rebuilds the level grid.
+
+---
+
+## Settings
+
+One toggle remains on the start screen:
+
+| Toggle | ID | Stored in | Effect |
+|--------|----|-----------|--------|
+| 🔬 Phonetics | `phonetics-real-toggle` | `lb_phonetics` | ON → plays phonetics clip (`MbO6vGBkx48`); OFF → plays phonics clip (`svmmuYQPrI4`) |
+
+All other previous toggles (Learning Video, Be Funny, Disable Video, Disable Old Levels) have been removed.
+
+---
+
 ## Game Modes
+
+### Quiz Tab (📝)
 
 | Mode      | Prompt        | Child picks     |
 |-----------|---------------|-----------------|
 | `normal`  | Big letter     | Image (4 choices) |
 | `reverse` | Image + word  | Letter (4 choices) |
 
-In both modes, 4 choices are shown: 1 correct + 3 distractors sampled from `levelItems` (current level's new letters + 4 random review letters from prior levels).
+In both modes, 4 choices are shown: 1 correct + 3 distractors sampled from `levelItems`. An **Exam level** (A–X, gold card) always appears at the end of the level grid — it cycles through A–X once with no repetition.
+
+### Case Tab (🔠)
+
+Teaches uppercase ↔ lowercase letter matching. 39 levels total (13 letter pairs × 3 levels each):
+
+| Level type | Mode key | Prompt | Child picks |
+|------------|----------|--------|-------------|
+| Normal | `caps-normal` | Uppercase letter | Lowercase (4 choices) |
+| Reverse | `caps-reverse` | Lowercase letter | Uppercase (4 choices) |
+| Test | `caps-test` | Mixed upper/lower | Opposite case (4 choices) |
+
+- **Letter pairs**: A/B, C/D, E/F, G/H, I/J, K/L, M/N, O/P, Q/R, S/T, U/V, W/X, Y/Z
+- **Distractors**: adjacent letters (sliding window of 4 from A–Z alphabet)
+- **All levels always unlocked** — no progression gate
+- **Always plays phonetics video** after correct answer; no TTS speech after correct
+
+Defined by `CAPS_GROUPS` and `CAPS_LEVELS` arrays. Each test level has a `cumulative` array (all letters seen so far) for future use.
+
+### Numbers Tab (🔢)
+
+5 levels, child sees a number and picks from 4 choices:
+
+| Level | Range | Notes |
+|-------|-------|-------|
+| 1 | 1–2 | Intro to 1 and 2 |
+| 2 | 3–4 | Intro to 3 and 4 |
+| 3 | 1–4 | Mixed review |
+| 4 | 5–6 | Intro to 5 and 6 |
+| 5 | 1–6 | Full mixed test |
+
+Distractors are drawn dynamically from within the full 1–6 range.
+
+### Kannada Tab (ಕನ್ನಡ)
+
+Teaches the first four Kannada vowels. **Hear mode only**: audio plays → child picks the correct Kannada letter from 4 choices (always all 4 shown).
+
+#### KANNADA_ITEMS
+
+```js
+{ letter: “ಅ”, roman: “a”,  start: 0,  vidStart: 14,   image: “images/prince.png”   }
+{ letter: “ಆ”, roman: “aa”, start: 3,  vidStart: 31,   image: “images/elephant.png” }
+{ letter: “ಇ”, roman: “i”,  start: 6,  vidStart: 44,   image: “images/rat.png”      }
+{ letter: “ಈ”, roman: “ii”, start: 9,  vidStart: null, image: “images/fly.png”      }
+```
+
+- `start` — offset (seconds) in `audio/kannada.mp3` for pronunciation
+- `vidStart` — offset (seconds) in `KANNADA_VIDEO_ID` for video reward (`null` = skip)
+- `image` — illustration for picture mode (not yet in gameplay; planned for Level 2 / Level 4)
+
+#### KANNADA_LEVELS
+
+| Level | Letters | Mode | Notes |
+|-------|---------|------|-------|
+| 1 | ಅ, ಆ | hear | Audio → pick letter |
+| 2 | ಇ, ಈ | hear | Audio → pick letter |
+| 3 ⭐ | all 4 | hear | Cumulative test (gold card) |
+
+#### Audio
+
+`playKannadaClip(letter)` uses an HTML5 `Audio` element pointed at `audio/kannada.mp3`. It seeks to `item.start`, plays, then pauses after 2.5 seconds.
+
+#### Video rewards
+
+`playKannadaVideo()` plays a clip from YouTube video `KMNRrw5fPCY` using the same IFrame mechanism as other video rewards. Per-item timestamps: ಅ→14s, ಆ→31s, ಇ→44s. ಈ has `vidStart: null` so it skips the video and advances immediately.
+
+Each item can also override the video ID via `vidId` field (currently unused; previously tested for ಈ).
 
 ---
 
@@ -191,12 +288,16 @@ Generated via Web Audio API oscillators (no audio files needed):
 
 ### Per-letter clip (after correct answer)
 
-Called by `playVideoReward()` — priority order:
+Called by `playVideoReward()`:
 
-1. **Phonetics mode ON** → `playPhonicsClip()`: seeks YouTube video `svmmuYQPrI4` to letter's timestamp (see `PHONICS_TIMESTAMPS`), plays ~5 seconds
-2. **Be Funny ON + funnyShort exists** → `playFunnyShort()`: plays the letter's YouTube Short
-3. **localVid exists** → plays local `<video>` element (F=fensi.mp4, G=guitar.mp4, I=icecream.mp4)
-4. **vidStart/vidEnd exist** → seeks archive YouTube video `a_DRSc0oZV0` to the timestamp window
+| Phonetics toggle | Function called | Video | Duration |
+|-----------------|-----------------|-------|----------|
+| ON | `playPhoneticClip()` | `MbO6vGBkx48` (real phonetics mouth shapes) | 5 sec from `PHONETICS_TIMESTAMPS[letter]` |
+| OFF | `playPhonicsClip()` | `svmmuYQPrI4` (phonics archive) | 5 sec from `PHONICS_TIMESTAMPS[letter]` |
+
+For the **Case tab**, `playPhoneticClip()` is always called regardless of the toggle.
+
+For the **Kannada tab**, `playKannadaVideo()` is called with video `KMNRrw5fPCY`, playing 8 seconds from the item's `vidStart`.
 
 All per-letter clips use `#video-overlay` and auto-advance to the next round when done.
 
@@ -208,18 +309,25 @@ Called by `playCartoonReward()`:
 - Plays for up to 5 minutes; child can skip with "Done ✖" button
 - Uses `#shorts-overlay` (separate from per-letter overlay)
 
-### Phonics Timestamps
+### Timestamps
 
+**PHONETICS_TIMESTAMPS** — video `MbO6vGBkx48` (real phonetics, mouth shapes):
 ```js
-PHONICS_TIMESTAMPS = {
-  "A":0, "B":13, "C":27, "D":40, "E":52, "F":64, "G":79, "H":93,
-  "I":106, "J":118, "K":131, "L":145, "M":157, "N":169, "O":182,
-  "P":196, "Q":211, "R":224, "S":238, "T":254, "U":268, "V":280,
-  "W":295, "X":309, "Y":323, "Z":337
-}
+{ A:0, B:7, C:16, D:23, E:31, F:39, G:46, H:53,
+  I:60, J:66, K:74, L:80, M:88, N:94, O:100, P:107,
+  Q:113, R:122, S:130, T:138, U:145, V:152, W:158, X:166,
+  Y:172, Z:179 }
 ```
 
-Clip duration is always `start + 5` seconds.
+**PHONICS_TIMESTAMPS** — video `svmmuYQPrI4` (phonics archive):
+```js
+{ A:0, B:13, C:27, D:40, E:52, F:64, G:79, H:93,
+  I:106, J:118, K:131, L:145, M:157, N:169, O:182,
+  P:196, Q:211, R:224, S:238, T:254, U:268, V:280,
+  W:295, X:309, Y:323, Z:337 }
+```
+
+All clip durations: `start + 5` seconds (Kannada clips: `start + 8` seconds).
 
 ---
 
@@ -241,13 +349,11 @@ All state is in `localStorage`:
 
 | Key              | Type    | Description                           |
 |------------------|---------|---------------------------------------|
-| `lb_unlocked`    | string  | Current unlocked pair number          |
+| `lb_unlocked`    | string  | Current unlocked pair number (Quiz tab) — defaults to max (all unlocked) |
+| `lb_caps_unlocked` | string | Current unlocked pair number (Case tab) — defaults to max (all unlocked) |
 | `lb_deviceId`    | string  | UUID for analytics                    |
 | `lb_deviceName`  | string  | Optional caregiver label              |
-| `lb_disableOld`  | `"0"/"1"` | Hide completed levels toggle        |
 | `lb_phonetics`   | `"0"/"1"` | Phonetics video mode (default ON)   |
-| `lb_wordVideo`   | `"0"/"1"` | Word video mode                     |
-| `lb_beFunny`     | `"0"/"1"` | Funny shorts mode                   |
 | `lb_cartoon`     | JSON    | `{ index, position }` for shorts resume |
 
 In-session state (global JS variables, not persisted):
