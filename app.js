@@ -94,12 +94,11 @@ const KANNADA_ITEMS = [
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
 const KANNADA_LEVELS = [
-    { label: "1", letters: ["ಅ", "ಆ"] },
-    { label: "2", letters: ["ಇ", "ಈ"] },
-    { label: "3", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], isTest: true },
-    { label: "4", letters: ["ಉ", "ಊ"] },
-    { label: "5", letters: ["ಋ", "ಎ"] },
-    { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], isTest: true },
+    { label: "1", letters: ["ಅ", "ಆ"], mode: "hear" },
+    { label: "2", letters: ["ಅ", "ಆ"], mode: "picture" },
+    { label: "3", letters: ["ಇ", "ಈ"], mode: "hear" },
+    { label: "4", letters: ["ಇ", "ಈ"], mode: "picture" },
+    { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
 ];
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -318,15 +317,24 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "kannada") {
-        KANNADA_LEVELS.forEach(({ label, letters, isTest }, idx) => {
+        KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }) => {
             const card = document.createElement("div");
             card.className = "level-card" + (isTest ? " exam-card" : "");
-            card.onclick = () => startKannadaGame(letters, "hear", isTest, idx);
-            const thumbs = letters.map(l =>
-                `<span class="caps-pair" style="font-family:serif">${l}</span>`
-            ).join("");
+            card.onclick = () => startKannadaGame(letters, mode);
+            let thumbs;
+            if (mode === "picture") {
+                thumbs = letters.map(l => {
+                    const it = KANNADA_ITEMS.find(k => k.letter === l);
+                    return `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">`;
+                }).join("");
+            } else {
+                thumbs = letters.map(l =>
+                    `<span class="caps-pair" style="font-family:serif">${l}</span>`
+                ).join("");
+            }
+            const modeIcon = isTest ? " ⭐" : (mode === "picture" ? " 🖼️" : " 🔊");
             card.innerHTML = `
-                <span class="level-number">${label}${isTest ? " ⭐" : ""}</span>
+                <span class="level-number">${label}${modeIcon}</span>
                 <div class="level-thumbs caps-preview">${thumbs}</div>
                 <span class="level-go">▶</span>
             `;
@@ -1220,22 +1228,9 @@ function loadKannadaRound() {
     const choicesEl = document.getElementById("choices");
     choicesEl.innerHTML = "";
 
-    if (kannadaMode === "hear") {
-        letterDisplay.innerHTML = `
-            <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
-            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
-        `;
-        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
-        setTimeout(() => playKannadaClip(currentItem.letter), 400);
-
-        const optionLetters = getKannadaOptions(
-            currentItem.letter,
-            kannadaActiveItems.map(it => it.letter),
-            kannadaLevelIsTest,
-            kannadaLevelIndex
-        );
-        optionLetters.forEach(letter => {
-            const opt = KANNADA_ITEMS.find(it => it.letter === letter);
+    if (kannadaMode === "picture") {
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        shuffle([...KANNADA_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.style.fontFamily = "serif";
@@ -1244,28 +1239,18 @@ function loadKannadaRound() {
             choicesEl.appendChild(btn);
         });
     } else {
-        // Show Kannada letter, choices are all 4 roman sounds
-        letterDisplay.innerHTML = `<div id="big-letter" style="font-family:serif">${currentItem.letter}</div>`;
-        const bigLetter = document.getElementById("big-letter");
-        bigLetter.style.animation = "none";
-        void bigLetter.offsetWidth;
-        bigLetter.style.animation = "popIn 0.4s ease-out";
-        playKannadaClip(currentItem.letter);
-        if (shouldPlayKannadaDoubleCue(currentItem.letter)) {
-            setTimeout(() => playKannadaClip(currentItem.letter, { duration: 1800 }), 900);
-        }
-
-        const optionLetters = getKannadaOptions(
-            currentItem.letter,
-            kannadaActiveItems.map(it => it.letter),
-            kannadaLevelIsTest,
-            kannadaLevelIndex
-        );
-        optionLetters.forEach(letter => {
-            const opt = KANNADA_ITEMS.find(it => it.letter === letter);
+        // hear mode
+        letterDisplay.innerHTML = `
+            <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+        `;
+        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
+        setTimeout(() => playKannadaClip(currentItem.letter), 400);
+        shuffle([...KANNADA_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.textContent = opt.roman;
+            btn.style.fontFamily = "serif";
+            btn.textContent = opt.letter;
             btn.onclick = () => handleKannadaChoice(btn, opt);
             choicesEl.appendChild(btn);
         });
@@ -1292,9 +1277,9 @@ function handleKannadaChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        if (shouldPlayKannadaDoubleCue(currentItem.letter)) {
-            playKannadaClip(currentItem.letter, { duration: 1800 });
-            setTimeout(() => playKannadaVideo(), 1900);
+        if (kannadaMode === "picture") {
+            playKannadaClip(currentItem.letter);
+            setTimeout(() => playKannadaVideo(), 1800);
         } else {
             setTimeout(() => playKannadaVideo(), 1600);
         }
