@@ -108,13 +108,14 @@ Each content level generates **2 game levels** (one per mode), so there are 22 t
 
 ## Tabs
 
-The start screen has four mode tabs (in order):
+The start screen has five mode tabs (in order):
 
 | Tab | ID | Description |
 |-----|----|-------------|
 | 📝 Quiz | `tab-quiz` | Main A–Z alphabet quiz |
 | 🔠 Case | `tab-matchcaps` | Uppercase ↔ lowercase matching |
 | ಕನ್ನಡ | `tab-kannada` | Kannada vowel recognition |
+| हिंदी | `tab-hindi` | Hindi vowel recognition |
 | 🔢 Numbers | `tab-saynumbers` | Number recognition 1–6 |
 
 Active tab is tracked in `currentAppMode`. Switching calls `setActiveTab(mode)` and rebuilds the level grid.
@@ -207,6 +208,46 @@ Teaches the first four Kannada vowels. **Hear mode only**: audio plays → child
 #### Video rewards
 
 `playKannadaVideo()` plays a clip from YouTube video `KMNRrw5fPCY` using the same IFrame mechanism as other video rewards. Per-item timestamps: ಅ→14s, ಆ→31s, ಇ→44s. ಈ has `vidStart: null` so it skips the video and advances immediately.
+
+### Hindi Tab (हिंदी)
+
+Teaches the first four Hindi vowels. **Hear mode only**: audio plays → child picks the correct Hindi letter from 4 choices (always all 4 shown).
+
+#### HINDI_ITEMS
+
+```js
+{ letter: “अ”, roman: “a”,  start: 0,  vidStart: 0,  vidEnd: 5,  image: “images/prince.png” }
+{ letter: “आ”, roman: “aa”, start: 3,  vidStart: 5,  vidEnd: 9,  image: “images/elephant.png” }
+{ letter: “इ”, roman: “i”,  start: 6,  vidStart: 9,  vidEnd: 15, image: “images/rat.png”      }
+{ letter: “ई”, roman: “ii”, start: 9,  vidStart: 15, vidEnd: 20, image: “images/fly.png”      }
+```
+
+- `start` — offset (seconds) in `audio/kannada.mp3` for pronunciation
+- `vidStart` — offset (seconds) in `HINDI_VIDEO_ID` for video reward
+- `vidEnd` — explicit end offset for Hindi clips
+- `image` — illustration for picture mode
+
+#### HINDI_LEVELS
+
+| Level | Letters | Mode | Notes |
+|-------|---------|------|-------|
+| 1 | अ, आ | hear | Audio → pick letter |
+| 2 | अ, आ | picture | Picture → pick letter |
+| 3 | इ, ई | hear | Audio → pick letter |
+| 4 | इ, ई | picture | Picture → pick letter |
+| 5 ⭐ | all 4 | hear | Cumulative test (gold card) |
+
+#### Audio
+
+`playHindiClip(letter)` reuses `audio/kannada.mp3` and seeks to the item’s `start` offset.
+
+#### Video rewards
+
+`playHindiVideo()` plays a clip from YouTube video `0EfSycgslF0` using the requested timestamps:
+- अ → 0:00
+- आ → 0:05
+- इ → 0:09
+- ई → 0:15
 
 Each item can also override the video ID via `vidId` field (currently unused; previously tested for ಈ).
 

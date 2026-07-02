@@ -82,10 +82,10 @@ function setCapsUnlockedLevel(lvl) {
 
 // ── Kannada ───────────────────────────────────────────────────────────
 const KANNADA_ITEMS = [
-    { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14 },
-    { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31 },
-    { letter: "ಇ", roman: "i",  start: 6,  vidStart: 96 },
-    { letter: "ಈ", roman: "ii", start: 9,  vidStart: null },
+    { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14,  image: "images/prince.png" },
+    { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31,  image: "images/elephant.png" },
+    { letter: "ಇ", roman: "i",  start: 6,  vidStart: 96,  image: "images/rat.png" },
+    { letter: "ಈ", roman: "ii", start: 9,  vidStart: null, image: "images/fly.png" },
     { letter: "ಉ", roman: "u",  start: 13, vidStart: 79 },
     { letter: "ಊ", roman: "uu", start: 17, vidStart: 94 },
     { letter: "ಋ", roman: "ru", start: 20, vidStart: 109 },
@@ -99,6 +99,21 @@ const KANNADA_LEVELS = [
     { label: "3", letters: ["ಇ", "ಈ"], mode: "hear" },
     { label: "4", letters: ["ಇ", "ಈ"], mode: "picture" },
     { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
+];
+
+const HINDI_ITEMS = [
+    { letter: "अ", roman: "a",  start: 0,  vidStart: 0,  image: "images/prince.png" },
+    { letter: "आ", roman: "aa", start: 3,  vidStart: 5,  image: "images/elephant.png" },
+    { letter: "इ", roman: "i",  start: 6,  vidStart: 9,  image: "images/rat.png" },
+    { letter: "ई", roman: "ii", start: 9,  vidStart: 15, image: "images/fly.png" },
+];
+const HINDI_VIDEO_ID = "0EfSycgslF0";
+const HINDI_LEVELS = [
+    { label: "1", letters: ["अ", "आ"], mode: "hear" },
+    { label: "2", letters: ["अ", "आ"], mode: "picture" },
+    { label: "3", letters: ["इ", "ई"], mode: "hear" },
+    { label: "4", letters: ["इ", "ई"], mode: "picture" },
+    { label: "5", letters: ["अ", "आ", "इ", "ई"], mode: "hear", isTest: true },
 ];
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -325,6 +340,33 @@ function buildLevelGrid() {
             if (mode === "picture") {
                 thumbs = letters.map(l => {
                     const it = KANNADA_ITEMS.find(k => k.letter === l);
+                    return `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">`;
+                }).join("");
+            } else {
+                thumbs = letters.map(l =>
+                    `<span class="caps-pair" style="font-family:serif">${l}</span>`
+                ).join("");
+            }
+            const modeIcon = isTest ? " ⭐" : (mode === "picture" ? " 🖼️" : " 🔊");
+            card.innerHTML = `
+                <span class="level-number">${label}${modeIcon}</span>
+                <div class="level-thumbs caps-preview">${thumbs}</div>
+                <span class="level-go">▶</span>
+            `;
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    if (currentAppMode === "hindi") {
+        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }) => {
+            const card = document.createElement("div");
+            card.className = "level-card" + (isTest ? " exam-card" : "");
+            card.onclick = () => startHindiGame(letters, mode);
+            let thumbs;
+            if (mode === "picture") {
+                thumbs = letters.map(l => {
+                    const it = HINDI_ITEMS.find(k => k.letter === l);
                     return `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">`;
                 }).join("");
             } else {
@@ -1150,8 +1192,13 @@ function handleCapsChoice(btn, chosen) {
 let kannadaMode = "see";
 let kannadaActiveItems = KANNADA_ITEMS;
 
+let hindiMode = "see";
+let hindiActiveItems = HINDI_ITEMS;
+
 let _kannadaAudio = null;
 let _kannadaClipTimer = null;
+let _hindiAudio = null;
+let _hindiClipTimer = null;
 
 function playKannadaClip(letter, options = {}) {
     const item = KANNADA_ITEMS.find(it => it.letter === letter);
@@ -1167,6 +1214,20 @@ function playKannadaClip(letter, options = {}) {
     _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), duration);
 }
 
+function playHindiClip(letter, options = {}) {
+    const item = HINDI_ITEMS.find(it => it.letter === letter);
+    if (!item) return;
+    if (!_hindiAudio) {
+        _hindiAudio = new Audio("audio/kannada.mp3");
+    }
+    clearTimeout(_hindiClipTimer);
+    _hindiAudio.pause();
+    _hindiAudio.currentTime = item.start;
+    _hindiAudio.play().catch(() => {});
+    const duration = options.duration ?? 2500;
+    _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), duration);
+}
+
 function shouldPlayKannadaDoubleCue(letter) {
     return ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"].includes(letter);
 }
@@ -1175,15 +1236,24 @@ function getKannadaOptions(correctLetter, levelLetters = [], isTest = false, lev
     const levelLetterSet = (levelLetters || []).filter(Boolean);
     const allowFirstVowel = levelIndex === 0 || isTest;
     const correct = correctLetter;
+    const pairMap = {
+        "ಅ": ["ಅ", "ಆ"],
+        "ಆ": ["ಅ", "ಆ"],
+        "ಇ": ["ಇ", "ಈ"],
+        "ಈ": ["ಇ", "ಈ"]
+    };
+    const pairLetters = pairMap[correct] || [correct];
+
     const distractorPool = KANNADA_ITEMS
         .map(item => item.letter)
         .filter(letter => {
             if (letter === "ಅ" && !allowFirstVowel) return false;
-            return letter !== correct && !levelLetterSet.includes(letter);
+            if (pairLetters.includes(letter)) return false;
+            return true;
         });
 
-    const options = [correct];
-    const remaining = shuffle([...levelLetterSet.filter(letter => letter !== correct), ...distractorPool]);
+    const options = [...new Set(pairLetters)];
+    const remaining = shuffle([...levelLetterSet.filter(letter => !options.includes(letter)), ...distractorPool]);
     while (options.length < 4 && remaining.length) {
         const next = remaining.shift();
         if (next && !options.includes(next)) options.push(next);
@@ -1228,14 +1298,16 @@ function loadKannadaRound() {
     const choicesEl = document.getElementById("choices");
     choicesEl.innerHTML = "";
 
+    const options = getKannadaOptions(currentItem.letter, kannadaActiveItems.map(it => it.letter), kannadaLevelIsTest, kannadaLevelIndex);
+
     if (kannadaMode === "picture") {
         letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
-        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+        options.forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.style.fontFamily = "serif";
-            btn.textContent = opt.letter;
-            btn.onclick = () => handleKannadaChoice(btn, opt);
+            btn.textContent = opt;
+            btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
             choicesEl.appendChild(btn);
         });
     } else {
@@ -1246,12 +1318,12 @@ function loadKannadaRound() {
         `;
         document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
-        shuffle([...KANNADA_ITEMS]).forEach(opt => {
+        options.forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             btn.style.fontFamily = "serif";
-            btn.textContent = opt.letter;
-            btn.onclick = () => handleKannadaChoice(btn, opt);
+            btn.textContent = opt;
+            btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
             choicesEl.appendChild(btn);
         });
     }
@@ -1293,6 +1365,130 @@ function handleKannadaChoice(btn, chosen) {
     }
 }
 
+function startHindiGame(letters = HINDI_ITEMS.map(it => it.letter), mode = "see", isTest = false, levelIndex = 0) {
+    hindiMode = mode;
+    hindiActiveItems = HINDI_ITEMS.filter(it => letters.includes(it.letter));
+    kannadaLevelIndex = levelIndex;
+    kannadaLevelIsTest = isTest;
+    isExamMode = false;
+    currentGameLevelIdx = -1;
+    gameMode = "hindi";
+    queue = shuffle([...hindiActiveItems, ...hindiActiveItems, ...hindiActiveItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    loadHindiRound();
+}
+
+function loadHindiRound() {
+    if (currentIndex >= queue.length) {
+        showDone();
+        return;
+    }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+
+    if (hindiMode === "picture") {
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        shuffle([...HINDI_ITEMS]).forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.fontFamily = "serif";
+            btn.textContent = opt.letter;
+            btn.onclick = () => handleHindiChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        letterDisplay.innerHTML = `
+            <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+        `;
+        document.getElementById("kannada-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter));
+        setTimeout(() => playHindiClip(currentItem.letter), 400);
+        shuffle([...HINDI_ITEMS]).forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.fontFamily = "serif";
+            btn.textContent = opt.letter;
+            btn.onclick = () => handleHindiChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    }
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleHindiChoice(btn, chosen) {
+    if (answered) return;
+
+    const isCorrect = chosen.letter === currentItem.letter;
+
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        if (roundClean) {
+            stars++;
+            document.getElementById("stars").textContent = stars;
+        }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        if (hindiMode === "picture") {
+            playHindiClip(currentItem.letter);
+            setTimeout(() => playHindiVideo(), 1800);
+        } else {
+            setTimeout(() => playHindiVideo(), 1600);
+        }
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        answered = false;
+    }
+}
+
+function playHindiVideo() {
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+
+    if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
+    const start = currentItem.vidStart;
+    const end = typeof currentItem.vidEnd === "number" ? currentItem.vidEnd : start + 5;
+    const videoId = currentItem.vidId || HINDI_VIDEO_ID;
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, 10000);
+}
+
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
@@ -1303,6 +1499,8 @@ function advanceRound() {
         loadCapsRound();
     } else if (currentAppMode === "kannada") {
         loadKannadaRound();
+    } else if (currentAppMode === "hindi") {
+        loadHindiRound();
     } else {
         loadRound();
     }
@@ -1312,7 +1510,7 @@ function advanceRound() {
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "matchcaps", "kannada", "saynumbers"].forEach(m => {
+    ["quiz", "matchcaps", "kannada", "hindi", "saynumbers"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === mode);
     });
@@ -1321,6 +1519,7 @@ function setActiveTab(mode) {
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("tab-matchcaps").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
+document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 // Reset any stored mode from removed tabs
 if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
@@ -1328,7 +1527,7 @@ if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
     localStorage.setItem("lb_mode", "quiz");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "matchcaps", "kannada", "saynumbers"].forEach(m => {
+["quiz", "matchcaps", "kannada", "hindi", "saynumbers"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
 });
