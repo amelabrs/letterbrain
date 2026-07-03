@@ -102,7 +102,7 @@ const KANNADA_LEVELS = [
 ];
 
 const HINDI_ITEMS = [
-    { letter: "अ", roman: "a",  start: 0,  vidStart: 0,  image: "images/prince.png" },
+    { letter: "अ", roman: "a",  start: 0,  vidStart: 0,  image: "images/mango.png" },
     { letter: "आ", roman: "aa", start: 3,  vidStart: 5,  image: "images/elephant.png" },
     { letter: "इ", roman: "i",  start: 6,  vidStart: 9,  image: "images/rat.png" },
     { letter: "ई", roman: "ii", start: 9,  vidStart: 15, image: "images/fly.png" },

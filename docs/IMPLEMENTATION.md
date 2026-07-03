@@ -178,54 +178,79 @@ Distractors are drawn dynamically from within the full 1–6 range.
 
 ### Kannada Tab (ಕನ್ನಡ)
 
-Teaches the first four Kannada vowels. **Hear mode only**: audio plays → child picks the correct Kannada letter from 4 choices (always all 4 shown).
+Teaches the first four Kannada vowels using two modes per vowel pair, then a cumulative test.
 
 #### KANNADA_ITEMS
 
 ```js
 { letter: “ಅ”, roman: “a”,  start: 0,  vidStart: 14,   image: “images/prince.png”   }
 { letter: “ಆ”, roman: “aa”, start: 3,  vidStart: 31,   image: “images/elephant.png” }
-{ letter: “ಇ”, roman: “i”,  start: 6,  vidStart: 44,   image: “images/rat.png”      }
+{ letter: “ಇ”, roman: “i”,  start: 6,  vidStart: 96,   image: “images/rat.png”      }
 { letter: “ಈ”, roman: “ii”, start: 9,  vidStart: null, image: “images/fly.png”      }
 ```
 
-- `start` — offset (seconds) in `audio/kannada.mp3` for pronunciation
-- `vidStart` — offset (seconds) in `KANNADA_VIDEO_ID` for video reward (`null` = skip)
-- `image` — illustration for picture mode (not yet in gameplay; planned for Level 2 / Level 4)
+- `start` — offset (seconds) in `audio/kannada.mp3` for pronunciation clip
+- `vidStart` — offset (seconds) in `KANNADA_VIDEO_ID` (`KMNRrw5fPCY`) for video reward; `null` = skip
+- `image` — illustration used in picture mode levels
 
-#### KANNADA_LEVELS
+#### KANNADA_LEVELS (5 levels)
 
-| Level | Letters | Mode | Notes |
-|-------|---------|------|-------|
-| 1 | ಅ, ಆ | hear | Audio → pick letter |
-| 2 | ಇ, ಈ | hear | Audio → pick letter |
-| 3 ⭐ | all 4 | hear | Cumulative test (gold card) |
+| Level | Letters | Mode | What child sees | Child picks |
+|-------|---------|------|-----------------|-------------|
+| 1 🔊 | ಅ, ಆ | hear | 🔊 button | Kannada letter (4 choices) |
+| 2 🖼️ | ಅ, ಆ | picture | Image (prince / elephant) | Kannada letter (4 choices) |
+| 3 🔊 | ಇ, ಈ | hear | 🔊 button | Kannada letter (4 choices) |
+| 4 🖼️ | ಇ, ಈ | picture | Image (rat / fly) | Kannada letter (4 choices) |
+| 5 ⭐ | all 4 | hear | 🔊 button | Kannada letter (4 choices) |
+
+All choices always show all 4 Kannada letters regardless of which letters are being tested.
 
 #### Audio
 
-`playKannadaClip(letter)` uses an HTML5 `Audio` element pointed at `audio/kannada.mp3`. It seeks to `item.start`, plays, then pauses after 2.5 seconds.
+`playKannadaClip(letter)` → HTML5 `Audio` → `audio/kannada.mp3`, seeks to `item.start`, plays 2.5 seconds.
+
+#### On correct answer
+
+- **Hear mode**: video plays after 1600ms
+- **Picture mode**: audio clip plays immediately (to confirm the letter), then video plays after 1800ms
 
 #### Video rewards
 
-`playKannadaVideo()` plays a clip from YouTube video `KMNRrw5fPCY` using the same IFrame mechanism as other video rewards. Per-item timestamps: ಅ→14s, ಆ→31s, ಇ→44s. ಈ has `vidStart: null` so it skips the video and advances immediately.
+`playKannadaVideo()` — YouTube video `KMNRrw5fPCY`, clips play for 8 seconds from `vidStart`. ಈ (`vidStart: null`) skips video and advances immediately.
+
+---
 
 ### Hindi Tab (हिंदी)
 
-Teaches the first four Hindi vowels. **Hear mode only**: audio plays → child picks the correct Hindi letter from 4 choices (always all 4 shown).
+Teaches the first four Hindi vowels. Same 5-level structure as Kannada (hear/picture pairs + test).
 
 #### HINDI_ITEMS
 
 ```js
-{ letter: “अ”, roman: “a”,  start: 0,  vidStart: 0,  vidEnd: 5,  image: “images/prince.png” }
-{ letter: “आ”, roman: “aa”, start: 3,  vidStart: 5,  vidEnd: 9,  image: “images/elephant.png” }
-{ letter: “इ”, roman: “i”,  start: 6,  vidStart: 9,  vidEnd: 15, image: “images/rat.png”      }
-{ letter: “ई”, roman: “ii”, start: 9,  vidStart: 15, vidEnd: 20, image: “images/fly.png”      }
+{ letter: “अ”, roman: “a”,  start: 0, vidStart: 0,  image: “images/mango.png”    }
+{ letter: “आ”, roman: “aa”, start: 3, vidStart: 5,  image: “images/elephant.png” }
+{ letter: “इ”, roman: “i”,  start: 6, vidStart: 9,  image: “images/rat.png”      }
+{ letter: “ई”, roman: “ii”, start: 9, vidStart: 15, image: “images/fly.png”      }
 ```
 
-- `start` — offset (seconds) in `audio/kannada.mp3` for pronunciation
-- `vidStart` — offset (seconds) in `HINDI_VIDEO_ID` for video reward
-- `vidEnd` — explicit end offset for Hindi clips
-- `image` — illustration for picture mode
+- `start` — offset in audio file for pronunciation
+- `vidStart` — offset (seconds) in `HINDI_VIDEO_ID` (`0EfSycgslF0`); clip plays for 5 seconds
+
+#### HINDI_LEVELS (5 levels)
+
+| Level | Letters | Mode | What child sees | Child picks |
+|-------|---------|------|-----------------|-------------|
+| 1 🔊 | अ, आ | hear | 🔊 button | Hindi letter (4 choices) |
+| 2 🖼️ | अ, आ | picture | Image (mango / elephant) | Hindi letter (4 choices) |
+| 3 🔊 | इ, ई | hear | 🔊 button | Hindi letter (4 choices) |
+| 4 🖼️ | इ, ई | picture | Image (rat / fly) | Hindi letter (4 choices) |
+| 5 ⭐ | all 4 | hear | 🔊 button | Hindi letter (4 choices) |
+
+#### Known issues (as of 2026-07-01)
+
+- **Audio**: `playHindiClip` currently points at `audio/kannada.mp3` — this is a placeholder. A dedicated Hindi pronunciation file is needed.
+- **Videos**: clips are 5 seconds from `vidStart`. If timestamps in `HINDI_ITEMS` don't match the actual video content, the video will appear to play the wrong segment. Needs user verification.
+- **Images**: picture mode images are shared with Kannada tab for now; may need Hindi-specific illustrations later.
 
 #### HINDI_LEVELS
 
