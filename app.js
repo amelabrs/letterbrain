@@ -1302,6 +1302,7 @@ function loadKannadaRound() {
 
     if (kannadaMode === "picture") {
         letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        setTimeout(() => playKannadaClip(currentItem.letter), 400);
         options.forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
@@ -1400,6 +1401,7 @@ function loadHindiRound() {
 
     if (hindiMode === "picture") {
         letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        setTimeout(() => playHindiClip(currentItem.letter), 400);
         shuffle([...HINDI_ITEMS]).forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
