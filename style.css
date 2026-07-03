@@ -431,6 +431,7 @@ header h1 {
 
 #quiz-screen {
     gap: 16px;
+    position: relative;
 }
 
 #letter-display {
@@ -726,6 +727,22 @@ header h1 {
     width: 100%;
 }
 .log-btn:hover { background: #ede5ff; }
+
+.back-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border: 2px solid #764ba2;
+    border-radius: 20px;
+    background: #f5f0ff;
+    color: #764ba2;
+    cursor: pointer;
+    z-index: 10;
+}
+.back-btn:active { background: #ede5ff; }
 
 .speech-log-overlay {
     position: fixed;
