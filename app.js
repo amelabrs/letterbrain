@@ -887,7 +887,7 @@ function playKannadaVideo() {
             : currentItem.letter === "ಇ"
                 ? 47
                 : currentItem.vidStart;
-    const end = start + 8;
+    const end = start + 5;
     const videoId = currentItem.vidId || KANNADA_VIDEO_ID;
     localPlayer.style.display = "none";
     ytEl.style.display = "block";
