@@ -853,8 +853,8 @@ header h1 {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 14px;
-    padding: 16px;
+    gap: 24px;
+    padding: 20px;
     min-height: 110px;
 }
 
@@ -864,8 +864,15 @@ header h1 {
     border-radius: 50%;
     background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     box-shadow: 0 4px 12px rgba(253, 160, 133, 0.5);
-    animation: popIn 0.3s ease-out;
+    animation: popIn 0.3s ease-out both;
 }
+
+.number-ball:nth-child(1) { animation-delay: 0ms; }
+.number-ball:nth-child(2) { animation-delay: 120ms; }
+.number-ball:nth-child(3) { animation-delay: 240ms; }
+.number-ball:nth-child(4) { animation-delay: 360ms; }
+.number-ball:nth-child(5) { animation-delay: 480ms; }
+.number-ball:nth-child(6) { animation-delay: 600ms; }
 
 .choice-number-btn {
     font-size: 3rem !important;
