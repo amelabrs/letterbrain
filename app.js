@@ -484,6 +484,10 @@ const phoneticsRealToggle = document.getElementById("phonetics-real-toggle");
 phoneticsRealToggle.checked = getPhoneticMode();
 phoneticsRealToggle.addEventListener("change", () => setPhoneticMode(phoneticsRealToggle.checked));
 
+const noVideoToggle = document.getElementById("no-video-toggle");
+noVideoToggle.checked = getVideosDisabled();
+noVideoToggle.addEventListener("change", () => setVideosDisabled(noVideoToggle.checked));
+
 
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
@@ -716,6 +720,13 @@ function setPhoneticMode(val) {
     localStorage.setItem("lb_phonetic", val ? "1" : "0");
 }
 
+function getVideosDisabled() {
+    return localStorage.getItem("lb_novideo") === "1";
+}
+function setVideosDisabled(val) {
+    localStorage.setItem("lb_novideo", val ? "1" : "0");
+}
+
 function getPhonicsClip(letter) {
     const start = PHONICS_TIMESTAMPS[letter] ?? 0;
     return { start, end: start + 5 };
@@ -830,11 +841,13 @@ function playPhoneticClip() {
 }
 
 function playVideoReward() {
+    if (getVideosDisabled()) { advanceRound(); return; }
     if (getPhoneticMode()) { playPhoneticClip(); return; }
     playPhonicsClip();
 }
 
 function playKannadaVideo() {
+    if (getVideosDisabled()) { proceedFromVideo(); return; }
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
@@ -1523,6 +1536,7 @@ function handleHindiChoice(btn, chosen) {
 }
 
 function playHindiVideo() {
+    if (getVideosDisabled()) { advanceRound(); return; }
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
