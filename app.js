@@ -94,10 +94,10 @@ const KANNADA_ITEMS = [
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
 const KANNADA_LEVELS = [
-    { label: "1", letters: ["ಅ", "ಆ"], mode: "hear" },
-    { label: "2", letters: ["ಅ", "ಆ"], mode: "picture" },
-    { label: "3", letters: ["ಇ", "ಈ"], mode: "hear" },
-    { label: "4", letters: ["ಇ", "ಈ"], mode: "picture" },
+    { label: "1", letters: ["ಅ", "ಆ"], mode: "letter-image" },
+    { label: "2", letters: ["ಅ", "ಆ"], mode: "video-letter" },
+    { label: "3", letters: ["ಇ", "ಈ"], mode: "letter-image" },
+    { label: "4", letters: ["ಇ", "ಈ"], mode: "video-letter" },
     { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
 ];
 
@@ -332,22 +332,22 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "kannada") {
-        KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }) => {
+        KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
             const card = document.createElement("div");
             card.className = "level-card" + (isTest ? " exam-card" : "");
-            card.onclick = () => startKannadaGame(letters, mode);
+            card.onclick = () => startKannadaGame(letters, mode, isTest, idx);
             let thumbs;
-            if (mode === "picture") {
+            if (mode === "video-letter") {
                 thumbs = letters.map(l => {
                     const it = KANNADA_ITEMS.find(k => k.letter === l);
-                    return `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">`;
+                    return it?.image ? `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">` : "";
                 }).join("");
             } else {
                 thumbs = letters.map(l =>
                     `<span class="caps-pair" style="font-family:serif">${l}</span>`
                 ).join("");
             }
-            const modeIcon = isTest ? " ⭐" : (mode === "picture" ? " 🖼️" : " 🔊");
+            const modeIcon = isTest ? " ⭐" : (mode === "video-letter" ? " 🎬" : " 🔤");
             card.innerHTML = `
                 <span class="level-number">${label}${modeIcon}</span>
                 <div class="level-thumbs caps-preview">${thumbs}</div>
@@ -849,7 +849,7 @@ function playKannadaVideo() {
         videoShowing = true;
         clearInterval(videoTimer);
         localPlayer.play().catch(() => {
-            advanceRound();
+            proceedFromVideo();
         });
         videoTimer = setInterval(() => {
             if (localPlayer.duration && localPlayer.currentTime >= localPlayer.duration - 0.2) {
@@ -864,7 +864,7 @@ function playKannadaVideo() {
         return;
     }
 
-    if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
+    if (!ytReady || currentItem.vidStart == null) { proceedFromVideo(); return; }
     const start = currentItem.letter === "ಅ"
         ? 18
         : currentItem.letter === "ಆ"
@@ -893,6 +893,17 @@ function playKannadaVideo() {
 }
 
 let safetyTimer = null;
+let afterVideoHide = null;
+
+function proceedFromVideo() {
+    if (afterVideoHide) {
+        const cb = afterVideoHide;
+        afterVideoHide = null;
+        cb();
+    } else {
+        advanceRound();
+    }
+}
 
 function hideVideoOverlay() {
     if (!videoShowing) return; // prevent double-fire
@@ -908,7 +919,13 @@ function hideVideoOverlay() {
         localPlayer.currentTime = 0;
     }
     if (ytPlayer) ytPlayer.pauseVideo();
-    advanceRound();
+    if (afterVideoHide) {
+        const cb = afterVideoHide;
+        afterVideoHide = null;
+        cb();
+    } else {
+        advanceRound();
+    }
 }
 
 function skipCartoon() {
@@ -1300,13 +1317,48 @@ function loadKannadaRound() {
 
     const options = getKannadaOptions(currentItem.letter, kannadaActiveItems.map(it => it.letter), kannadaLevelIsTest, kannadaLevelIndex);
 
-    if (kannadaMode === "picture") {
+    if (kannadaMode === "letter-image") {
+        // Show big Kannada letter + play audio → choose from 4 images
+        letterDisplay.innerHTML = `
+            <div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>
+            <div id="kannada-hear-btn" class="kannada-listen-btn" style="font-size:1.4rem;margin-top:6px">🔊</div>
+        `;
+        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
+        setTimeout(() => playKannadaClip(currentItem.letter), 400);
+        choicesEl.className = "image-choices";
+        options.forEach(opt => {
+            const item = KANNADA_ITEMS.find(k => k.letter === opt);
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-img-btn";
+            btn.innerHTML = item?.image ? `<img src="${item.image}" alt="${opt}">` : `<span style="font-size:2rem;font-family:'Noto Sans Kannada',serif">${opt}</span>`;
+            btn.dataset.letter = opt;
+            btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
+            choicesEl.appendChild(btn);
+        });
+    } else if (kannadaMode === "video-letter") {
+        // Play teaching video first → then show image question + 4 letter choices
+        letterDisplay.innerHTML = "";
+        choicesEl.innerHTML = "";
+        afterVideoHide = () => {
+            letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+            setTimeout(() => playKannadaClip(currentItem.letter), 300);
+            options.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "choice-btn choice-letter-btn";
+                btn.style.fontFamily = "'Noto Sans Kannada',serif";
+                btn.textContent = opt;
+                btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
+                choicesEl.appendChild(btn);
+            });
+        };
+        setTimeout(() => playKannadaVideo(), 300);
+    } else if (kannadaMode === "picture") {
         letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
         options.forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.style.fontFamily = "serif";
+            btn.style.fontFamily = "'Noto Sans Kannada',serif";
             btn.textContent = opt;
             btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
             choicesEl.appendChild(btn);
@@ -1322,7 +1374,7 @@ function loadKannadaRound() {
         options.forEach(opt => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.style.fontFamily = "serif";
+            btn.style.fontFamily = "'Noto Sans Kannada',serif";
             btn.textContent = opt;
             btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
             choicesEl.appendChild(btn);
@@ -1350,7 +1402,13 @@ function handleKannadaChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        if (kannadaMode === "picture") {
+        if (kannadaMode === "letter-image") {
+            playKannadaClip(currentItem.letter);
+            setTimeout(() => playKannadaVideo(), 1800);
+        } else if (kannadaMode === "video-letter") {
+            // Video was already shown before the question; just advance
+            setTimeout(() => advanceRound(), 1200);
+        } else if (kannadaMode === "picture") {
             playKannadaClip(currentItem.letter);
             setTimeout(() => playKannadaVideo(), 1800);
         } else {
