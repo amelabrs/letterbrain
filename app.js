@@ -98,9 +98,9 @@ const KANNADA_LEVELS = [
     { label: "2", letters: ["ಅ", "ಆ"], mode: "video-letter" },
     { label: "3", letters: ["ಇ", "ಈ"], mode: "letter-image" },
     { label: "4", letters: ["ಇ", "ಈ"], mode: "video-letter" },
-    { label: "6", letters: ["ಉ", "ಊ"], mode: "letter-image" },
-    { label: "7", letters: ["ಉ", "ಊ"], mode: "video-letter" },
-    { label: "8", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
+    { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "video-letter" },
+    { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "letter-image" },
+    { label: "7", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
 ];
 
 const HINDI_ITEMS = [
