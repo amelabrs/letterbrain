@@ -868,11 +868,11 @@ header h1 {
 }
 
 .number-ball:nth-child(1) { animation-delay: 0ms; }
-.number-ball:nth-child(2) { animation-delay: 500ms; }
-.number-ball:nth-child(3) { animation-delay: 1000ms; }
-.number-ball:nth-child(4) { animation-delay: 1500ms; }
-.number-ball:nth-child(5) { animation-delay: 2000ms; }
-.number-ball:nth-child(6) { animation-delay: 2500ms; }
+.number-ball:nth-child(2) { animation-delay: 600ms; }
+.number-ball:nth-child(3) { animation-delay: 1200ms; }
+.number-ball:nth-child(4) { animation-delay: 1800ms; }
+.number-ball:nth-child(5) { animation-delay: 2400ms; }
+.number-ball:nth-child(6) { animation-delay: 3000ms; }
 
 .choice-number-btn {
     font-size: 3rem !important;
