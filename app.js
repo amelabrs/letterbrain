@@ -98,7 +98,9 @@ const KANNADA_LEVELS = [
     { label: "2", letters: ["ಅ", "ಆ"], mode: "video-letter" },
     { label: "3", letters: ["ಇ", "ಈ"], mode: "letter-image" },
     { label: "4", letters: ["ಇ", "ಈ"], mode: "video-letter" },
-    { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
+    { label: "6", letters: ["ಉ", "ಊ"], mode: "letter-image" },
+    { label: "7", letters: ["ಉ", "ಊ"], mode: "video-letter" },
+    { label: "8", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
 ];
 
 const HINDI_ITEMS = [
@@ -1353,7 +1355,9 @@ function loadKannadaRound() {
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
         afterVideoHide = () => {
-            letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+            letterDisplay.innerHTML = currentItem.image
+                ? `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`
+                : `<div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>`;
             setTimeout(() => playKannadaClip(currentItem.letter), 300);
             options.forEach(opt => {
                 const btn = document.createElement("button");
