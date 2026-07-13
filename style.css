@@ -873,6 +873,8 @@ header h1 {
 .number-ball:nth-child(4) { animation-delay: 2700ms; }
 .number-ball:nth-child(5) { animation-delay: 3600ms; }
 .number-ball:nth-child(6) { animation-delay: 4500ms; }
+.number-ball:nth-child(7) { animation-delay: 5400ms; }
+.number-ball:nth-child(8) { animation-delay: 6300ms; }
 
 .choice-number-btn {
     font-size: 3rem !important;
