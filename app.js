@@ -1764,7 +1764,7 @@ document.getElementById("tab-hindi").addEventListener("click", () => setActiveTa
 document.getElementById("tab-blends").addEventListener("click", () => setActiveTab("blends"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 // Reset any stored mode from removed tabs
-if (["sayit", "saywords", "sayletters", "hindi"].includes(currentAppMode)) {
+if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
     currentAppMode = "quiz";
     localStorage.setItem("lb_mode", "quiz");
 }
