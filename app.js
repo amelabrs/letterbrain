@@ -97,15 +97,15 @@ const KANNADA_LEVELS = [
     { label: "2", letters: ["ಅ", "ಆ"], mode: "video-letter" },
     { label: "3", letters: ["ಇ", "ಈ"], mode: "letter-image" },
     { label: "4", letters: ["ಇ", "ಈ"], mode: "video-letter" },
-    { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "video-letter" },
-    { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "letter-image" },
-    { label: "7", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
+    { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "video-letter", isTest: true },
+    { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "letter-image", isTest: true },
+    { label: "7", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear",         isTest: true },
     { label: "8", letters: ["ಉ", "ಊ"], mode: "letter-image" },
     { label: "9", letters: ["ಉ", "ಊ"], mode: "video-letter" },
-    { label: "10", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "video-letter" },
-    { label: "11", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "letter-image" },
-    { label: "12", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear" },
-    { label: "13", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear", isTest: true },
+    { label: "10", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "video-letter", isTest: true },
+    { label: "11", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "letter-image", isTest: true },
+    { label: "12", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
+    { label: "13", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
 ];
 
 const HINDI_ITEMS = [
