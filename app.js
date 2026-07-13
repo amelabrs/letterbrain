@@ -123,6 +123,16 @@ const HINDI_LEVELS = [
     { label: "5", letters: ["अ", "आ", "इ", "ई"], mode: "hear", isTest: true },
 ];
 
+// ── Blends ───────────────────────────────────────────────────────────
+const BLENDS_ITEMS = [
+    { blend: "th", word: "Thief", image: "images/thief.png", vidStart: 43, videoId: "V-cvlZLNEBM" },
+];
+const BLENDS_DISTRACTORS = ["sh", "ch", "wh", "ph"];
+const BLENDS_LEVELS = [
+    { label: "1", blends: ["th"], mode: "normal" },
+    { label: "2", blends: ["th"], mode: "picture" },
+];
+
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
 
@@ -391,6 +401,25 @@ function buildLevelGrid() {
                 ).join("");
             }
             const modeIcon = isTest ? " ⭐" : (mode === "picture" ? " 🖼️" : " 🔊");
+            card.innerHTML = `
+                <span class="level-number">${label}${modeIcon}</span>
+                <div class="level-thumbs caps-preview">${thumbs}</div>
+                <span class="level-go">▶</span>
+            `;
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    if (currentAppMode === "blends") {
+        BLENDS_LEVELS.forEach(({ label, blends, mode }) => {
+            const card = document.createElement("div");
+            card.className = "level-card";
+            card.onclick = () => startBlendsGame(blends, mode);
+            const modeIcon = mode === "picture" ? " 🖼️" : " 🔤";
+            const thumbs = blends.map(b =>
+                `<span class="caps-pair" style="font-size:1.2rem;font-weight:900">${b}</span>`
+            ).join("");
             card.innerHTML = `
                 <span class="level-number">${label}${modeIcon}</span>
                 <div class="level-thumbs caps-preview">${thumbs}</div>
@@ -1570,6 +1599,134 @@ function playHindiVideo() {
     }, 10000);
 }
 
+// ── Blends Game ──────────────────────────────────────────────────────
+
+let blendsMode = "normal";
+let blendsActiveItems = [];
+
+function startBlendsGame(blends, mode) {
+    blendsMode = mode;
+    blendsActiveItems = BLENDS_ITEMS.filter(it => blends.includes(it.blend));
+    gameMode = "blends-" + mode;
+    currentAppMode = "blends";
+    queue = shuffle([...blendsActiveItems, ...blendsActiveItems, ...blendsActiveItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    showScreen("quiz-screen");
+    loadBlendsRound();
+}
+
+function loadBlendsRound() {
+    if (currentIndex >= queue.length) { showDone(); return; }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+
+    // Build 4 options: active blends + distractors
+    const activeBlends = blendsActiveItems.map(it => it.blend);
+    const distractors = shuffle(BLENDS_DISTRACTORS.filter(b => !activeBlends.includes(b)));
+    const optionBlends = shuffle([...new Set([...activeBlends, ...distractors])]).slice(0, 4);
+    if (!optionBlends.includes(currentItem.blend)) {
+        optionBlends[optionBlends.length - 1] = currentItem.blend;
+    }
+    const options = shuffle(optionBlends);
+
+    if (blendsMode === "normal") {
+        // Show blend text → pick image
+        letterDisplay.innerHTML = `
+            <div class="letter-label">What starts with</div>
+            <div id="big-letter" style="font-size:4rem;font-weight:900;color:#764ba2">${currentItem.blend.toUpperCase()}</div>
+            <div class="letter-label">?</div>
+        `;
+        choicesEl.className = "image-choices";
+        const imageOptions = options.map(b => BLENDS_ITEMS.find(it => it.blend === b) || { blend: b, image: null });
+        // Fill missing images with distractor images from ALL_ITEMS
+        const fallbackImgs = shuffle(ALL_ITEMS.filter(it => it.image)).map(it => it.image);
+        let fbIdx = 0;
+        imageOptions.forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-img-btn";
+            const imgSrc = opt.image || fallbackImgs[fbIdx++] || "";
+            btn.innerHTML = `<img src="${imgSrc}" alt="${opt.blend}">`;
+            btn.dataset.blend = opt.blend;
+            btn.onclick = () => handleBlendsChoice(btn, opt.blend);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        // Show image → pick blend text
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        options.forEach(b => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.fontSize = "2.2rem";
+            btn.textContent = b;
+            btn.onclick = () => handleBlendsChoice(btn, b);
+            choicesEl.appendChild(btn);
+        });
+    }
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleBlendsChoice(btn, chosen) {
+    if (answered) return;
+
+    const isCorrect = chosen === currentItem.blend;
+
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        speak(currentItem.word);
+        setTimeout(() => playBlendsVideo(), 1600);
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        answered = false;
+    }
+}
+
+function playBlendsVideo() {
+    if (getVideosDisabled()) { advanceRound(); return; }
+    if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    const start = currentItem.vidStart;
+    const end = start + 5;
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId: currentItem.videoId, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => { clearInterval(videoTimer); hideVideoOverlay(); }, 10000);
+}
+
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
@@ -1583,6 +1740,8 @@ function advanceRound() {
         loadKannadaRound();
     } else if (currentAppMode === "hindi") {
         loadHindiRound();
+    } else if (currentAppMode === "blends") {
+        loadBlendsRound();
     } else {
         loadRound();
     }
@@ -1592,7 +1751,7 @@ function advanceRound() {
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "matchcaps", "kannada", "hindi", "saynumbers"].forEach(m => {
+    ["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === mode);
     });
@@ -1602,14 +1761,15 @@ document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab
 document.getElementById("tab-matchcaps").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
+document.getElementById("tab-blends").addEventListener("click", () => setActiveTab("blends"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 // Reset any stored mode from removed tabs
-if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
+if (["sayit", "saywords", "sayletters", "hindi"].includes(currentAppMode)) {
     currentAppMode = "quiz";
     localStorage.setItem("lb_mode", "quiz");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "matchcaps", "kannada", "hindi", "saynumbers"].forEach(m => {
+["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
 });
