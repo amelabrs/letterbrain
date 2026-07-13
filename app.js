@@ -109,18 +109,18 @@ const KANNADA_LEVELS = [
 ];
 
 const HINDI_ITEMS = [
-    { letter: "अ", roman: "a",  start: 0,  vidStart: 0,  image: "images/pomegranate.png" },
-    { letter: "आ", roman: "aa", start: 3,  vidStart: 5,  image: "images/mango.png" },
-    { letter: "इ", roman: "i",  start: 6,  vidStart: 9,  image: "images/tamarind.png" },
-    { letter: "ई", roman: "ii", start: 9,  vidStart: 15, image: "images/sugarcane.png" },
+    { letter: "क", roman: "ka",  start: 0, vidStart: 58, image: "images/lotus.png" },
+    { letter: "ख", roman: "kha", start: 0, vidStart: 63, image: "images/rabbit.png" },
+    { letter: "ग", roman: "ga",  start: 0, vidStart: 67, image: "images/cow.png" },
+    { letter: "घ", roman: "gha", start: 0, vidStart: 71, image: "images/clock.png" },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
-    { label: "1", letters: ["अ", "आ"], mode: "hear" },
-    { label: "2", letters: ["अ", "आ"], mode: "picture" },
-    { label: "3", letters: ["इ", "ई"], mode: "hear" },
-    { label: "4", letters: ["इ", "ई"], mode: "picture" },
-    { label: "5", letters: ["अ", "आ", "इ", "ई"], mode: "hear", isTest: true },
+    { label: "1", letters: ["क", "ख"], mode: "hear" },
+    { label: "2", letters: ["क", "ख"], mode: "picture" },
+    { label: "3", letters: ["ग", "घ"], mode: "hear" },
+    { label: "4", letters: ["ग", "घ"], mode: "picture" },
+    { label: "5", letters: ["क", "ख", "ग", "घ"], mode: "hear", isTest: true },
 ];
 
 // ── Blends ───────────────────────────────────────────────────────────
