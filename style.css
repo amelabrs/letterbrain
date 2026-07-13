@@ -476,6 +476,7 @@ header h1 {
 .choice-letter-btn {
     font-size: 3rem !important;
     font-weight: 900 !important;
+    font-family: 'Noto Sans Kannada', 'Comic Sans MS', 'Chalkboard SE', sans-serif;
     color: #764ba2;
     min-height: 100px;
 }

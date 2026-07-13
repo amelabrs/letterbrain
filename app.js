@@ -347,7 +347,7 @@ function buildLevelGrid() {
                 }).join("");
             } else {
                 thumbs = letters.map(l =>
-                    `<span class="caps-pair" style="font-family:serif">${l}</span>`
+                    `<span class="caps-pair" style="font-family:'Noto Sans Kannada',serif">${l}</span>`
                 ).join("");
             }
             const modeIcon = isTest ? " ⭐" : (mode === "video-letter" ? " 🎬" : " 🔤");
@@ -374,7 +374,7 @@ function buildLevelGrid() {
                 }).join("");
             } else {
                 thumbs = letters.map(l =>
-                    `<span class="caps-pair" style="font-family:serif">${l}</span>`
+                    `<span class="caps-pair" style="font-family:'Noto Sans Kannada',serif">${l}</span>`
                 ).join("");
             }
             const modeIcon = isTest ? " ⭐" : (mode === "picture" ? " 🖼️" : " 🔊");
