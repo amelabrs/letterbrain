@@ -318,6 +318,8 @@ function buildLevelGrid() {
             { label: "3", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4] },
             { label: "4", thumbs: "<span>5</span><span>6</span>",                         range: [5, 6] },
             { label: "5", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6] },
+            { label: "6", thumbs: "<span>7</span><span>8</span>",             range: [7, 8] },
+            { label: "7", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>", range: [1, 8] },
         ].forEach(({ label, thumbs, range }) => {
             const card = document.createElement("div");
             card.className = "level-card";
