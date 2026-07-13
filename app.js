@@ -67,9 +67,8 @@ CAPS_GROUPS.forEach((group, i) => {
     const pair = i + 1;
     _capsRunning = [..._capsRunning, ...group];
     const cumulative = [..._capsRunning];
-    CAPS_LEVELS.push({ letters: group, mode: "caps-normal",  pair, cumulative });
-    CAPS_LEVELS.push({ letters: group, mode: "caps-reverse", pair, cumulative });
-    CAPS_LEVELS.push({ letters: group, mode: "caps-test",    pair, cumulative });
+    CAPS_LEVELS.push({ letters: group, mode: "caps-normal", pair, cumulative });
+    CAPS_LEVELS.push({ letters: group, mode: "caps-test",   pair, cumulative });
 });
 
 function getCapsUnlockedLevel() {
@@ -86,8 +85,8 @@ const KANNADA_ITEMS = [
     { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31,  image: "images/elephant.png" },
     { letter: "ಇ", roman: "i",  start: 6,  vidStart: 96,  image: "images/rat.png" },
     { letter: "ಈ", roman: "ii", start: 9,  vidStart: null, image: "images/fly.png" },
-    { letter: "ಉ", roman: "u",  start: 13, vidStart: 79 },
-    { letter: "ಊ", roman: "uu", start: 17, vidStart: 94 },
+    { letter: "ಉ", roman: "u",  start: 13, vidStart: 79,  image: "images/ring.png" },
+    { letter: "ಊ", roman: "uu", start: 17, vidStart: 94,  image: "images/sadhya.png" },
     { letter: "ಋ", roman: "ru", start: 20, vidStart: 109 },
     { letter: "ಎ", roman: "e",  start: 24, vidStart: 125 },
 ];
@@ -402,7 +401,7 @@ function buildLevelGrid() {
                 const range = `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`;
                 thumbs = `<span class="caps-pair" style="font-size:1.3rem">TEST ${range}</span>`;
             } else {
-                modeIcon = gl.mode === "caps-normal" ? "🔠" : "🔡";
+                modeIcon = "🔠";
                 thumbs = gl.letters.map(l =>
                     `<span class="caps-pair">${l}${l.toLowerCase()}</span>`
                 ).join("");
@@ -1109,12 +1108,8 @@ function startCapsGame(capsLevelIdx) {
     const cumItems = gl.cumulative.map(l => ALL_ITEMS.find(it => it.letter === l));
 
     if (gl.mode === "caps-test") {
-        // Both directions, 1x each, shuffled together
-        levelItems = [...ALL_ITEMS]; // full alphabet for distractor pool
-        queue = shuffle([
-            ...cumItems.map(item => ({ ...item, capsDirection: "caps-normal" })),
-            ...cumItems.map(item => ({ ...item, capsDirection: "caps-reverse" }))
-        ]);
+        levelItems = [...ALL_ITEMS];
+        queue = shuffle(cumItems.map(item => ({ ...item, capsDirection: "caps-normal" })));
     } else {
         const targetItems = gl.letters.map(l => ALL_ITEMS.find(it => it.letter === l));
         const priorItems = cumItems.filter(it => !gl.letters.includes(it.letter));
@@ -1143,12 +1138,8 @@ function loadCapsRound() {
     currentItem = queue[currentIndex];
     document.getElementById("choices").className = "";
 
-    const dir = currentItem.capsDirection || gameMode;
-    const isNormal = dir === "caps-normal";
-    const displayLetter = isNormal ? currentItem.letter : currentItem.letter.toLowerCase();
-
     const letterDisplay = document.getElementById("letter-display");
-    letterDisplay.innerHTML = `<div id="big-letter">${displayLetter}</div>`;
+    letterDisplay.innerHTML = `<div id="big-letter">${currentItem.letter}</div>`;
     const bigLetter = document.getElementById("big-letter");
     bigLetter.style.animation = "none";
     void bigLetter.offsetWidth;
@@ -1172,7 +1163,7 @@ function loadCapsRound() {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-letter-btn";
         btn.dataset.letter = opt.letter;
-        btn.textContent = isNormal ? opt.letter.toLowerCase() : opt.letter;
+        btn.textContent = opt.letter.toLowerCase();
         btn.onclick = () => handleCapsChoice(btn, opt);
         choicesEl.appendChild(btn);
     });
