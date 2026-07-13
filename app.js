@@ -100,6 +100,8 @@ const KANNADA_LEVELS = [
     { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "video-letter" },
     { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "letter-image" },
     { label: "7", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
+    { label: "8", letters: ["ಉ", "ಊ"], mode: "letter-image" },
+    { label: "9", letters: ["ಉ", "ಊ"], mode: "video-letter" },
 ];
 
 const HINDI_ITEMS = [
