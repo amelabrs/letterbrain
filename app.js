@@ -125,7 +125,7 @@ const HINDI_LEVELS = [
 
 // ── Blends ───────────────────────────────────────────────────────────
 const BLENDS_ITEMS = [
-    { blend: "th", word: "Thief", image: "images/thief.png", vidStart: 43, videoId: "V-cvlZLNEBM" },
+    { blend: "th", word: "Thief", image: "images/thief.png", vidStart: 46, videoId: "V-cvlZLNEBM" },
 ];
 const BLENDS_DISTRACTORS = ["sh", "ch", "wh", "ph"];
 const BLENDS_LEVELS = [
