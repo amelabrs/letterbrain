@@ -102,6 +102,10 @@ const KANNADA_LEVELS = [
     { label: "7", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear", isTest: true },
     { label: "8", letters: ["ಉ", "ಊ"], mode: "letter-image" },
     { label: "9", letters: ["ಉ", "ಊ"], mode: "video-letter" },
+    { label: "10", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "video-letter" },
+    { label: "11", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "letter-image" },
+    { label: "12", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear" },
+    { label: "13", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear", isTest: true },
 ];
 
 const HINDI_ITEMS = [
@@ -315,19 +319,26 @@ function buildLevelGrid() {
 
     if (currentAppMode === "saynumbers") {
         [
-            { label: "1", thumbs: "<span>1</span><span>2</span>",             range: [1, 2] },
-            { label: "2", thumbs: "<span>3</span><span>4</span>",             range: [3, 4] },
-            { label: "3", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4] },
-            { label: "4", thumbs: "<span>5</span><span>6</span>",                         range: [5, 6] },
-            { label: "5", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6] },
-            { label: "6", thumbs: "<span>7</span><span>8</span>",             range: [7, 8] },
-            { label: "7", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>", range: [1, 8] },
-        ].forEach(({ label, thumbs, range }) => {
+            { label: "1", icon: "🔢", thumbs: "<span>1</span><span>2</span>",             range: [1, 2],  mode: "normal" },
+            { label: "1", icon: "🔊", thumbs: "<span>1</span><span>2</span>",             range: [1, 2],  mode: "hear" },
+            { label: "2", icon: "🔢", thumbs: "<span>3</span><span>4</span>",             range: [3, 4],  mode: "normal" },
+            { label: "2", icon: "🔊", thumbs: "<span>3</span><span>4</span>",             range: [3, 4],  mode: "hear" },
+            { label: "3", icon: "🔢", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4], mode: "normal" },
+            { label: "3", icon: "🔊", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4], mode: "hear" },
+            { label: "4", icon: "🔢", thumbs: "<span>5</span><span>6</span>",             range: [5, 6],  mode: "normal" },
+            { label: "4", icon: "🔊", thumbs: "<span>5</span><span>6</span>",             range: [5, 6],  mode: "hear" },
+            { label: "5", icon: "🔢", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6], mode: "normal" },
+            { label: "5", icon: "🔊", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6], mode: "hear" },
+            { label: "6", icon: "🔢", thumbs: "<span>7</span><span>8</span>",             range: [7, 8],  mode: "normal" },
+            { label: "6", icon: "🔊", thumbs: "<span>7</span><span>8</span>",             range: [7, 8],  mode: "hear" },
+            { label: "7", icon: "🔢", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>", range: [1, 8], mode: "normal" },
+            { label: "7", icon: "🔊", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>", range: [1, 8], mode: "hear" },
+        ].forEach(({ label, icon, thumbs, range, mode }) => {
             const card = document.createElement("div");
             card.className = "level-card";
-            card.onclick = () => startNumbers("normal", range);
+            card.onclick = () => startNumbers(mode, range);
             card.innerHTML = `
-                <span class="level-number">${label}</span>
+                <span class="level-number">${label} ${icon}</span>
                 <div class="level-thumbs number-level-preview">${thumbs}</div>
                 <span class="level-go">▶</span>
             `;
@@ -1328,13 +1339,10 @@ function loadKannadaRound() {
     const options = getKannadaOptions(currentItem.letter, kannadaActiveItems.map(it => it.letter), kannadaLevelIsTest, kannadaLevelIndex);
 
     if (kannadaMode === "letter-image") {
-        // Show big Kannada letter + play audio → choose from 4 images
+        // Show big Kannada letter silently → child picks matching image
         letterDisplay.innerHTML = `
             <div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>
-            <div id="kannada-hear-btn" class="kannada-listen-btn" style="font-size:1.4rem;margin-top:6px">🔊</div>
         `;
-        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
-        setTimeout(() => playKannadaClip(currentItem.letter), 400);
         choicesEl.className = "image-choices";
         options.forEach(opt => {
             const item = KANNADA_ITEMS.find(k => k.letter === opt);
@@ -1567,6 +1575,7 @@ function advanceRound() {
     currentIndex++;
     if (currentAppMode === "saynumbers") {
         if (gameMode === "reverse") loadNumberRoundReverse();
+        else if (gameMode === "hear") loadNumberRoundHear();
         else loadNumberRound();
     } else if (currentAppMode === "matchcaps") {
         loadCapsRound();
@@ -1951,6 +1960,7 @@ function startNumbers(mode = "normal", range = [1, 4]) {
     document.getElementById("stars").textContent = stars;
     showScreen("quiz-screen");
     if (gameMode === "reverse") loadNumberRoundReverse();
+    else if (gameMode === "hear") loadNumberRoundHear();
     else loadNumberRound();
 }
 
@@ -1973,6 +1983,43 @@ function loadNumberRound() {
     choicesEl.innerHTML = "";
 
     // Build 3 distractors from nearby numbers, then shuffle with the correct answer
+    const pool = [];
+    for (let n = Math.max(1, count - 3); n <= count + 3; n++) {
+        if (n !== count) pool.push(n);
+    }
+    const choices = shuffle([count, ...shuffle(pool).slice(0, 3)]);
+    choices.forEach(n => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-number-btn";
+        btn.textContent = n;
+        btn.onclick = () => handleNumberChoice(btn, n, count);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function loadNumberRoundHear() {
+    if (currentIndex >= queue.length) { showNumbersDone(); return; }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    const count = queue[currentIndex];
+
+    const letterDisplay = document.getElementById("letter-display");
+    letterDisplay.innerHTML = `
+        <div id="number-hear-btn" class="kannada-listen-btn" style="font-size:2.5rem">🔊</div>
+        <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+    `;
+    document.getElementById("number-hear-btn").addEventListener("click", () => speak(String(count)));
+    setTimeout(() => speak(String(count)), 400);
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.className = "";
+    choicesEl.innerHTML = "";
+
     const pool = [];
     for (let n = Math.max(1, count - 3); n <= count + 3; n++) {
         if (n !== count) pool.push(n);
