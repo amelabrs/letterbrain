@@ -127,9 +127,9 @@ const HINDI_ITEMS = [
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
     { label: "1", letters: ["क", "ख"], mode: "hear" },
-    { label: "2", letters: ["क", "ख"], mode: "picture" },
+    { label: "2", letters: ["क", "ख"], mode: "video-letter" },
     { label: "3", letters: ["ग", "घ"], mode: "hear" },
-    { label: "4", letters: ["ग", "घ"], mode: "picture" },
+    { label: "4", letters: ["ग", "घ"], mode: "video-letter" },
     { label: "5", letters: ["क", "ख", "ग", "घ"], mode: "hear", isTest: true },
 ];
 
@@ -451,7 +451,7 @@ function buildLevelGrid() {
     if (currentAppMode === "hindi") {
         HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
             const displayLetters = letters.slice(0, 2);
-            const modeIcon = mode === "hear" ? "🔊" : mode === "picture" ? "🖼️" : "";
+            const modeIcon = mode === "hear" ? "🔊" : mode === "video-letter" ? "▶" : mode === "picture" ? "🖼️" : "";
             const letterStr = displayLetters.join('');
             const fs = letters.length > 2 ? "20px" : "26px";
             const sublabel = isTest ? "★ test" : modeIcon;
@@ -1585,12 +1585,25 @@ function loadHindiRound() {
         });
     };
 
-    if (hindiMode === "picture") {
+    if (hindiMode === "video-letter") {
+        // Play teaching video first → after it hides, show image prompt + letter choices
+        letterDisplay.innerHTML = "";
+        choicesEl.innerHTML = "";
+        afterVideoHide = () => {
+            letterDisplay.style.background = MODE_COLORS.hindi;
+            letterDisplay.innerHTML = currentItem.image
+                ? `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`
+                : `<div style="font-size:4rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>`;
+            setTimeout(() => playHindiClip(currentItem.letter), 300);
+            buildHindiChoices();
+        };
+        setTimeout(() => playHindiVideo(), 300);
+    } else if (hindiMode === "picture") {
         // Show image silently → child picks letter
         letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
         buildHindiChoices();
     } else {
-        // Play audio clip first → then reveal 🔊 button + letter choices
+        // hear mode — play audio clip then show 🔊 button + letter choices
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
         letterDisplay.innerHTML = `
@@ -1602,7 +1615,7 @@ function loadHindiRound() {
         buildHindiChoices();
     }
 
-    setLetterDisplayColor("hindi");
+    if (hindiMode !== "video-letter") setLetterDisplayColor("hindi");
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1625,7 +1638,10 @@ function handleHindiChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        if (hindiMode === "picture") {
+        if (hindiMode === "video-letter") {
+            // Video was already shown as the question; just advance
+            setTimeout(() => advanceRound(), 1200);
+        } else if (hindiMode === "picture") {
             playHindiClip(currentItem.letter);
             setTimeout(() => playHindiVideo(), 1800);
         } else {
