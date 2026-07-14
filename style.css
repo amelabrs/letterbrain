@@ -133,6 +133,7 @@ header {
 #start-screen {
   gap: 0;
   padding: 0 0 32px;
+  overflow-y: auto;
 }
 
 /* ── Mode Tabs (icon circles) ────────────────────────────────────── */
@@ -453,11 +454,11 @@ header {
   font-size: 0;   /* hide text label; image carries meaning */
   line-height: 1;
 }
-.choice-emoji img.emoji { width: 68px !important; height: 68px !important; border-radius: 50%; }
+.choice-emoji img.emoji { width: 62% !important; height: 62% !important; border-radius: 50%; }
 
 .choice-img {
-  width: 68px;
-  height: 68px;
+  width: 62%;
+  height: 62%;
   object-fit: contain;
   border-radius: 50%;
 }
@@ -465,15 +466,15 @@ header {
 .choice-label { display: none; }
 
 .choice-img-btn img {
-  width: 68px;
-  height: 68px;
+  width: 62%;
+  height: 62%;
   object-fit: contain;
   border-radius: 50%;
 }
 
 /* Glyph / letter tiles (Kannada, Hindi, Case, Numbers, Blends) */
 .choice-letter-btn {
-  font-size: 44px !important;
+  font-size: clamp(32px, 9vw, 52px) !important;
   font-weight: 700 !important;
   color: #fff !important;
   font-family: var(--font-serif) !important;
@@ -481,7 +482,7 @@ header {
 }
 
 .choice-number-btn {
-  font-size: 52px !important;
+  font-size: clamp(42px, 11vw, 64px) !important;
   font-weight: 700 !important;
   color: #fff !important;
   font-family: var(--font-serif) !important;

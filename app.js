@@ -427,21 +427,18 @@ function buildLevelGrid() {
 
     if (currentAppMode === "kannada") {
         KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const firstLetter = letters[0];
-            const firstItem = KANNADA_ITEMS.find(k => k.letter === firstLetter);
-            let content;
-            if (mode === "video-letter" && firstItem?.image) {
-                content = `<img src="${firstItem.image}" alt="">`;
-            } else {
-                content = `<span style="font-family:'Noto Sans Kannada',serif;font-size:32px;font-weight:700;color:#fff">${firstLetter}</span>`;
-            }
-            if (letters.length > 1) {
-                const second = letters[1];
-                content += `<span class="node-sublabel" style="font-family:'Noto Sans Kannada',serif">${letters.map(l => l).join(' ')}</span>`;
-            }
+            const displayLetters = letters.slice(0, 2);
+            const modeIcon = mode === "hear" ? "🔊" : mode === "video-letter" ? "▶" : mode === "letter-image" ? "✎" : "";
+            const letterStr = displayLetters.join('');
+            const fs = letters.length > 2 ? "20px" : "26px";
+            const sublabel = isTest ? "★ test" : modeIcon;
+            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
+            </div>`;
             grid.appendChild(makeNode({
                 color: MODE_COLORS.kannada,
-                content: `<span style="font-family:'Noto Sans Kannada',serif;font-size:30px;font-weight:700;color:#fff">${firstLetter}</span>`,
+                content,
                 isLocked: false,
                 isCurrent: false,
                 isExam: isTest,
@@ -453,10 +450,18 @@ function buildLevelGrid() {
 
     if (currentAppMode === "hindi") {
         HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const firstLetter = letters[0];
+            const displayLetters = letters.slice(0, 2);
+            const modeIcon = mode === "hear" ? "🔊" : mode === "picture" ? "🖼️" : "";
+            const letterStr = displayLetters.join('');
+            const fs = letters.length > 2 ? "20px" : "26px";
+            const sublabel = isTest ? "★ test" : modeIcon;
+            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
+            </div>`;
             grid.appendChild(makeNode({
                 color: MODE_COLORS.hindi,
-                content: `<span style="font-family:'Noto Sans Kannada',serif;font-size:30px;font-weight:700;color:#fff">${firstLetter}</span>`,
+                content,
                 isLocked: false,
                 isCurrent: false,
                 isExam: isTest,
@@ -678,9 +683,10 @@ function loadRound() {
 
         const choicesEl = document.getElementById("choices");
         choicesEl.innerHTML = "";
-        options.forEach((opt) => {
+        options.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
             btn.dataset.letter = opt.letter;
             btn.textContent = opt.letter;
             btn.onclick = () => handleChoice(btn, opt);
@@ -705,9 +711,10 @@ function loadRound() {
 
         const choicesEl = document.getElementById("choices");
         choicesEl.innerHTML = "";
-        options.forEach((opt) => {
+        options.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
             btn.dataset.letter = opt.letter;
             if (opt.image) {
                 btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
@@ -722,8 +729,6 @@ function loadRound() {
     }
 
     setLetterDisplayColor(currentAppMode);
-    const choicesEl2 = document.getElementById("choices");
-    applyTileColors(choicesEl2);
 
     // Update progress
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
@@ -1259,9 +1264,10 @@ function loadCapsRound() {
 
     const choicesEl = document.getElementById("choices");
     choicesEl.innerHTML = "";
-    options.forEach(opt => {
+    options.forEach((opt, i) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-letter-btn";
+        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
         btn.dataset.letter = opt.letter;
         btn.textContent = opt.letter.toLowerCase();
         btn.onclick = () => handleCapsChoice(btn, opt);
@@ -1269,7 +1275,6 @@ function loadCapsRound() {
     });
 
     setLetterDisplayColor("matchcaps");
-    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1433,16 +1438,29 @@ function loadKannadaRound() {
 
     const options = getKannadaOptions(currentItem.letter, kannadaActiveItems.map(it => it.letter), kannadaLevelIsTest, kannadaLevelIndex);
 
+    const addKannadaLetterBtns = (opts) => {
+        opts.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            btn.style.fontFamily = "'Noto Sans Kannada',serif";
+            btn.textContent = opt;
+            btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
+            choicesEl.appendChild(btn);
+        });
+    };
+
     if (kannadaMode === "letter-image") {
         // Show big Kannada letter silently → child picks matching image
         letterDisplay.innerHTML = `
             <div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>
         `;
         choicesEl.className = "image-choices";
-        options.forEach(opt => {
+        options.forEach((opt, i) => {
             const item = KANNADA_ITEMS.find(k => k.letter === opt);
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-img-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
             btn.innerHTML = item?.image ? `<img src="${item.image}" alt="${opt}">` : `<span style="font-size:2rem;font-family:'Noto Sans Kannada',serif">${opt}</span>`;
             btn.dataset.letter = opt;
             btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
@@ -1453,31 +1471,18 @@ function loadKannadaRound() {
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
         afterVideoHide = () => {
+            letterDisplay.style.background = MODE_COLORS.kannada;
             letterDisplay.innerHTML = currentItem.image
-                ? `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`
+                ? `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`
                 : `<div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>`;
             setTimeout(() => playKannadaClip(currentItem.letter), 300);
-            options.forEach(opt => {
-                const btn = document.createElement("button");
-                btn.className = "choice-btn choice-letter-btn";
-                btn.style.fontFamily = "'Noto Sans Kannada',serif";
-                btn.textContent = opt;
-                btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
-                choicesEl.appendChild(btn);
-            });
+            addKannadaLetterBtns(options);
         };
         setTimeout(() => playKannadaVideo(), 300);
     } else if (kannadaMode === "picture") {
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
-        options.forEach(opt => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-letter-btn";
-            btn.style.fontFamily = "'Noto Sans Kannada',serif";
-            btn.textContent = opt;
-            btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
-            choicesEl.appendChild(btn);
-        });
+        addKannadaLetterBtns(options);
     } else {
         // hear mode
         letterDisplay.innerHTML = `
@@ -1486,18 +1491,10 @@ function loadKannadaRound() {
         `;
         document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
         setTimeout(() => playKannadaClip(currentItem.letter), 400);
-        options.forEach(opt => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-letter-btn";
-            btn.style.fontFamily = "'Noto Sans Kannada',serif";
-            btn.textContent = opt;
-            btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
-            choicesEl.appendChild(btn);
-        });
+        addKannadaLetterBtns(options);
     }
 
     setLetterDisplayColor("kannada");
-    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1577,9 +1574,10 @@ function loadHindiRound() {
     choicesEl.innerHTML = "";
 
     const buildHindiChoices = () => {
-        shuffle([...HINDI_ITEMS]).forEach(opt => {
+        shuffle([...HINDI_ITEMS]).forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
             btn.style.fontFamily = "'Noto Sans Kannada',serif";
             btn.textContent = opt.letter;
             btn.onclick = () => handleHindiChoice(btn, opt);
@@ -1589,7 +1587,7 @@ function loadHindiRound() {
 
     if (hindiMode === "picture") {
         // Show image silently → child picks letter
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
         buildHindiChoices();
     } else {
         // Play audio clip first → then reveal 🔊 button + letter choices
@@ -1605,7 +1603,6 @@ function loadHindiRound() {
     }
 
     setLetterDisplayColor("hindi");
-    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1726,9 +1723,10 @@ function loadBlendsRound() {
         // Fill missing images with distractor images from ALL_ITEMS
         const fallbackImgs = shuffle(ALL_ITEMS.filter(it => it.image)).map(it => it.image);
         let fbIdx = 0;
-        imageOptions.forEach(opt => {
+        imageOptions.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-img-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
             const imgSrc = opt.image || fallbackImgs[fbIdx++] || "";
             btn.innerHTML = `<img src="${imgSrc}" alt="${opt.blend}">`;
             btn.dataset.blend = opt.blend;
@@ -1737,10 +1735,11 @@ function loadBlendsRound() {
         });
     } else {
         // Show image → pick blend text
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:180px;height:180px;object-fit:contain;animation:popIn 0.4s ease-out">`;
-        options.forEach(b => {
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        options.forEach((b, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
+            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
             btn.style.fontSize = "2.2rem";
             btn.textContent = b;
             btn.onclick = () => handleBlendsChoice(btn, b);
@@ -1749,7 +1748,6 @@ function loadBlendsRound() {
     }
 
     setLetterDisplayColor("blends");
-    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -2226,16 +2224,18 @@ function loadNumberRound() {
         if (n !== count) pool.push(n);
     }
     const choices = shuffle([count, ...shuffle(pool).slice(0, 3)]);
-    choices.forEach(n => {
+    choices.forEach((n, i) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
+        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
         btn.textContent = n;
         btn.onclick = () => handleNumberChoice(btn, n, count);
         choicesEl.appendChild(btn);
     });
 
-    setLetterDisplayColor("saynumbers");
-    applyTileColors(choicesEl);
+    // Don't color letter-display — balls are honey and would vanish on honey bg
+    const ld = document.getElementById("letter-display");
+    if (ld) ld.style.background = "#285C39"; // dark green so honey balls are visible
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -2265,16 +2265,16 @@ function loadNumberRoundHear() {
         if (n !== count) pool.push(n);
     }
     const choices = shuffle([count, ...shuffle(pool).slice(0, 3)]);
-    choices.forEach(n => {
+    choices.forEach((n, i) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
+        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
         btn.textContent = n;
         btn.onclick = () => handleNumberChoice(btn, n, count);
         choicesEl.appendChild(btn);
     });
 
     setLetterDisplayColor("saynumbers");
-    applyTileColors(choicesEl);
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -2354,7 +2354,6 @@ function loadNumberRoundReverse() {
         choicesEl.appendChild(ball);
     }
 
-    setLetterDisplayColor("saynumbers");
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
