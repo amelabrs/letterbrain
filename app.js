@@ -1266,7 +1266,25 @@ let _kannadaAudio = null;
 let _kannadaClipTimer = null;
 const _hindiAudio = new Audio("audio/consonants.mp3");
 _hindiAudio.preload = "auto";
+let _hindiReady = false;
 let _hindiClipTimer = null;
+_hindiAudio.addEventListener("canplaythrough", () => { _hindiReady = true; }, { once: true });
+_hindiAudio.load();
+
+// Warm up on the first tap anywhere: a muted play-pause forces the browser
+// (especially iOS Safari, which ignores preload) to buffer the file so all
+// later seeks land on loaded data.
+document.addEventListener("pointerdown", () => {
+    if (_hindiReady) return;
+    _hindiAudio.muted = true;
+    _hindiAudio.play().then(() => {
+        if (_hindiAudio.muted) {
+            _hindiAudio.pause();
+            _hindiAudio.currentTime = 0;
+            _hindiAudio.muted = false;
+        }
+    }).catch(() => { _hindiAudio.muted = false; });
+}, { once: true });
 
 function playKannadaClip(letter, options = {}) {
     const item = KANNADA_ITEMS.find(it => it.letter === letter);
@@ -1285,12 +1303,18 @@ function playKannadaClip(letter, options = {}) {
 function playHindiClip(letter) {
     const item = HINDI_ITEMS.find(it => it.letter === letter);
     if (!item) return;
+    if (!_hindiReady && _hindiAudio.readyState === 4) _hindiReady = true;
+    if (!_hindiReady) {
+        // Not buffered yet — play as soon as it is
+        _hindiAudio.addEventListener("canplaythrough", () => playHindiClip(letter), { once: true });
+        return;
+    }
     clearTimeout(_hindiClipTimer);
     _hindiAudio.pause();
 
     const startPlay = () => {
         _hindiAudio.play().catch(() => {});
-        _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 2500);
+        _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 1000);
     };
 
     const doSeek = () => {
@@ -1540,10 +1564,20 @@ function loadHindiRound() {
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
         letterDisplay.innerHTML = `
-            <div id="hindi-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div id="hindi-hear-btn" class="kannada-listen-btn">${_hindiReady ? "🔊" : "⏳"}</div>
             <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
         `;
-        document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter));
+        const hearBtn = document.getElementById("hindi-hear-btn");
+        hearBtn.addEventListener("click", () => {
+            if (_hindiReady) playHindiClip(currentItem.letter);
+        });
+        if (!_hindiReady) {
+            hearBtn.style.opacity = "0.5";
+            _hindiAudio.addEventListener("canplaythrough", () => {
+                hearBtn.textContent = "🔊";
+                hearBtn.style.opacity = "1";
+            }, { once: true });
+        }
         setTimeout(() => playHindiClip(currentItem.letter), 400);
         buildHindiChoices();
     }
