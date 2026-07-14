@@ -1284,7 +1284,7 @@ function playKannadaClip(letter, options = {}) {
 function playHindiClip(letter, onDone) {
     const item = HINDI_ITEMS.find(it => it.letter === letter);
     if (!item) { if (onDone) onDone(); return; }
-    if (!_hindiAudio) _hindiAudio = new Audio("audio/consonants.mp3");
+    if (!_hindiAudio) _hindiAudio = new Audio("audio/kannada.mp3");
     clearTimeout(_hindiClipTimer);
     _hindiAudio.pause();
     _hindiAudio.currentTime = item.start;
