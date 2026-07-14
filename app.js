@@ -427,11 +427,12 @@ function buildLevelGrid() {
 
     if (currentAppMode === "kannada") {
         KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const displayLetters = letters.slice(0, 2);
             const modeIcon = mode === "hear" ? "🔊" : mode === "video-letter" ? "▶" : mode === "letter-image" ? "✎" : "";
-            const letterStr = displayLetters.join('');
-            const fs = letters.length > 2 ? "20px" : "26px";
-            const sublabel = isTest ? "★ test" : modeIcon;
+            const letterStr = isTest
+                ? `${letters[0]}–${letters[letters.length - 1]}`
+                : letters.slice(0, 2).join('');
+            const fs = isTest ? "18px" : letters.length > 2 ? "20px" : "26px";
+            const sublabel = isTest ? "★" : modeIcon;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
                 <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
@@ -450,11 +451,12 @@ function buildLevelGrid() {
 
     if (currentAppMode === "hindi") {
         HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const displayLetters = letters.slice(0, 2);
             const modeIcon = mode === "hear" ? "🔊" : mode === "video-letter" ? "▶" : mode === "picture" ? "🖼️" : "";
-            const letterStr = displayLetters.join('');
-            const fs = letters.length > 2 ? "20px" : "26px";
-            const sublabel = isTest ? "★ test" : modeIcon;
+            const letterStr = isTest
+                ? `${letters[0]}–${letters[letters.length - 1]}`
+                : letters.slice(0, 2).join('');
+            const fs = isTest ? "18px" : letters.length > 2 ? "20px" : "26px";
+            const sublabel = isTest ? "★" : modeIcon;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
                 <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
@@ -491,15 +493,19 @@ function buildLevelGrid() {
         CAPS_LEVELS.forEach((gl, idx) => {
             const isLocked = gl.pair > unlockedPair;
             const isTest = gl.mode === "caps-test";
-            const firstLetter = isTest ? "★" : gl.letters[0];
             const displayColor = TILE_COLORS[idx % TILE_COLORS.length];
-            // isCurrent = first locked node
             const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && CAPS_LEVELS[idx + 1].pair > unlockedPair;
+            const rangeStr = isTest
+                ? `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`
+                : `${gl.letters[0]}–${gl.letters[gl.letters.length - 1]}`;
+            const sublabel = isTest ? "★" : "Aa";
+            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                <span style="font-family:'Newsreader',serif;font-size:22px;font-weight:700;color:#fff;line-height:1.15">${rangeStr}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
+            </div>`;
             grid.appendChild(makeNode({
                 color: displayColor,
-                content: isTest
-                    ? `<span style="font-family:'Newsreader',serif;font-size:22px;font-weight:700;color:#fff">A–Z</span>`
-                    : `<span style="font-family:'Newsreader',serif;font-size:34px;font-weight:700;color:#fff">${firstLetter}${firstLetter.toLowerCase()}</span>`,
+                content,
                 isLocked,
                 isCurrent,
                 isExam: isTest,
