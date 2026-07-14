@@ -431,7 +431,7 @@ function buildLevelGrid() {
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
                 : letters.slice(0, 2).join('');
-            const fs = isTest ? "18px" : letters.length > 2 ? "20px" : "26px";
+            const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
             const sublabel = isTest ? "★" : modeIcon;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
@@ -455,7 +455,7 @@ function buildLevelGrid() {
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
                 : letters.slice(0, 2).join('');
-            const fs = isTest ? "18px" : letters.length > 2 ? "20px" : "26px";
+            const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
             const sublabel = isTest ? "★" : modeIcon;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
@@ -478,7 +478,7 @@ function buildLevelGrid() {
             const firstBlend = blends[0];
             grid.appendChild(makeNode({
                 color: TILE_COLORS[idx % TILE_COLORS.length],
-                content: `<span style="font-family:'Newsreader',serif;font-size:22px;font-weight:900;color:#fff">${firstBlend.toUpperCase()}</span>`,
+                content: `<span style="font-family:'Newsreader',serif;font-size:30px;font-weight:900;color:#fff">${firstBlend.toUpperCase()}</span>`,
                 isLocked: false,
                 isCurrent: false,
                 isExam: false,
@@ -500,7 +500,7 @@ function buildLevelGrid() {
                 : `${gl.letters[0]}–${gl.letters[gl.letters.length - 1]}`;
             const sublabel = isTest ? "★" : "Aa";
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Newsreader',serif;font-size:22px;font-weight:700;color:#fff;line-height:1.15">${rangeStr}</span>
+                <span style="font-family:'Newsreader',serif;font-size:28px;font-weight:700;color:#fff;line-height:1.15">${rangeStr}</span>
                 <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
