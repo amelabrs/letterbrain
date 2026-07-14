@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#764ba2">
+    <meta name="theme-color" content="#F4EDDF">
     <title>LetterBrain — ABC for Kids</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="images/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;700&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
         <!-- Header -->
         <header>
-            <h1 id="app-title">🔤 LetterBrain</h1>
+            <div class="header-title">
+                <svg class="header-sparkle" viewBox="0 0 24 24" width="20" height="20" fill="var(--honey-500)" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+                <span>My Garden</span>
+            </div>
             <div class="header-right">
                 <div class="score">⭐ <span id="stars">0</span></div>
                 <button id="settings-btn" class="settings-icon" title="Settings">⚙️</button>
@@ -26,16 +29,19 @@
 
         <!-- Start Screen -->
         <div id="start-screen" class="screen active">
-            <div class="big-emoji">🎓</div>
-            <h2>Learn Your ABCs!</h2>
-
             <div id="mode-tabs">
-                <button id="tab-quiz" class="mode-tab active">📝 Quiz</button>
-                <button id="tab-matchcaps" class="mode-tab">🔠 Case</button>
-                <button id="tab-kannada" class="mode-tab">ಕನ್ನಡ</button>
-                <button id="tab-hindi" class="mode-tab">हिंदी</button>
-                <button id="tab-blends" class="mode-tab">🧩 Blends</button>
-                <button id="tab-saynumbers" class="mode-tab">🔢 Numbers</button>
+                <button id="tab-quiz" class="mode-tab mode-tab-quiz active" title="Quiz">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>
+                </button>
+                <button id="tab-matchcaps" class="mode-tab mode-tab-case" title="Case">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                </button>
+                <button id="tab-kannada" class="mode-tab mode-tab-kannada" title="ಕನ್ನಡ">ಅ</button>
+                <button id="tab-hindi" class="mode-tab mode-tab-hindi" title="हिंदी">अ</button>
+                <button id="tab-blends" class="mode-tab mode-tab-blends" title="Blends">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>
+                </button>
+                <button id="tab-saynumbers" class="mode-tab mode-tab-numbers" title="Numbers">3</button>
             </div>
 
             <div id="level-grid"></div>
@@ -55,7 +61,8 @@
 
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="screen">
-            <button class="back-btn" onclick="showScreen('start-screen')">← Home</button>
+            <button class="back-btn" onclick="showScreen('start-screen')" aria-label="Home">←</button>
+            <div id="mode-chip" class="mode-chip"></div>
             <div id="letter-display">
                 <div class="letter-label">What starts with</div>
                 <div id="big-letter">A</div>
@@ -93,6 +100,13 @@
             <button class="skip-btn" onclick="skipShorts()">Done ✖</button>
         </div>
 
+        <!-- Celebration Banner -->
+        <div id="celebration-banner" class="celebration-banner hidden" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--honey-200)" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="white" stroke="white" stroke-width="1" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--honey-200)" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+        </div>
+
         <!-- Done Screen -->
         <div id="done-screen" class="screen">
             <div class="big-emoji">🎉</div>
@@ -106,6 +120,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>

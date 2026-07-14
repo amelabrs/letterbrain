@@ -45,6 +45,16 @@ let levelItems = [];
 let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
 let numberRange = [1, 4]; // active range for Numbers levels
 
+const TILE_COLORS = ["#347046", "#DEA431", "#2E5E6E", "#B85C38"];
+const MODE_COLORS = {
+    quiz:       "#347046",
+    matchcaps:  "#2E5E6E",
+    kannada:    "#B85C38",
+    hindi:      "#7B5A86",
+    saynumbers: "#DEA431",
+    blends:     "#1A4226",
+};
+
 // ── Game levels: pairs of (normal, reverse) for each letter group ──
 const CONTENT_LEVELS = [...new Set(ALL_ITEMS.map(it => it.level))].sort((a, b) => a - b);
 const GAME_LEVELS = [];
@@ -285,6 +295,45 @@ function shuffle(arr) {
 function showScreen(id) {
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
+    // Hide celebration banner when leaving quiz screen
+    if (id !== "quiz-screen") {
+        const banner = document.getElementById("celebration-banner");
+        if (banner) banner.classList.add("hidden");
+    }
+}
+
+function setModeChip(mode) {
+    const chip = document.getElementById("mode-chip");
+    if (!chip) return;
+    chip.style.background = MODE_COLORS[mode] || MODE_COLORS.quiz;
+    chip.style.outline = "none";
+    const icons = {
+        quiz:       '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>',
+        matchcaps:  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+        kannada:    '<span style="font-family:\'Noto Sans Kannada\',serif;font-size:20px;font-weight:600;color:#fff">ಅ</span>',
+        hindi:      '<span style="font-family:\'Noto Sans Kannada\',serif;font-size:20px;font-weight:600;color:#fff">अ</span>',
+        saynumbers: '<span style="font-family:\'Newsreader\',serif;font-size:20px;font-weight:700;color:#fff">3</span>',
+        blends:     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>',
+    };
+    chip.innerHTML = icons[mode] || '';
+}
+
+function addCheckBadge(btn) {
+    const badge = document.createElement("div");
+    badge.className = "check-badge";
+    badge.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    btn.appendChild(badge);
+}
+
+function applyTileColors(choicesEl) {
+    Array.from(choicesEl.querySelectorAll(".choice-btn")).forEach((btn, i) => {
+        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+    });
+}
+
+function setLetterDisplayColor(mode) {
+    const el = document.getElementById("letter-display");
+    if (el) el.style.background = MODE_COLORS[mode] || MODE_COLORS.quiz;
 }
 
 // Pick a friendly female/child voice
@@ -321,111 +370,113 @@ function speak(text) {
     speechSynthesis.speak(utter);
 }
 
-// ── Build Level Cards ───────────────────────────────────────────────
+// ── Build Level Grid (circle nodes) ────────────────────────────────
+
+function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
+    const node = document.createElement("div");
+    let cls = "level-node";
+    if (isLocked) cls += " locked";
+    else if (isCurrent) cls += " current";
+    else if (isExam) cls += " exam";
+    node.className = cls;
+    if (!isLocked) {
+        node.style.background = color;
+        node.innerHTML = content;
+        node.addEventListener("click", onclick);
+    } else {
+        node.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    }
+    return node;
+}
 
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
 
     if (currentAppMode === "saynumbers") {
-        [
-            { label: "1", icon: "🔢", thumbs: "<span>1</span><span>2</span>",             range: [1, 2],  mode: "normal" },
-            { label: "1", icon: "🔊", thumbs: "<span>1</span><span>2</span>",             range: [1, 2],  mode: "hear" },
-            { label: "2", icon: "🔢", thumbs: "<span>3</span><span>4</span>",             range: [3, 4],  mode: "normal" },
-            { label: "2", icon: "🔊", thumbs: "<span>3</span><span>4</span>",             range: [3, 4],  mode: "hear" },
-            { label: "3", icon: "🔢", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4], mode: "normal" },
-            { label: "3", icon: "🔊", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span>", range: [1, 4], mode: "hear" },
-            { label: "4", icon: "🔢", thumbs: "<span>5</span><span>6</span>",             range: [5, 6],  mode: "normal" },
-            { label: "4", icon: "🔊", thumbs: "<span>5</span><span>6</span>",             range: [5, 6],  mode: "hear" },
-            { label: "5", icon: "🔢", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6], mode: "normal" },
-            { label: "5", icon: "🔊", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>", range: [1, 6], mode: "hear" },
-            { label: "6", icon: "🔢", thumbs: "<span>7</span><span>8</span>",             range: [7, 8],  mode: "normal" },
-            { label: "6", icon: "🔊", thumbs: "<span>7</span><span>8</span>",             range: [7, 8],  mode: "hear" },
-            { label: "7", icon: "🔢", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>", range: [1, 8], mode: "normal" },
-            { label: "7", icon: "🔊", thumbs: "<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>", range: [1, 8], mode: "hear" },
-        ].forEach(({ label, icon, thumbs, range, mode }) => {
-            const card = document.createElement("div");
-            card.className = "level-card";
-            card.onclick = () => startNumbers(mode, range);
-            card.innerHTML = `
-                <span class="level-number">${label} ${icon}</span>
-                <div class="level-thumbs number-level-preview">${thumbs}</div>
-                <span class="level-go">▶</span>
-            `;
-            grid.appendChild(card);
+        const numDefs = [
+            { label: "1–2", range: [1, 2],  mode: "normal" },
+            { label: "1–2", range: [1, 2],  mode: "hear" },
+            { label: "3–4", range: [3, 4],  mode: "normal" },
+            { label: "3–4", range: [3, 4],  mode: "hear" },
+            { label: "1–4", range: [1, 4],  mode: "normal" },
+            { label: "1–4", range: [1, 4],  mode: "hear" },
+            { label: "5–6", range: [5, 6],  mode: "normal" },
+            { label: "5–6", range: [5, 6],  mode: "hear" },
+            { label: "1–6", range: [1, 6],  mode: "normal" },
+            { label: "1–6", range: [1, 6],  mode: "hear" },
+            { label: "7–8", range: [7, 8],  mode: "normal" },
+            { label: "7–8", range: [7, 8],  mode: "hear" },
+            { label: "1–8", range: [1, 8],  mode: "normal" },
+            { label: "1–8", range: [1, 8],  mode: "hear" },
+        ];
+        numDefs.forEach(({ label, range, mode }, idx) => {
+            const icon = mode === "hear" ? "🔊" : "#";
+            const content = `<span style="font-family:'Newsreader',serif;font-size:20px;font-weight:700;color:#fff;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px;opacity:0.8">${mode === "hear" ? "🔊" : "🔢"}</span></span>`;
+            grid.appendChild(makeNode({
+                color: TILE_COLORS[idx % TILE_COLORS.length],
+                content,
+                isLocked: false,
+                isCurrent: false,
+                isExam: false,
+                onclick: () => startNumbers(mode, range),
+            }));
         });
         return;
     }
 
     if (currentAppMode === "kannada") {
         KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const card = document.createElement("div");
-            card.className = "level-card" + (isTest ? " exam-card" : "");
-            card.onclick = () => startKannadaGame(letters, mode, isTest, idx);
-            let thumbs;
-            if (mode === "video-letter") {
-                thumbs = letters.map(l => {
-                    const it = KANNADA_ITEMS.find(k => k.letter === l);
-                    return it?.image ? `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">` : "";
-                }).join("");
+            const firstLetter = letters[0];
+            const firstItem = KANNADA_ITEMS.find(k => k.letter === firstLetter);
+            let content;
+            if (mode === "video-letter" && firstItem?.image) {
+                content = `<img src="${firstItem.image}" alt="">`;
             } else {
-                thumbs = letters.map(l =>
-                    `<span class="caps-pair" style="font-family:'Noto Sans Kannada',serif">${l}</span>`
-                ).join("");
+                content = `<span style="font-family:'Noto Sans Kannada',serif;font-size:32px;font-weight:700;color:#fff">${firstLetter}</span>`;
             }
-            const modeIcon = isTest ? " ⭐" : (mode === "video-letter" ? " 🎬" : " 🔤");
-            card.innerHTML = `
-                <span class="level-number">${label}${modeIcon}</span>
-                <div class="level-thumbs caps-preview">${thumbs}</div>
-                <span class="level-go">▶</span>
-            `;
-            grid.appendChild(card);
+            if (letters.length > 1) {
+                const second = letters[1];
+                content += `<span class="node-sublabel" style="font-family:'Noto Sans Kannada',serif">${letters.map(l => l).join(' ')}</span>`;
+            }
+            grid.appendChild(makeNode({
+                color: MODE_COLORS.kannada,
+                content: `<span style="font-family:'Noto Sans Kannada',serif;font-size:30px;font-weight:700;color:#fff">${firstLetter}</span>`,
+                isLocked: false,
+                isCurrent: false,
+                isExam: isTest,
+                onclick: () => startKannadaGame(letters, mode, isTest, idx),
+            }));
         });
         return;
     }
 
     if (currentAppMode === "hindi") {
-        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }) => {
-            const card = document.createElement("div");
-            card.className = "level-card" + (isTest ? " exam-card" : "");
-            card.onclick = () => startHindiGame(letters, mode);
-            let thumbs;
-            if (mode === "picture") {
-                thumbs = letters.map(l => {
-                    const it = HINDI_ITEMS.find(k => k.letter === l);
-                    return `<img src="${it.image}" style="width:38px;height:38px;object-fit:contain;">`;
-                }).join("");
-            } else {
-                thumbs = letters.map(l =>
-                    `<span class="caps-pair" style="font-family:'Noto Sans Kannada',serif">${l}</span>`
-                ).join("");
-            }
-            const modeIcon = isTest ? " ⭐" : (mode === "picture" ? " 🖼️" : " 🔊");
-            card.innerHTML = `
-                <span class="level-number">${label}${modeIcon}</span>
-                <div class="level-thumbs caps-preview">${thumbs}</div>
-                <span class="level-go">▶</span>
-            `;
-            grid.appendChild(card);
+        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
+            const firstLetter = letters[0];
+            grid.appendChild(makeNode({
+                color: MODE_COLORS.hindi,
+                content: `<span style="font-family:'Noto Sans Kannada',serif;font-size:30px;font-weight:700;color:#fff">${firstLetter}</span>`,
+                isLocked: false,
+                isCurrent: false,
+                isExam: isTest,
+                onclick: () => startHindiGame(letters, mode),
+            }));
         });
         return;
     }
 
     if (currentAppMode === "blends") {
-        BLENDS_LEVELS.forEach(({ label, blends, mode }) => {
-            const card = document.createElement("div");
-            card.className = "level-card";
-            card.onclick = () => startBlendsGame(blends, mode);
-            const modeIcon = mode === "picture" ? " 🖼️" : " 🔤";
-            const thumbs = blends.map(b =>
-                `<span class="caps-pair" style="font-size:1.2rem;font-weight:900">${b}</span>`
-            ).join("");
-            card.innerHTML = `
-                <span class="level-number">${label}${modeIcon}</span>
-                <div class="level-thumbs caps-preview">${thumbs}</div>
-                <span class="level-go">▶</span>
-            `;
-            grid.appendChild(card);
+        BLENDS_LEVELS.forEach(({ label, blends, mode }, idx) => {
+            const firstBlend = blends[0];
+            grid.appendChild(makeNode({
+                color: TILE_COLORS[idx % TILE_COLORS.length],
+                content: `<span style="font-family:'Newsreader',serif;font-size:22px;font-weight:900;color:#fff">${firstBlend.toUpperCase()}</span>`,
+                isLocked: false,
+                isCurrent: false,
+                isExam: false,
+                onclick: () => startBlendsGame(blends, mode),
+            }));
         });
         return;
     }
@@ -433,29 +484,22 @@ function buildLevelGrid() {
     if (currentAppMode === "matchcaps") {
         const unlockedPair = getCapsUnlockedLevel();
         CAPS_LEVELS.forEach((gl, idx) => {
-            const card = document.createElement("div");
             const isLocked = gl.pair > unlockedPair;
             const isTest = gl.mode === "caps-test";
-            card.className = "level-card" + (isLocked ? " locked" : "") + (isTest ? " exam-card" : "");
-            if (!isLocked) card.onclick = () => startCapsGame(idx);
-
-            let modeIcon, thumbs;
-            if (isTest) {
-                modeIcon = "⭐";
-                const range = `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`;
-                thumbs = `<span class="caps-pair" style="font-size:1.3rem">TEST ${range}</span>`;
-            } else {
-                modeIcon = "🔠";
-                thumbs = gl.letters.map(l =>
-                    `<span class="caps-pair">${l}${l.toLowerCase()}</span>`
-                ).join("");
-            }
-            card.innerHTML = `
-                <span class="level-number">${idx + 1} ${modeIcon}</span>
-                <div class="level-thumbs caps-preview">${thumbs}</div>
-                <span class="level-go">${isLocked ? "🔒" : "▶"}</span>
-            `;
-            grid.appendChild(card);
+            const firstLetter = isTest ? "★" : gl.letters[0];
+            const displayColor = TILE_COLORS[idx % TILE_COLORS.length];
+            // isCurrent = first locked node
+            const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && CAPS_LEVELS[idx + 1].pair > unlockedPair;
+            grid.appendChild(makeNode({
+                color: displayColor,
+                content: isTest
+                    ? `<span style="font-family:'Newsreader',serif;font-size:22px;font-weight:700;color:#fff">A–Z</span>`
+                    : `<span style="font-family:'Newsreader',serif;font-size:34px;font-weight:700;color:#fff">${firstLetter}${firstLetter.toLowerCase()}</span>`,
+                isLocked,
+                isCurrent,
+                isExam: isTest,
+                onclick: () => startCapsGame(idx),
+            }));
         });
         return;
     }
@@ -463,44 +507,38 @@ function buildLevelGrid() {
     const unlockedPair = getUnlockedLevel();
 
     GAME_LEVELS.forEach((gl, idx) => {
-
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
-        const card = document.createElement("div");
         const isLocked = gl.pair > unlockedPair;
-        card.className = "level-card" + (isLocked ? " locked" : "");
+        const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && GAME_LEVELS[idx + 1].pair > unlockedPair;
+        const firstItem = items[0];
+        const color = TILE_COLORS[idx % TILE_COLORS.length];
 
-        if (!isLocked) {
-            card.onclick = () => startGame(idx);
-        }
+        const content = firstItem?.image
+            ? `<img src="${firstItem.image}" alt="${firstItem.word}">`
+            : `<span style="font-family:'Newsreader',serif;font-size:34px;font-weight:700;color:#fff">${firstItem?.letter || '?'}</span>`;
 
-        const modeIcon = gl.mode === "normal" ? "🔤" : "🖼️";
-        const thumbs = items.map((it) =>
-            `<img src="${it.image}" alt="${it.word}">`
-        ).join("");
-
-        card.innerHTML = `
-            <span class="level-number">${idx + 1} ${modeIcon}</span>
-            <div class="level-thumbs">${thumbs}</div>
-            <span class="level-go">${isLocked ? "🔒" : "▶"}</span>
-        `;
-        grid.appendChild(card);
+        grid.appendChild(makeNode({
+            color,
+            content,
+            isLocked,
+            isCurrent,
+            isExam: false,
+            onclick: () => startGame(idx),
+        }));
     });
 
-    // A–Z exam cards — always unlocked
-    const examThumbs = [ALL_ITEMS[0], ALL_ITEMS[8], ALL_ITEMS[12], ALL_ITEMS[25]]
-        .map(it => `<img src="${it.image}" alt="${it.word}">`).join("");
-
+    // A–Z exam nodes
+    const examColor = MODE_COLORS.quiz;
     ["normal", "reverse"].forEach(mode => {
-        const card = document.createElement("div");
-        card.className = "level-card exam-card";
-        card.onclick = () => startExam(mode);
-        const modeIcon = mode === "normal" ? "🔤" : "🖼️";
-        card.innerHTML = `
-            <span class="level-number">A–Z ${modeIcon}</span>
-            <div class="level-thumbs">${examThumbs}</div>
-            <span class="level-go">▶</span>
-        `;
-        grid.appendChild(card);
+        const icon = mode === "normal" ? "🔤" : "🖼️";
+        grid.appendChild(makeNode({
+            color: examColor,
+            content: `<span style="font-family:'Newsreader',serif;font-size:20px;font-weight:700;color:#fff;text-align:center;line-height:1.2">A–Z<br><span style="font-size:14px">${icon}</span></span>`,
+            isLocked: false,
+            isCurrent: false,
+            isExam: true,
+            onclick: () => startExam(mode),
+        }));
     });
 }
 
@@ -576,6 +614,7 @@ function startExam(mode) {
     stars = 0;
     sessionStats = [];
     document.getElementById("stars").textContent = stars;
+    setModeChip("quiz");
     showScreen("quiz-screen");
     loadRound();
 }
@@ -601,6 +640,7 @@ function startGame(gameLevelIdx) {
     stars = 0;
     sessionStats = [];
     document.getElementById("stars").textContent = stars;
+    setModeChip(currentAppMode);
     showScreen("quiz-screen");
     loadRound();
 }
@@ -681,6 +721,10 @@ function loadRound() {
         if (window.twemoji) twemoji.parse(choicesEl, { folder: 'svg', ext: '.svg' });
     }
 
+    setLetterDisplayColor(currentAppMode);
+    const choicesEl2 = document.getElementById("choices");
+    applyTileColors(choicesEl2);
+
     // Update progress
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
@@ -699,6 +743,7 @@ function handleChoice(btn, chosen) {
         });
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
+        addCheckBadge(btn);
         if (roundClean) {
             stars++;
             document.getElementById("stars").textContent = stars;
@@ -994,24 +1039,34 @@ function skipCartoon() {
 // ── Feedback ────────────────────────────────────────────────────────
 
 function showFeedback(correct) {
+    if (correct) {
+        const banner = document.getElementById("celebration-banner");
+        if (banner) {
+            banner.classList.remove("hidden");
+            banner.style.animation = "none";
+            void banner.offsetWidth;
+            banner.style.animation = "slideUp 0.35s ease-out";
+            setTimeout(() => banner.classList.add("hidden"), 1500);
+        }
+        return;
+    }
+
     const fb = document.getElementById("feedback");
     const emoji = document.getElementById("feedback-emoji");
     const text = document.getElementById("feedback-text");
 
-    fb.className = "feedback show " + (correct ? "correct-fb" : "wrong-fb");
-    emoji.textContent = correct ? "🌟" : "😊";
+    fb.className = "feedback show wrong-fb";
+    emoji.textContent = "😊";
     if (currentAppMode === "matchcaps") {
-        text.textContent = correct
-            ? `${currentItem.letter} = ${currentItem.letter.toLowerCase()}!`
-            : `It's ${currentItem.letter} / ${currentItem.letter.toLowerCase()}!`;
+        text.textContent = `It's ${currentItem.letter} / ${currentItem.letter.toLowerCase()}!`;
     } else if (currentAppMode === "kannada") {
-        text.textContent = correct
-            ? `${currentItem.letter} = ${currentItem.roman}!`
-            : `It's ${currentItem.roman}!`;
+        text.textContent = `It's ${currentItem.roman}!`;
+    } else if (currentAppMode === "hindi") {
+        text.textContent = `It's ${currentItem.roman}!`;
+    } else if (currentAppMode === "blends") {
+        text.textContent = `It's ${currentItem.blend}!`;
     } else {
-        text.textContent = correct
-            ? `${currentItem.letter} for ${currentItem.word}!`
-            : `It's ${currentItem.word}!`;
+        text.textContent = `It's ${currentItem.word}!`;
     }
 
     setTimeout(() => {
@@ -1166,6 +1221,7 @@ function startCapsGame(capsLevelIdx) {
     stars = 0;
     sessionStats = [];
     document.getElementById("stars").textContent = stars;
+    setModeChip("matchcaps");
     showScreen("quiz-screen");
     loadCapsRound();
 }
@@ -1212,6 +1268,8 @@ function loadCapsRound() {
         choicesEl.appendChild(btn);
     });
 
+    setLetterDisplayColor("matchcaps");
+    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1226,6 +1284,7 @@ function handleCapsChoice(btn, chosen) {
         document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
+        addCheckBadge(btn);
         if (roundClean) {
             stars++;
             document.getElementById("stars").textContent = stars;
@@ -1351,6 +1410,7 @@ function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "
     stars = 0;
     sessionStats = [];
     document.getElementById("stars").textContent = stars;
+    setModeChip("kannada");
     showScreen("quiz-screen");
     loadKannadaRound();
 }
@@ -1436,6 +1496,8 @@ function loadKannadaRound() {
         });
     }
 
+    setLetterDisplayColor("kannada");
+    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1450,6 +1512,7 @@ function handleKannadaChoice(btn, chosen) {
         document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
+        addCheckBadge(btn);
         if (roundClean) {
             stars++;
             document.getElementById("stars").textContent = stars;
@@ -1492,6 +1555,7 @@ function startHindiGame(letters = HINDI_ITEMS.map(it => it.letter), mode = "see"
     stars = 0;
     sessionStats = [];
     document.getElementById("stars").textContent = stars;
+    setModeChip("hindi");
     showScreen("quiz-screen");
     loadHindiRound();
 }
@@ -1540,6 +1604,8 @@ function loadHindiRound() {
         buildHindiChoices();
     }
 
+    setLetterDisplayColor("hindi");
+    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1554,6 +1620,7 @@ function handleHindiChoice(btn, chosen) {
         document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
+        addCheckBadge(btn);
         if (roundClean) {
             stars++;
             document.getElementById("stars").textContent = stars;
@@ -1620,6 +1687,7 @@ function startBlendsGame(blends, mode) {
     stars = 0;
     sessionStats = [];
     document.getElementById("stars").textContent = stars;
+    setModeChip("blends");
     showScreen("quiz-screen");
     loadBlendsRound();
 }
@@ -1680,6 +1748,8 @@ function loadBlendsRound() {
         });
     }
 
+    setLetterDisplayColor("blends");
+    applyTileColors(document.getElementById("choices"));
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1694,6 +1764,7 @@ function handleBlendsChoice(btn, chosen) {
         document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
+        addCheckBadge(btn);
         if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
         playCorrectSound();
         showFeedback(true);
@@ -2124,6 +2195,7 @@ function startNumbers(mode = "normal", range = [1, 4]) {
     stars = 0;
     answered = false;
     document.getElementById("stars").textContent = stars;
+    setModeChip("saynumbers");
     showScreen("quiz-screen");
     if (gameMode === "reverse") loadNumberRoundReverse();
     else if (gameMode === "hear") loadNumberRoundHear();
@@ -2162,6 +2234,8 @@ function loadNumberRound() {
         choicesEl.appendChild(btn);
     });
 
+    setLetterDisplayColor("saynumbers");
+    applyTileColors(choicesEl);
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -2199,6 +2273,8 @@ function loadNumberRoundHear() {
         choicesEl.appendChild(btn);
     });
 
+    setLetterDisplayColor("saynumbers");
+    applyTileColors(choicesEl);
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -2211,6 +2287,7 @@ function handleNumberChoice(btn, chosen, count) {
         document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
         btn.classList.remove("dimmed");
         btn.classList.add("correct");
+        addCheckBadge(btn);
         if (roundClean) {
             stars++;
             document.getElementById("stars").textContent = stars;
@@ -2219,12 +2296,7 @@ function handleNumberChoice(btn, chosen, count) {
         spawnConfetti();
         speak(String(count));
         setTimeout(() => speak(String(count)), 1200);
-
-        const fb = document.getElementById("feedback");
-        fb.className = "feedback show correct-fb";
-        document.getElementById("feedback-emoji").textContent = "🌟";
-        document.getElementById("feedback-text").textContent = `${count}!`;
-        setTimeout(() => { fb.className = "feedback hidden"; }, 1800);
+        showFeedback(true);
 
         setTimeout(advanceRound, 2200);
     } else {
@@ -2275,18 +2347,14 @@ function loadNumberRoundReverse() {
                 speak(String(count));
                 setTimeout(() => speak(String(count)), 1200);
 
-                const fb = document.getElementById("feedback");
-                fb.className = "feedback show correct-fb";
-                document.getElementById("feedback-emoji").textContent = "🌟";
-                document.getElementById("feedback-text").textContent = `${count}!`;
-                setTimeout(() => { fb.className = "feedback hidden"; }, 1800);
-
+                showFeedback(true);
                 setTimeout(advanceRound, 2200);
             }
         };
         choicesEl.appendChild(ball);
     }
 
+    setLetterDisplayColor("saynumbers");
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
