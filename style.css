@@ -689,28 +689,28 @@ header {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 24px;
-  padding: 20px;
-  min-height: 110px;
+  gap: 6px;
+  padding: 8px;
 }
 
 .number-ball {
-  width: 56px;
-  height: 56px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--honey-500);
   box-shadow: var(--shadow);
   animation: popIn 0.3s ease-out both;
+  flex-shrink: 0;
 }
 
 .number-ball:nth-child(1) { animation-delay: 0ms; }
-.number-ball:nth-child(2) { animation-delay: 900ms; }
-.number-ball:nth-child(3) { animation-delay: 1800ms; }
-.number-ball:nth-child(4) { animation-delay: 2700ms; }
-.number-ball:nth-child(5) { animation-delay: 3600ms; }
-.number-ball:nth-child(6) { animation-delay: 4500ms; }
-.number-ball:nth-child(7) { animation-delay: 5400ms; }
-.number-ball:nth-child(8) { animation-delay: 6300ms; }
+.number-ball:nth-child(2) { animation-delay: 300ms; }
+.number-ball:nth-child(3) { animation-delay: 600ms; }
+.number-ball:nth-child(4) { animation-delay: 900ms; }
+.number-ball:nth-child(5) { animation-delay: 1200ms; }
+.number-ball:nth-child(6) { animation-delay: 1500ms; }
+.number-ball:nth-child(7) { animation-delay: 1800ms; }
+.number-ball:nth-child(8) { animation-delay: 2100ms; }
 
 .number-level-preview {
   font-family: var(--font-serif);
