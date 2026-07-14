@@ -81,14 +81,14 @@ function setCapsUnlockedLevel(lvl) {
 
 // ── Kannada ───────────────────────────────────────────────────────────
 const KANNADA_ITEMS = [
-    { letter: "ಅ", roman: "a",  start: 0,  vidStart: 14,  image: "images/prince.png" },
-    { letter: "ಆ", roman: "aa", start: 3,  vidStart: 31,  image: "images/elephant.png" },
-    { letter: "ಇ", roman: "i",  start: 6,  vidStart: 96,  image: "images/rat.png" },
-    { letter: "ಈ", roman: "ii", start: 9,  vidStart: null, image: "images/fly.png" },
-    { letter: "ಉ", roman: "u",  start: 13, vidStart: 79,  image: "images/ring.png" },
-    { letter: "ಊ", roman: "uu", start: 17, vidStart: 94,  image: "images/sadhya.png" },
-    { letter: "ಋ", roman: "ru", start: 20, vidStart: 109 },
-    { letter: "ಎ", roman: "e",  start: 24, vidStart: 125 },
+    { letter: "ಅ", roman: "a",  audio: "audio/kannada_a.mp3",  vidStart: 14,  image: "images/prince.png" },
+    { letter: "ಆ", roman: "aa", audio: "audio/kannada_aa.mp3", vidStart: 31,  image: "images/elephant.png" },
+    { letter: "ಇ", roman: "i",  audio: "audio/kannada_i.mp3",  vidStart: 96,  image: "images/rat.png" },
+    { letter: "ಈ", roman: "ii", audio: "audio/kannada_ii.mp3", vidStart: null, image: "images/fly.png" },
+    { letter: "ಉ", roman: "u",  audio: "audio/kannada_u.mp3",  vidStart: 79,  image: "images/ring.png" },
+    { letter: "ಊ", roman: "uu", audio: "audio/kannada_uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
+    { letter: "ಋ", roman: "ru", audio: "audio/kannada_ru.mp3", vidStart: 109 },
+    { letter: "ಎ", roman: "e",  audio: "audio/kannada_e.mp3",  vidStart: 125 },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -1262,7 +1262,12 @@ let kannadaActiveItems = KANNADA_ITEMS;
 let hindiMode = "see";
 let hindiActiveItems = HINDI_ITEMS;
 
-let _kannadaAudio = null;
+const _kannadaAudios = {};
+KANNADA_ITEMS.forEach(item => {
+    const a = new Audio(item.audio);
+    a.preload = "auto";
+    _kannadaAudios[item.letter] = a;
+});
 let _kannadaClipTimer = null;
 const _hindiAudios = {};
 HINDI_ITEMS.forEach(item => {
@@ -1272,18 +1277,16 @@ HINDI_ITEMS.forEach(item => {
 });
 let _hindiClipTimer = null;
 
-function playKannadaClip(letter, options = {}) {
+function playKannadaClip(letter) {
     const item = KANNADA_ITEMS.find(it => it.letter === letter);
     if (!item) return;
-    if (!_kannadaAudio) {
-        _kannadaAudio = new Audio("audio/kannada.mp3");
-    }
     clearTimeout(_kannadaClipTimer);
-    _kannadaAudio.pause();
-    _kannadaAudio.currentTime = item.start;
-    _kannadaAudio.play().catch(() => {});
-    const duration = options.duration ?? 2500;
-    _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), duration);
+    Object.values(_kannadaAudios).forEach(a => a.pause());
+    const audio = _kannadaAudios[letter];
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+    _kannadaClipTimer = setTimeout(() => audio.pause(), 2500);
 }
 
 function playHindiClip(letter) {
