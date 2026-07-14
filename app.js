@@ -81,14 +81,14 @@ function setCapsUnlockedLevel(lvl) {
 
 // ── Kannada ───────────────────────────────────────────────────────────
 const KANNADA_ITEMS = [
-    { letter: "ಅ", roman: "a",  audio: "audio/kannada_a.mp3",  vidStart: 14,  image: "images/prince.png" },
-    { letter: "ಆ", roman: "aa", audio: "audio/kannada_aa.mp3", vidStart: 31,  image: "images/elephant.png" },
-    { letter: "ಇ", roman: "i",  audio: "audio/kannada_i.mp3",  vidStart: 96,  image: "images/rat.png" },
-    { letter: "ಈ", roman: "ii", audio: "audio/kannada_ii.mp3", vidStart: null, image: "images/fly.png" },
-    { letter: "ಉ", roman: "u",  audio: "audio/kannada_u.mp3",  vidStart: 79,  image: "images/ring.png" },
-    { letter: "ಊ", roman: "uu", audio: "audio/kannada_uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
-    { letter: "ಋ", roman: "ru", audio: "audio/kannada_ru.mp3", vidStart: 109 },
-    { letter: "ಎ", roman: "e",  audio: "audio/kannada_e.mp3",  vidStart: 125 },
+    { letter: "ಅ", roman: "a",  audio: "audio/kannada/a.mp3",  vidStart: 14,  image: "images/prince.png" },
+    { letter: "ಆ", roman: "aa", audio: "audio/kannada/aa.mp3", vidStart: 31,  image: "images/elephant.png" },
+    { letter: "ಇ", roman: "i",  audio: "audio/kannada/i.mp3",  vidStart: 96,  image: "images/rat.png" },
+    { letter: "ಈ", roman: "ii", audio: "audio/kannada/ii.mp3", vidStart: null, image: "images/fly.png" },
+    { letter: "ಉ", roman: "u",  audio: "audio/kannada/u.mp3",  vidStart: 79,  image: "images/ring.png" },
+    { letter: "ಊ", roman: "uu", audio: "audio/kannada/uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
+    { letter: "ಋ", roman: "ru", audio: "audio/kannada/ru.mp3", vidStart: 109 },
+    { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 125 },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -109,10 +109,10 @@ const KANNADA_LEVELS = [
 ];
 
 const HINDI_ITEMS = [
-    { letter: "क", roman: "ka",  audio: "audio/hindi_ka.mp3",  vidStart: 58, image: "images/lotus.png" },
-    { letter: "ख", roman: "kha", audio: "audio/hindi_kha.mp3", vidStart: 63, image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",  audio: "audio/hindi_ga.mp3",  vidStart: 67, image: "images/cow.png" },
-    { letter: "घ", roman: "gha", audio: "audio/hindi_gha.mp3", vidStart: 71, image: "images/clock.png" },
+    { letter: "क", roman: "ka",  audio: "audio/hindi/ka.mp3",  vidStart: 58, image: "images/lotus.png" },
+    { letter: "ख", roman: "kha", audio: "audio/hindi/kha.mp3", vidStart: 63, image: "images/rabbit.png" },
+    { letter: "ग", roman: "ga",  audio: "audio/hindi/ga.mp3",  vidStart: 67, image: "images/cow.png" },
+    { letter: "घ", roman: "gha", audio: "audio/hindi/gha.mp3", vidStart: 71, image: "images/clock.png" },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
