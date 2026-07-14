@@ -110,9 +110,9 @@ const KANNADA_LEVELS = [
 
 const HINDI_ITEMS = [
     { letter: "क", roman: "ka",  start: 3, vidStart: 58, image: "images/lotus.png" },
-    { letter: "ख", roman: "kha", start: 3, vidStart: 63, image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",  start: 3, vidStart: 67, image: "images/cow.png" },
-    { letter: "घ", roman: "gha", start: 3, vidStart: 71, image: "images/clock.png" },
+    { letter: "ख", roman: "kha", start: 4, vidStart: 63, image: "images/rabbit.png" },
+    { letter: "ग", roman: "ga",  start: 5, vidStart: 67, image: "images/cow.png" },
+    { letter: "घ", roman: "gha", start: 6, vidStart: 71, image: "images/clock.png" },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
@@ -1264,7 +1264,8 @@ let hindiActiveItems = HINDI_ITEMS;
 
 let _kannadaAudio = null;
 let _kannadaClipTimer = null;
-let _hindiAudio = null;
+const _hindiAudio = new Audio("audio/consonants.mp3");
+_hindiAudio.preload = "auto";
 let _hindiClipTimer = null;
 
 function playKannadaClip(letter, options = {}) {
@@ -1281,18 +1282,14 @@ function playKannadaClip(letter, options = {}) {
     _kannadaClipTimer = setTimeout(() => _kannadaAudio.pause(), duration);
 }
 
-function playHindiClip(letter, onDone) {
+function playHindiClip(letter) {
     const item = HINDI_ITEMS.find(it => it.letter === letter);
-    if (!item) { if (onDone) onDone(); return; }
-    if (!_hindiAudio) _hindiAudio = new Audio("audio/kannada.mp3");
+    if (!item) return;
     clearTimeout(_hindiClipTimer);
     _hindiAudio.pause();
     _hindiAudio.currentTime = item.start;
     _hindiAudio.play().catch(() => {});
-    _hindiClipTimer = setTimeout(() => {
-        _hindiAudio.pause();
-        if (onDone) onDone();
-    }, 2500);
+    _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 2500);
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
@@ -1529,8 +1526,8 @@ function loadHindiRound() {
             <div id="hindi-hear-btn" class="kannada-listen-btn">🔊</div>
             <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
         `;
-        document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter, null));
-        setTimeout(() => playHindiClip(currentItem.letter, null), 400);
+        document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter));
+        setTimeout(() => playHindiClip(currentItem.letter), 400);
         buildHindiChoices();
     }
 
