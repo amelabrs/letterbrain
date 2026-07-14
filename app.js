@@ -109,12 +109,11 @@ const KANNADA_LEVELS = [
 ];
 
 const HINDI_ITEMS = [
-    { letter: "क", roman: "ka",  audioStart: 4,  vidStart: 58, image: "images/lotus.png" },
-    { letter: "ख", roman: "kha", audioStart: 8,  vidStart: 63, image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",  audioStart: 11, vidStart: 67, image: "images/cow.png" },
-    { letter: "घ", roman: "gha", audioStart: 15, vidStart: 71, image: "images/clock.png" },
+    { letter: "क", roman: "ka",  start: 3, vidStart: 58, image: "images/lotus.png" },
+    { letter: "ख", roman: "kha", start: 4, vidStart: 63, image: "images/rabbit.png" },
+    { letter: "ग", roman: "ga",  start: 5, vidStart: 67, image: "images/cow.png" },
+    { letter: "घ", roman: "gha", start: 6, vidStart: 71, image: "images/clock.png" },
 ];
-const HINDI_AUDIO_VIDEO_ID = "cTBRKCUzOcE";
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
     { label: "1", letters: ["क", "ख"], mode: "hear" },
@@ -1284,26 +1283,16 @@ function playKannadaClip(letter, options = {}) {
 
 function playHindiClip(letter, onDone) {
     const item = HINDI_ITEMS.find(it => it.letter === letter);
-    if (!item || !ytReady) { if (onDone) onDone(); return; }
-    const overlay = document.getElementById("video-overlay");
-    const localPlayer = document.getElementById("local-player");
-    const ytEl = document.getElementById("yt-player");
-    const start = item.audioStart;
-    const end = start + 3;
-    localPlayer.style.display = "none";
-    ytEl.style.display = "block";
-    overlay.className = "video-overlay show";
-    videoShowing = true;
-    ytPlayer.loadVideoById({ videoId: HINDI_AUDIO_VIDEO_ID, startSeconds: start });
-    clearInterval(videoTimer);
-    if (onDone) afterVideoHide = onDone;
-    videoTimer = setInterval(() => {
-        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
-            clearInterval(videoTimer);
-            hideVideoOverlay();
-        }
-    }, 200);
-    safetyTimer = setTimeout(() => { clearInterval(videoTimer); hideVideoOverlay(); }, 6000);
+    if (!item) { if (onDone) onDone(); return; }
+    if (!_hindiAudio) _hindiAudio = new Audio("audio/consonants.mp3");
+    clearTimeout(_hindiClipTimer);
+    _hindiAudio.pause();
+    _hindiAudio.currentTime = item.start;
+    _hindiAudio.play().catch(() => {});
+    _hindiClipTimer = setTimeout(() => {
+        _hindiAudio.pause();
+        if (onDone) onDone();
+    }, 2500);
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
@@ -1536,14 +1525,13 @@ function loadHindiRound() {
         // Play audio clip first → then reveal 🔊 button + letter choices
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
-        playHindiClip(currentItem.letter, () => {
-            letterDisplay.innerHTML = `
-                <div id="hindi-hear-btn" class="kannada-listen-btn">🔊</div>
-                <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
-            `;
-            document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter, null));
-            buildHindiChoices();
-        });
+        letterDisplay.innerHTML = `
+            <div id="hindi-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+        `;
+        document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter, null));
+        setTimeout(() => playHindiClip(currentItem.letter, null), 400);
+        buildHindiChoices();
     }
 
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
