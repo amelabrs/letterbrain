@@ -1287,9 +1287,27 @@ function playHindiClip(letter) {
     if (!item) return;
     clearTimeout(_hindiClipTimer);
     _hindiAudio.pause();
-    _hindiAudio.currentTime = item.start;
-    _hindiAudio.play().catch(() => {});
-    _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 2500);
+
+    const startPlay = () => {
+        _hindiAudio.play().catch(() => {});
+        _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 2500);
+    };
+
+    const doSeek = () => {
+        _hindiAudio.addEventListener('seeked', startPlay, { once: true });
+        _hindiAudio.currentTime = item.start;
+        // If currentTime was already at this position, 'seeked' won't fire
+        if (Math.abs(_hindiAudio.currentTime - item.start) < 0.05) {
+            _hindiAudio.removeEventListener('seeked', startPlay);
+            startPlay();
+        }
+    };
+
+    if (_hindiAudio.readyState >= 1) {
+        doSeek();
+    } else {
+        _hindiAudio.addEventListener('loadedmetadata', doSeek, { once: true });
+    }
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
