@@ -774,3 +774,108 @@ header {
 /* ── Caps pairs ──────────────────────────────────────────────────────── */
 .caps-pair { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: inherit; }
 .caps-preview { flex-wrap: wrap; gap: 4px !important; justify-content: center; }
+
+/* ── Theme: Rainbow Trail ────────────────────────────────────────────── */
+body.theme-rainbow {
+  --bg:          #F4EDDF;
+  --bg-raised:   #FBF6EC;
+  --bg-deep:     #EDE5D4;
+  --fg:          #20251D;
+  --fg-soft:     #5C6151;
+  --fg-faint:    #8C8E7C;
+  --line:        #E6DCC8;
+  --neon-green:  #347046;
+}
+
+body.theme-rainbow .level-node.locked {
+  border-color: var(--fg-faint) !important;
+  color: var(--fg-faint);
+}
+
+body.theme-rainbow .progress-fill {
+  background: #347046;
+  box-shadow: none;
+}
+
+body.theme-rainbow .check-badge { background: #347046; }
+
+body.theme-rainbow .celebration-banner {
+  background: var(--bg-raised);
+  border-color: #347046;
+  box-shadow: 0 4px 20px rgba(52,112,70,0.2);
+}
+
+body.theme-rainbow #done-screen h2 { color: #347046; }
+body.theme-rainbow .unlock-msg     { color: #347046; }
+body.theme-rainbow .start-btn {
+  border-color: #347046;
+  color: #347046;
+  box-shadow: none;
+}
+
+/* Rainbow tab styling: solid colored circles */
+body.theme-rainbow .mode-tab {
+  background: transparent;
+  opacity: 0.5;
+}
+body.theme-rainbow .mode-tab.active { opacity: 1; border-width: 2px; }
+
+body.theme-rainbow .mode-tab-quiz    { border-color: #347046; color: #347046; }
+body.theme-rainbow .mode-tab-case    { border-color: #2E5E6E; color: #2E5E6E; }
+body.theme-rainbow .mode-tab-kannada { border-color: #B85C38; color: #B85C38; }
+body.theme-rainbow .mode-tab-hindi   { border-color: #7B5A86; color: #7B5A86; }
+body.theme-rainbow .mode-tab-blends  { border-color: #1A4226; color: #1A4226; }
+body.theme-rainbow .mode-tab-numbers { border-color: #DEA431; color: #DEA431; }
+
+body.theme-rainbow .mode-tab-quiz.active    { background: #347046; color: #fff; box-shadow: 0 2px 8px rgba(52,112,70,0.35); }
+body.theme-rainbow .mode-tab-case.active    { background: #2E5E6E; color: #fff; box-shadow: 0 2px 8px rgba(46,94,110,0.35); }
+body.theme-rainbow .mode-tab-kannada.active { background: #B85C38; color: #fff; box-shadow: 0 2px 8px rgba(184,92,56,0.35); }
+body.theme-rainbow .mode-tab-hindi.active   { background: #7B5A86; color: #fff; box-shadow: 0 2px 8px rgba(123,90,134,0.35); }
+body.theme-rainbow .mode-tab-blends.active  { background: #1A4226; color: #fff; box-shadow: 0 2px 8px rgba(26,66,38,0.35); }
+body.theme-rainbow .mode-tab-numbers.active { background: #DEA431; color: #fff; box-shadow: 0 2px 8px rgba(222,164,49,0.35); }
+
+body.theme-rainbow .choice-btn.correct { outline-color: #347046; }
+body.theme-rainbow .feedback.wrong-fb #feedback-text  { color: #B85C38; }
+body.theme-rainbow .feedback.number-fb #feedback-text { color: #DEA431; }
+
+body.theme-rainbow .number-ball {
+  background: #DEA431;
+  box-shadow: 0 2px 6px rgba(222,164,49,0.5);
+}
+
+body.theme-rainbow .number-tap-ball {
+  background: #FBF6EC;
+  border-color: #DEA431;
+  box-shadow: none;
+}
+body.theme-rainbow .number-tap-ball.tapped {
+  background: #DEA431;
+  box-shadow: 0 2px 8px rgba(222,164,49,0.4);
+}
+
+/* Theme toggle buttons */
+.theme-row {
+  display: flex;
+  gap: 8px;
+}
+.theme-btn {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--bg-raised);
+  color: var(--fg-soft);
+  cursor: pointer;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s;
+}
+.theme-btn.active {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+body.theme-rainbow .theme-btn.active {
+  border-color: #347046;
+  color: #347046;
+}

@@ -52,7 +52,11 @@
                     <input type="checkbox" id="no-video-toggle">
                     <span>🚫 No Videos</span>
                 </label>
-                <button class="log-btn" onclick="showSpeechLog()">🎙️ Speech Log</button>
+                <div class="theme-row">
+                <button class="theme-btn active" data-theme="chalkboard" onclick="applyTheme('chalkboard')">🌙 Chalkboard</button>
+                <button class="theme-btn" data-theme="rainbow" onclick="applyTheme('rainbow')">🌿 Rainbow</button>
+            </div>
+            <button class="log-btn" onclick="showSpeechLog()">🎙️ Speech Log</button>
             </div>
         </div>
 
@@ -119,6 +123,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="app.js?v=19"></script>
+    <script src="app.js?v=20"></script>
 </body>
 </html>

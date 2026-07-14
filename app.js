@@ -45,8 +45,9 @@ let levelItems = [];
 let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
 let numberRange = [1, 4]; // active range for Numbers levels
 
-const TILE_COLORS = ["#7CFF6B", "#00E5FF", "#FFEA00", "#FF4FA3", "#FF8A3D", "#B47CFF"];
-const MODE_COLORS = {
+const CHALK_TILE_COLORS  = ["#7CFF6B", "#00E5FF", "#FFEA00", "#FF4FA3", "#FF8A3D", "#B47CFF"];
+const RAINBOW_TILE_COLORS = ["#347046", "#DEA431", "#2E5E6E", "#B85C38"];
+const CHALK_MODE_COLORS = {
     quiz:       "#7CFF6B",
     matchcaps:  "#00E5FF",
     kannada:    "#FF8A3D",
@@ -54,6 +55,25 @@ const MODE_COLORS = {
     saynumbers: "#FFEA00",
     blends:     "#B47CFF",
 };
+const RAINBOW_MODE_COLORS = {
+    quiz:       "#347046",
+    matchcaps:  "#2E5E6E",
+    kannada:    "#B85C38",
+    hindi:      "#7B5A86",
+    saynumbers: "#DEA431",
+    blends:     "#1A4226",
+};
+
+let currentTheme = localStorage.getItem("lb_theme") || "chalkboard";
+
+function tileColor(i) {
+    const arr = currentTheme === "chalkboard" ? CHALK_TILE_COLORS : RAINBOW_TILE_COLORS;
+    return arr[i % arr.length];
+}
+function modeColor(mode) {
+    const map = currentTheme === "chalkboard" ? CHALK_MODE_COLORS : RAINBOW_MODE_COLORS;
+    return map[mode] || map.quiz;
+}
 
 // ── Game levels: pairs of (normal, reverse) for each letter group ──
 const CONTENT_LEVELS = [...new Set(ALL_ITEMS.map(it => it.level))].sort((a, b) => a - b);
@@ -305,45 +325,89 @@ function showScreen(id) {
 function setModeChip(mode) {
     const chip = document.getElementById("mode-chip");
     if (!chip) return;
-    const neon = MODE_COLORS[mode] || MODE_COLORS.quiz;
-    chip.style.background = "#23272F";
-    chip.style.border = `3px solid ${neon}`;
-    chip.style.boxShadow = `0 0 18px 2px ${neon}99`;
-    chip.style.color = neon;
-    const icons = {
-        quiz:       `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${neon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>`,
-        matchcaps:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${neon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
-        kannada:    `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${neon}">ಅ</span>`,
-        hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${neon}">अ</span>`,
-        saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${neon}">3</span>`,
-        blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${neon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
-    };
-    chip.innerHTML = icons[mode] || '';
+    const c = modeColor(mode);
+    if (currentTheme === "chalkboard") {
+        chip.style.background = "#23272F";
+        chip.style.border = `3px solid ${c}`;
+        chip.style.boxShadow = `0 0 18px 2px ${c}99`;
+        chip.style.color = c;
+        const icons = {
+            quiz:       `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>`,
+            matchcaps:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+            kannada:    `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${c}">ಅ</span>`,
+            hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${c}">अ</span>`,
+            saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${c}">3</span>`,
+            blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
+        };
+        chip.innerHTML = icons[mode] || '';
+    } else {
+        chip.style.background = c;
+        chip.style.border = "none";
+        chip.style.boxShadow = `0 4px 12px ${c}66`;
+        chip.style.color = "#fff";
+        const icons = {
+            quiz:       `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>`,
+            matchcaps:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+            kannada:    `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:#fff">ಅ</span>`,
+            hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:#fff">अ</span>`,
+            saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff">3</span>`,
+            blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
+        };
+        chip.innerHTML = icons[mode] || '';
+    }
 }
 
 function addCheckBadge(btn) {
     const badge = document.createElement("div");
     badge.className = "check-badge";
-    badge.innerHTML = '<span style="font-family:\'Baloo 2\',sans-serif;font-size:16px;font-weight:800;color:#23272F;line-height:1">✓</span>';
+    if (currentTheme === "chalkboard") {
+        badge.innerHTML = '<span style="font-family:\'Baloo 2\',sans-serif;font-size:16px;font-weight:800;color:#23272F;line-height:1">✓</span>';
+    } else {
+        badge.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    }
     btn.appendChild(badge);
 }
 
 function styleTile(btn, i) {
-    const c = TILE_COLORS[i % TILE_COLORS.length];
-    btn.style.background = "#23272F";
-    btn.style.border = `3px solid ${c}`;
-    btn.style.boxShadow = `0 0 14px 2px ${c}66`;
-    btn.style.color = c;
+    const c = tileColor(i);
+    if (currentTheme === "chalkboard") {
+        btn.style.background = "#23272F";
+        btn.style.border = `3px solid ${c}`;
+        btn.style.boxShadow = `0 0 14px 2px ${c}66`;
+        btn.style.color = c;
+    } else {
+        btn.style.background = c;
+        btn.style.border = "none";
+        btn.style.boxShadow = "0 4px 10px rgba(0,0,0,0.18)";
+        btn.style.color = "#fff";
+    }
 }
 
 function setLetterDisplayColor(mode) {
     const el = document.getElementById("letter-display");
     if (!el) return;
-    const neon = MODE_COLORS[mode] || MODE_COLORS.quiz;
-    el.style.background = "#23272F";
-    el.style.border = `4px solid ${neon}`;
-    el.style.boxShadow = `0 0 26px 4px ${neon}8C`;
-    el.style.color = neon;
+    const c = modeColor(mode);
+    if (currentTheme === "chalkboard") {
+        el.style.background = "#23272F";
+        el.style.border = `4px solid ${c}`;
+        el.style.boxShadow = `0 0 26px 4px ${c}8C`;
+        el.style.color = c;
+    } else {
+        el.style.background = c;
+        el.style.border = "none";
+        el.style.boxShadow = "0 4px 16px rgba(0,0,0,0.22)";
+        el.style.color = "#fff";
+    }
+}
+
+function applyTheme(theme) {
+    currentTheme = theme;
+    localStorage.setItem("lb_theme", theme);
+    document.body.classList.toggle("theme-rainbow", theme === "rainbow");
+    document.querySelectorAll(".theme-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.theme === theme);
+    });
+    buildLevelGrid();
 }
 
 // Pick a friendly female/child voice
@@ -390,18 +454,27 @@ function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
     else if (isExam) cls += " exam";
     node.className = cls;
     if (!isLocked) {
-        const borderW = isCurrent ? "4px" : "3px";
-        const glow    = isCurrent
-            ? `0 0 24px 4px ${color}CC`
-            : `0 0 16px 2px ${color}80`;
-        node.style.background  = "#23272F";
-        node.style.border      = `${borderW} solid ${color}`;
-        node.style.boxShadow   = glow;
-        node.style.color       = color;
+        if (currentTheme === "chalkboard") {
+            const borderW = isCurrent ? "4px" : "3px";
+            const glow = isCurrent ? `0 0 24px 4px ${color}CC` : `0 0 16px 2px ${color}80`;
+            node.style.background = "#23272F";
+            node.style.border     = `${borderW} solid ${color}`;
+            node.style.boxShadow  = glow;
+            node.style.color      = color;
+        } else {
+            node.style.background = color;
+            node.style.border     = "none";
+            node.style.boxShadow  = isCurrent ? "0 6px 18px rgba(0,0,0,0.28)" : "0 4px 12px rgba(0,0,0,0.18)";
+            node.style.color      = "#fff";
+        }
         node.innerHTML = content;
         node.addEventListener("click", onclick);
     } else {
-        node.innerHTML = '<span style="font-family:\'Baloo 2\',sans-serif;font-size:28px;font-weight:700">?</span>';
+        if (currentTheme === "chalkboard") {
+            node.innerHTML = '<span style="font-family:\'Baloo 2\',sans-serif;font-size:28px;font-weight:700">?</span>';
+        } else {
+            node.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+        }
     }
     return node;
 }
@@ -431,7 +504,7 @@ function buildLevelGrid() {
             const icon = mode === "hear" ? "🔊" : "#";
             const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px;opacity:0.8">${mode === "hear" ? "🔊" : "🔢"}</span></span>`;
             grid.appendChild(makeNode({
-                color: TILE_COLORS[idx % TILE_COLORS.length],
+                color: tileColor(idx),
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -455,7 +528,7 @@ function buildLevelGrid() {
                 <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: TILE_COLORS[idx % TILE_COLORS.length],
+                color: tileColor(idx),
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -479,7 +552,7 @@ function buildLevelGrid() {
                 <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: TILE_COLORS[idx % TILE_COLORS.length],
+                color: tileColor(idx),
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -494,7 +567,7 @@ function buildLevelGrid() {
         BLENDS_LEVELS.forEach(({ label, blends, mode }, idx) => {
             const firstBlend = blends[0];
             grid.appendChild(makeNode({
-                color: TILE_COLORS[idx % TILE_COLORS.length],
+                color: tileColor(idx),
                 content: `<span style="font-family:'Baloo 2',sans-serif;font-size:30px;font-weight:900;color:inherit">${firstBlend.toUpperCase()}</span>`,
                 isLocked: false,
                 isCurrent: false,
@@ -510,7 +583,7 @@ function buildLevelGrid() {
         CAPS_LEVELS.forEach((gl, idx) => {
             const isLocked = gl.pair > unlockedPair;
             const isTest = gl.mode === "caps-test";
-            const displayColor = TILE_COLORS[idx % TILE_COLORS.length];
+            const displayColor = tileColor(idx);
             const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && CAPS_LEVELS[idx + 1].pair > unlockedPair;
             const rangeStr = isTest
                 ? `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`
@@ -539,7 +612,7 @@ function buildLevelGrid() {
         const isLocked = gl.pair > unlockedPair;
         const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && GAME_LEVELS[idx + 1].pair > unlockedPair;
         const firstItem = items[0];
-        const color = TILE_COLORS[idx % TILE_COLORS.length];
+        const color = tileColor(idx);
 
         const content = firstItem?.image
             ? `<img src="${firstItem.image}" alt="${firstItem.word}">`
@@ -556,7 +629,7 @@ function buildLevelGrid() {
     });
 
     // A–Z exam nodes
-    const examColor = MODE_COLORS.quiz;
+    const examColor = modeColor("quiz");
     ["normal", "reverse"].forEach(mode => {
         const icon = mode === "normal" ? "🔤" : "🖼️";
         grid.appendChild(makeNode({
@@ -1681,12 +1754,12 @@ function handleHindiChoice(btn, chosen) {
 }
 
 function playHindiVideo() {
-    if (getVideosDisabled()) { advanceRound(); return; }
+    if (getVideosDisabled()) { proceedFromVideo(); return; }
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
 
-    if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
+    if (!ytReady || currentItem.vidStart == null) { proceedFromVideo(); return; }
     const start = currentItem.vidStart;
     const end = typeof currentItem.vidEnd === "number" ? currentItem.vidEnd : start + 4;
     const videoId = currentItem.vidId || HINDI_VIDEO_ID;
@@ -1886,6 +1959,12 @@ if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
 ["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
+});
+
+// Apply saved theme on load
+document.body.classList.toggle("theme-rainbow", currentTheme === "rainbow");
+document.querySelectorAll(".theme-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.theme === currentTheme);
 });
 
 // ── Speech Recognition ────────────────────────────────────────────────
