@@ -1287,12 +1287,20 @@ function playHindiClip(letter, onDone) {
     if (!_hindiAudio) _hindiAudio = new Audio("audio/consonants.mp3");
     clearTimeout(_hindiClipTimer);
     _hindiAudio.pause();
-    _hindiAudio.currentTime = item.start;
-    _hindiAudio.play().catch(() => {});
-    _hindiClipTimer = setTimeout(() => {
-        _hindiAudio.pause();
-        if (onDone) onDone();
-    }, 2500);
+    const doPlay = () => {
+        _hindiAudio.currentTime = item.start;
+        _hindiAudio.play().catch(() => {});
+        _hindiClipTimer = setTimeout(() => {
+            _hindiAudio.pause();
+            if (onDone) onDone();
+        }, 2500);
+    };
+    if (_hindiAudio.readyState >= 2) {
+        doPlay();
+    } else {
+        _hindiAudio.addEventListener("canplay", doPlay, { once: true });
+        _hindiAudio.load();
+    }
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
@@ -1579,7 +1587,7 @@ function playHindiVideo() {
 
     if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
     const start = currentItem.vidStart;
-    const end = typeof currentItem.vidEnd === "number" ? currentItem.vidEnd : start + 5;
+    const end = typeof currentItem.vidEnd === "number" ? currentItem.vidEnd : start + 4;
     const videoId = currentItem.vidId || HINDI_VIDEO_ID;
     localPlayer.style.display = "none";
     ytEl.style.display = "block";
