@@ -1290,7 +1290,7 @@ function playHindiClip(letter) {
 
     const startPlay = () => {
         _hindiAudio.play().catch(() => {});
-        _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 2500);
+        _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 1000);
     };
 
     const doSeek = () => {
