@@ -110,9 +110,9 @@ const KANNADA_LEVELS = [
 
 const HINDI_ITEMS = [
     { letter: "क", roman: "ka",  start: 3, vidStart: 58, image: "images/lotus.png" },
-    { letter: "ख", roman: "kha", start: 4, vidStart: 63, image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",  start: 5, vidStart: 67, image: "images/cow.png" },
-    { letter: "घ", roman: "gha", start: 6, vidStart: 71, image: "images/clock.png" },
+    { letter: "ख", roman: "kha", start: 3, vidStart: 63, image: "images/rabbit.png" },
+    { letter: "ग", roman: "ga",  start: 3, vidStart: 67, image: "images/cow.png" },
+    { letter: "घ", roman: "gha", start: 3, vidStart: 71, image: "images/clock.png" },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
