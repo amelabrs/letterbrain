@@ -1264,8 +1264,13 @@ let hindiActiveItems = HINDI_ITEMS;
 
 let _kannadaAudio = null;
 let _kannadaClipTimer = null;
-const _hindiAudio = new Audio("audio/consonants.mp3");
-_hindiAudio.preload = "auto";
+const _hindiAudios = {};
+HINDI_ITEMS.forEach(item => {
+    const a = new Audio("audio/consonants.mp3");
+    a.preload = "auto";
+    a.addEventListener('loadedmetadata', () => { a.currentTime = item.start; }, { once: true });
+    _hindiAudios[item.letter] = a;
+});
 let _hindiClipTimer = null;
 
 function playKannadaClip(letter, options = {}) {
@@ -1286,28 +1291,12 @@ function playHindiClip(letter) {
     const item = HINDI_ITEMS.find(it => it.letter === letter);
     if (!item) return;
     clearTimeout(_hindiClipTimer);
-    _hindiAudio.pause();
-
-    const startPlay = () => {
-        _hindiAudio.play().catch(() => {});
-        _hindiClipTimer = setTimeout(() => _hindiAudio.pause(), 1000);
-    };
-
-    const doSeek = () => {
-        _hindiAudio.addEventListener('seeked', startPlay, { once: true });
-        _hindiAudio.currentTime = item.start;
-        // If currentTime was already at this position, 'seeked' won't fire
-        if (Math.abs(_hindiAudio.currentTime - item.start) < 0.05) {
-            _hindiAudio.removeEventListener('seeked', startPlay);
-            startPlay();
-        }
-    };
-
-    if (_hindiAudio.readyState >= 1) {
-        doSeek();
-    } else {
-        _hindiAudio.addEventListener('loadedmetadata', doSeek, { once: true });
-    }
+    HINDI_ITEMS.forEach(it => { const a = _hindiAudios[it.letter]; if (a) a.pause(); });
+    const audio = _hindiAudios[letter];
+    if (!audio) return;
+    audio.currentTime = item.start;
+    audio.play().catch(() => {});
+    _hindiClipTimer = setTimeout(() => audio.pause(), 1000);
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
