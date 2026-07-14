@@ -437,7 +437,7 @@ function buildLevelGrid() {
                 <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: MODE_COLORS.kannada,
+                color: TILE_COLORS[idx % TILE_COLORS.length],
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -460,7 +460,7 @@ function buildLevelGrid() {
                 <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: MODE_COLORS.hindi,
+                color: TILE_COLORS[idx % TILE_COLORS.length],
                 content,
                 isLocked: false,
                 isCurrent: false,
