@@ -1287,20 +1287,12 @@ function playHindiClip(letter, onDone) {
     if (!_hindiAudio) _hindiAudio = new Audio("audio/consonants.mp3");
     clearTimeout(_hindiClipTimer);
     _hindiAudio.pause();
-    const doPlay = () => {
-        _hindiAudio.currentTime = item.start;
-        _hindiAudio.play().catch(() => {});
-        _hindiClipTimer = setTimeout(() => {
-            _hindiAudio.pause();
-            if (onDone) onDone();
-        }, 2500);
-    };
-    if (_hindiAudio.readyState >= 2) {
-        doPlay();
-    } else {
-        _hindiAudio.addEventListener("canplay", doPlay, { once: true });
-        _hindiAudio.load();
-    }
+    _hindiAudio.currentTime = item.start;
+    _hindiAudio.play().catch(() => {});
+    _hindiClipTimer = setTimeout(() => {
+        _hindiAudio.pause();
+        if (onDone) onDone();
+    }, 2500);
 }
 
 function shouldPlayKannadaDoubleCue(letter) {
