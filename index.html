@@ -5,22 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#F4EDDF">
+    <meta name="theme-color" content="#23272F">
     <title>LetterBrain — ABC for Kids</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="images/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;700&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;700&family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
         <!-- Header -->
         <header>
-            <div class="header-title">
-                <svg class="header-sparkle" viewBox="0 0 24 24" width="20" height="20" fill="var(--honey-500)" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
-                <span>My Garden</span>
-            </div>
+            <div class="header-title">My Levels</div>
             <div class="header-right">
                 <div class="score">⭐ <span id="stars">0</span></div>
                 <button id="settings-btn" class="settings-icon" title="Settings">⚙️</button>
@@ -102,9 +99,11 @@
 
         <!-- Celebration Banner -->
         <div id="celebration-banner" class="celebration-banner hidden" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--honey-200)" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="white" stroke="white" stroke-width="1" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--honey-200)" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+            <div class="banner-dot" style="background:#FFEA00;box-shadow:0 0 8px 1px #FFEA00"></div>
+            <div class="banner-dot" style="background:#00E5FF;box-shadow:0 0 8px 1px #00E5FF"></div>
+            <div class="banner-dot" style="background:#FF4FA3;box-shadow:0 0 8px 1px #FF4FA3"></div>
+            <div class="banner-dot" style="background:#7CFF6B;box-shadow:0 0 8px 1px #7CFF6B"></div>
+            <div class="banner-dot" style="background:#FF8A3D;box-shadow:0 0 8px 1px #FF8A3D"></div>
         </div>
 
         <!-- Done Screen -->
@@ -120,6 +119,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="app.js?v=17"></script>
+    <script src="app.js?v=19"></script>
 </body>
 </html>

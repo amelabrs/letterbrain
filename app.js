@@ -45,14 +45,14 @@ let levelItems = [];
 let gameMode = "normal"; // "normal" = letter→image, "reverse" = image→letter
 let numberRange = [1, 4]; // active range for Numbers levels
 
-const TILE_COLORS = ["#347046", "#DEA431", "#2E5E6E", "#B85C38"];
+const TILE_COLORS = ["#7CFF6B", "#00E5FF", "#FFEA00", "#FF4FA3", "#FF8A3D", "#B47CFF"];
 const MODE_COLORS = {
-    quiz:       "#347046",
-    matchcaps:  "#2E5E6E",
-    kannada:    "#B85C38",
-    hindi:      "#7B5A86",
-    saynumbers: "#DEA431",
-    blends:     "#1A4226",
+    quiz:       "#7CFF6B",
+    matchcaps:  "#00E5FF",
+    kannada:    "#FF8A3D",
+    hindi:      "#FF4FA3",
+    saynumbers: "#FFEA00",
+    blends:     "#B47CFF",
 };
 
 // ── Game levels: pairs of (normal, reverse) for each letter group ──
@@ -305,15 +305,18 @@ function showScreen(id) {
 function setModeChip(mode) {
     const chip = document.getElementById("mode-chip");
     if (!chip) return;
-    chip.style.background = MODE_COLORS[mode] || MODE_COLORS.quiz;
-    chip.style.outline = "none";
+    const neon = MODE_COLORS[mode] || MODE_COLORS.quiz;
+    chip.style.background = "#23272F";
+    chip.style.border = `3px solid ${neon}`;
+    chip.style.boxShadow = `0 0 18px 2px ${neon}99`;
+    chip.style.color = neon;
     const icons = {
-        quiz:       '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>',
-        matchcaps:  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
-        kannada:    '<span style="font-family:\'Noto Sans Kannada\',serif;font-size:20px;font-weight:600;color:#fff">ಅ</span>',
-        hindi:      '<span style="font-family:\'Noto Sans Kannada\',serif;font-size:20px;font-weight:600;color:#fff">अ</span>',
-        saynumbers: '<span style="font-family:\'Newsreader\',serif;font-size:20px;font-weight:700;color:#fff">3</span>',
-        blends:     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>',
+        quiz:       `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${neon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-9"/><path d="M9.5 9.4c1.1.8 1.8 2.1 2 3.3-3.4.4-6.8-1.1-8-4.5a9 9 0 0 1 14 7.2c-2 .4-4.4-.4-6-2.1"/></svg>`,
+        matchcaps:  `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${neon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+        kannada:    `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${neon}">ಅ</span>`,
+        hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${neon}">अ</span>`,
+        saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${neon}">3</span>`,
+        blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${neon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
     };
     chip.innerHTML = icons[mode] || '';
 }
@@ -321,19 +324,26 @@ function setModeChip(mode) {
 function addCheckBadge(btn) {
     const badge = document.createElement("div");
     badge.className = "check-badge";
-    badge.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    badge.innerHTML = '<span style="font-family:\'Baloo 2\',sans-serif;font-size:16px;font-weight:800;color:#23272F;line-height:1">✓</span>';
     btn.appendChild(badge);
 }
 
-function applyTileColors(choicesEl) {
-    Array.from(choicesEl.querySelectorAll(".choice-btn")).forEach((btn, i) => {
-        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
-    });
+function styleTile(btn, i) {
+    const c = TILE_COLORS[i % TILE_COLORS.length];
+    btn.style.background = "#23272F";
+    btn.style.border = `3px solid ${c}`;
+    btn.style.boxShadow = `0 0 14px 2px ${c}66`;
+    btn.style.color = c;
 }
 
 function setLetterDisplayColor(mode) {
     const el = document.getElementById("letter-display");
-    if (el) el.style.background = MODE_COLORS[mode] || MODE_COLORS.quiz;
+    if (!el) return;
+    const neon = MODE_COLORS[mode] || MODE_COLORS.quiz;
+    el.style.background = "#23272F";
+    el.style.border = `4px solid ${neon}`;
+    el.style.boxShadow = `0 0 26px 4px ${neon}8C`;
+    el.style.color = neon;
 }
 
 // Pick a friendly female/child voice
@@ -380,11 +390,18 @@ function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
     else if (isExam) cls += " exam";
     node.className = cls;
     if (!isLocked) {
-        node.style.background = color;
+        const borderW = isCurrent ? "4px" : "3px";
+        const glow    = isCurrent
+            ? `0 0 24px 4px ${color}CC`
+            : `0 0 16px 2px ${color}80`;
+        node.style.background  = "#23272F";
+        node.style.border      = `${borderW} solid ${color}`;
+        node.style.boxShadow   = glow;
+        node.style.color       = color;
         node.innerHTML = content;
         node.addEventListener("click", onclick);
     } else {
-        node.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+        node.innerHTML = '<span style="font-family:\'Baloo 2\',sans-serif;font-size:28px;font-weight:700">?</span>';
     }
     return node;
 }
@@ -412,7 +429,7 @@ function buildLevelGrid() {
         ];
         numDefs.forEach(({ label, range, mode }, idx) => {
             const icon = mode === "hear" ? "🔊" : "#";
-            const content = `<span style="font-family:'Newsreader',serif;font-size:20px;font-weight:700;color:#fff;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px;opacity:0.8">${mode === "hear" ? "🔊" : "🔢"}</span></span>`;
+            const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px;opacity:0.8">${mode === "hear" ? "🔊" : "🔢"}</span></span>`;
             grid.appendChild(makeNode({
                 color: TILE_COLORS[idx % TILE_COLORS.length],
                 content,
@@ -434,8 +451,8 @@ function buildLevelGrid() {
             const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
             const sublabel = isTest ? "★" : modeIcon;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
+                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:inherit;line-height:1.15">${letterStr}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
                 color: TILE_COLORS[idx % TILE_COLORS.length],
@@ -458,8 +475,8 @@ function buildLevelGrid() {
             const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
             const sublabel = isTest ? "★" : modeIcon;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:#fff;line-height:1.15">${letterStr}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
+                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:inherit;line-height:1.15">${letterStr}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
                 color: TILE_COLORS[idx % TILE_COLORS.length],
@@ -478,7 +495,7 @@ function buildLevelGrid() {
             const firstBlend = blends[0];
             grid.appendChild(makeNode({
                 color: TILE_COLORS[idx % TILE_COLORS.length],
-                content: `<span style="font-family:'Newsreader',serif;font-size:30px;font-weight:900;color:#fff">${firstBlend.toUpperCase()}</span>`,
+                content: `<span style="font-family:'Baloo 2',sans-serif;font-size:30px;font-weight:900;color:inherit">${firstBlend.toUpperCase()}</span>`,
                 isLocked: false,
                 isCurrent: false,
                 isExam: false,
@@ -500,8 +517,8 @@ function buildLevelGrid() {
                 : `${gl.letters[0]}–${gl.letters[gl.letters.length - 1]}`;
             const sublabel = isTest ? "★" : "Aa";
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Newsreader',serif;font-size:28px;font-weight:700;color:#fff;line-height:1.15">${rangeStr}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1">${sublabel}</span>
+                <span style="font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:700;color:inherit;line-height:1.15">${rangeStr}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
                 color: displayColor,
@@ -526,7 +543,7 @@ function buildLevelGrid() {
 
         const content = firstItem?.image
             ? `<img src="${firstItem.image}" alt="${firstItem.word}">`
-            : `<span style="font-family:'Newsreader',serif;font-size:34px;font-weight:700;color:#fff">${firstItem?.letter || '?'}</span>`;
+            : `<span style="font-family:'Baloo 2',sans-serif;font-size:34px;font-weight:700;color:inherit">${firstItem?.letter || '?'}</span>`;
 
         grid.appendChild(makeNode({
             color,
@@ -544,7 +561,7 @@ function buildLevelGrid() {
         const icon = mode === "normal" ? "🔤" : "🖼️";
         grid.appendChild(makeNode({
             color: examColor,
-            content: `<span style="font-family:'Newsreader',serif;font-size:20px;font-weight:700;color:#fff;text-align:center;line-height:1.2">A–Z<br><span style="font-size:14px">${icon}</span></span>`,
+            content: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.2">A–Z<br><span style="font-size:14px">${icon}</span></span>`,
             isLocked: false,
             isCurrent: false,
             isExam: true,
@@ -692,7 +709,7 @@ function loadRound() {
         options.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             btn.dataset.letter = opt.letter;
             btn.textContent = opt.letter;
             btn.onclick = () => handleChoice(btn, opt);
@@ -720,7 +737,7 @@ function loadRound() {
         options.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             btn.dataset.letter = opt.letter;
             if (opt.image) {
                 btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
@@ -1273,7 +1290,7 @@ function loadCapsRound() {
     options.forEach((opt, i) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-letter-btn";
-        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+        styleTile(btn, i);
         btn.dataset.letter = opt.letter;
         btn.textContent = opt.letter.toLowerCase();
         btn.onclick = () => handleCapsChoice(btn, opt);
@@ -1448,7 +1465,7 @@ function loadKannadaRound() {
         opts.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             btn.style.fontFamily = "'Noto Sans Kannada',serif";
             btn.textContent = opt;
             btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
@@ -1466,7 +1483,7 @@ function loadKannadaRound() {
             const item = KANNADA_ITEMS.find(k => k.letter === opt);
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-img-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             btn.innerHTML = item?.image ? `<img src="${item.image}" alt="${opt}">` : `<span style="font-size:2rem;font-family:'Noto Sans Kannada',serif">${opt}</span>`;
             btn.dataset.letter = opt;
             btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
@@ -1477,7 +1494,7 @@ function loadKannadaRound() {
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
         afterVideoHide = () => {
-            letterDisplay.style.background = MODE_COLORS.kannada;
+            setLetterDisplayColor("kannada");
             letterDisplay.innerHTML = currentItem.image
                 ? `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`
                 : `<div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>`;
@@ -1583,7 +1600,7 @@ function loadHindiRound() {
         shuffle([...HINDI_ITEMS]).forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             btn.style.fontFamily = "'Noto Sans Kannada',serif";
             btn.textContent = opt.letter;
             btn.onclick = () => handleHindiChoice(btn, opt);
@@ -1596,7 +1613,7 @@ function loadHindiRound() {
         letterDisplay.innerHTML = "";
         choicesEl.innerHTML = "";
         afterVideoHide = () => {
-            letterDisplay.style.background = MODE_COLORS.hindi;
+            setLetterDisplayColor("hindi");
             letterDisplay.innerHTML = currentItem.image
                 ? `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`
                 : `<div style="font-size:4rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>`;
@@ -1737,7 +1754,7 @@ function loadBlendsRound() {
         // Show blend text → pick image
         letterDisplay.innerHTML = `
             <div class="letter-label">What starts with</div>
-            <div id="big-letter" style="font-size:4rem;font-weight:900;color:#764ba2">${currentItem.blend.toUpperCase()}</div>
+            <div id="big-letter" style="font-size:4rem;font-weight:900;color:inherit">${currentItem.blend.toUpperCase()}</div>
             <div class="letter-label">?</div>
         `;
         choicesEl.className = "image-choices";
@@ -1748,7 +1765,7 @@ function loadBlendsRound() {
         imageOptions.forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-img-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             const imgSrc = opt.image || fallbackImgs[fbIdx++] || "";
             btn.innerHTML = `<img src="${imgSrc}" alt="${opt.blend}">`;
             btn.dataset.blend = opt.blend;
@@ -1761,7 +1778,7 @@ function loadBlendsRound() {
         options.forEach((b, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
-            btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+            styleTile(btn, i);
             btn.style.fontSize = "2.2rem";
             btn.textContent = b;
             btn.onclick = () => handleBlendsChoice(btn, b);
@@ -2249,15 +2266,13 @@ function loadNumberRound() {
     choices.forEach((n, i) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
-        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+        styleTile(btn, i);
         btn.textContent = n;
         btn.onclick = () => handleNumberChoice(btn, n, count);
         choicesEl.appendChild(btn);
     });
 
-    // Don't color letter-display — balls are honey and would vanish on honey bg
-    const ld = document.getElementById("letter-display");
-    if (ld) ld.style.background = "#285C39"; // dark green so honey balls are visible
+    setLetterDisplayColor("saynumbers");
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -2290,7 +2305,7 @@ function loadNumberRoundHear() {
     choices.forEach((n, i) => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-number-btn";
-        btn.style.background = TILE_COLORS[i % TILE_COLORS.length];
+        styleTile(btn, i);
         btn.textContent = n;
         btn.onclick = () => handleNumberChoice(btn, n, count);
         choicesEl.appendChild(btn);
@@ -2342,6 +2357,7 @@ function loadNumberRoundReverse() {
 
     const letterDisplay = document.getElementById("letter-display");
     letterDisplay.innerHTML = `<div id="big-letter">${count}</div>`;
+    setLetterDisplayColor("saynumbers");
     const bigLetter = document.getElementById("big-letter");
     bigLetter.style.animation = "none";
     void bigLetter.offsetWidth;
