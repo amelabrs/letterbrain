@@ -166,16 +166,16 @@ const WORD_ITEMS = [
 const WORD_LEVELS = [
     { family: "at", mode: "normal"  },
     { family: "at", mode: "reverse" },
-    { family: "an", mode: "normal"  },
-    { family: "an", mode: "reverse" },
     { family: "og", mode: "normal"  },
     { family: "og", mode: "reverse" },
+    { family: "un", mode: "normal"  },
+    { family: "un", mode: "reverse" },
+    { family: "an", mode: "normal"  },
+    { family: "an", mode: "reverse" },
     { family: "en", mode: "normal"  },
     { family: "en", mode: "reverse" },
     { family: "ug", mode: "normal"  },
     { family: "ug", mode: "reverse" },
-    { family: "un", mode: "normal"  },
-    { family: "un", mode: "reverse" },
 ];
 const PHONEME_MAP = {
     a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
@@ -2014,6 +2014,47 @@ function startWordsGame(family, mode) {
     loadWordsRound();
 }
 
+function playWordPhonicsChain(word, onDone) {
+    const letters = word.toUpperCase().split("");
+    let idx = 0;
+
+    const playNext = () => {
+        if (idx >= letters.length) {
+            afterVideoHide = null;
+            onDone();
+            return;
+        }
+        const letter = letters[idx++];
+        const start = PHONETICS_TIMESTAMPS[letter] ?? 0;
+        const end = start + 5;
+
+        afterVideoHide = playNext;
+
+        const overlay = document.getElementById("video-overlay");
+        const localPlayer = document.getElementById("local-player");
+        const ytEl = document.getElementById("yt-player");
+        localPlayer.style.display = "none";
+        ytEl.style.display = "block";
+        overlay.className = "video-overlay show";
+        videoShowing = true;
+
+        ytPlayer.loadVideoById({ videoId: PHONETICS_VIDEO_ID, startSeconds: start });
+        clearInterval(videoTimer);
+        videoTimer = setInterval(() => {
+            if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+                clearInterval(videoTimer);
+                hideVideoOverlay();
+            }
+        }, 200);
+        safetyTimer = setTimeout(() => {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }, 7000);
+    };
+
+    playNext();
+}
+
 function loadWordsRound() {
     if (currentIndex >= queue.length) { showDone(); return; }
 
@@ -2023,9 +2064,7 @@ function loadWordsRound() {
     currentItem = queue[currentIndex];
     document.getElementById("choices").className = "";
 
-    const letterDisplay = document.getElementById("letter-display");
-    const choicesEl = document.getElementById("choices");
-    choicesEl.innerHTML = "";
+    setLetterDisplayColor("words");
 
     // 3 wrong options: same family first, fill from others if needed
     const sameFamily = shuffle(wordsFamilyItems.filter(it => it.word !== currentItem.word));
@@ -2033,41 +2072,45 @@ function loadWordsRound() {
     const wrongPool = [...sameFamily, ...otherFamily].slice(0, 3);
     const options = shuffle([currentItem, ...wrongPool]);
 
-    setLetterDisplayColor("words");
+    const buildQuestion = () => {
+        const letterDisplay = document.getElementById("letter-display");
+        const choicesEl = document.getElementById("choices");
+        choicesEl.innerHTML = "";
 
-    if (wordsMode === "normal") {
-        // Show written word → pick image
-        letterDisplay.innerHTML = `<div class="big-word">${currentItem.word.toUpperCase()}</div>`;
-        playPhonics(currentItem.word);
+        if (wordsMode === "normal") {
+            letterDisplay.innerHTML = `<div class="big-word">${currentItem.word.toUpperCase()}</div>`;
+            choicesEl.className = "image-choices";
+            options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "choice-btn choice-img-btn";
+                styleTile(btn, i);
+                btn.innerHTML = `<img src="${opt.image}" alt="${opt.word}">`;
+                btn.dataset.word = opt.word;
+                btn.onclick = () => handleWordsChoice(btn, opt);
+                choicesEl.appendChild(btn);
+            });
+        } else {
+            letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`;
+            options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "choice-btn choice-letter-btn";
+                styleTile(btn, i);
+                btn.textContent = opt.word;
+                btn.dataset.word = opt.word;
+                btn.onclick = () => handleWordsChoice(btn, opt);
+                choicesEl.appendChild(btn);
+            });
+        }
 
-        choicesEl.className = "image-choices";
-        options.forEach((opt, i) => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-img-btn";
-            styleTile(btn, i);
-            btn.innerHTML = `<img src="${opt.image}" alt="${opt.word}">`;
-            btn.dataset.word = opt.word;
-            btn.onclick = () => handleWordsChoice(btn, opt);
-            choicesEl.appendChild(btn);
-        });
+        document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+        document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+    };
+
+    if (!getVideosDisabled() && ytReady) {
+        playWordPhonicsChain(currentItem.word, buildQuestion);
     } else {
-        // Show image → pick written word
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`;
-        setTimeout(() => playPhonics(currentItem.word), 400);
-
-        options.forEach((opt, i) => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-letter-btn";
-            styleTile(btn, i);
-            btn.textContent = opt.word;
-            btn.dataset.word = opt.word;
-            btn.onclick = () => handleWordsChoice(btn, opt);
-            choicesEl.appendChild(btn);
-        });
+        buildQuestion();
     }
-
-    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
-    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
 
 function handleWordsChoice(btn, chosen) {
