@@ -54,6 +54,7 @@ const CHALK_MODE_COLORS = {
     hindi:      "#FF4FA3",
     saynumbers: "#FFEA00",
     blends:     "#B47CFF",
+    words:      "#FF6060",
 };
 const RAINBOW_MODE_COLORS = {
     quiz:       "#347046",
@@ -62,6 +63,7 @@ const RAINBOW_MODE_COLORS = {
     hindi:      "#7B5A86",
     saynumbers: "#DEA431",
     blends:     "#1A4226",
+    words:      "#C0392B",
 };
 
 let currentTheme = localStorage.getItem("lb_theme") || "chalkboard";
@@ -137,6 +139,61 @@ const KANNADA_LEVELS = [
     { label: "12", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
     { label: "13", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
 ];
+
+// ── Word Families ────────────────────────────────────────────────────
+const WORD_ITEMS = [
+    { word: "cat", family: "at", image: "images/cat.png" },
+    { word: "bat", family: "at", image: "images/bat.png" },
+    { word: "hat", family: "at", image: "images/hat.png" },
+    { word: "rat", family: "at", image: "images/rat.png" },
+    { word: "can", family: "an", image: "images/can.png" },
+    { word: "fan", family: "an", image: "images/fan.png" },
+    { word: "pan", family: "an", image: "images/pan.png" },
+    { word: "van", family: "an", image: "images/van.png" },
+    { word: "dog", family: "og", image: "images/dog.png" },
+    { word: "frog", family: "og", image: "images/frog.png" },
+    { word: "log",  family: "og", image: "images/log.png" },
+    { word: "hen", family: "en", image: "images/hen.png" },
+    { word: "pen", family: "en", image: "images/pen.png" },
+    { word: "ten", family: "en", image: "images/ten.png" },
+    { word: "bug", family: "ug", image: "images/bug.png" },
+    { word: "mug", family: "ug", image: "images/mug.png" },
+    { word: "jug", family: "ug", image: "images/jug.png" },
+    { word: "sun", family: "un", image: "images/sun.png" },
+    { word: "bun", family: "un", image: "images/bun.png" },
+    { word: "run", family: "un", image: "images/run.png" },
+];
+const WORD_LEVELS = [
+    { family: "at", mode: "normal"  },
+    { family: "at", mode: "reverse" },
+    { family: "an", mode: "normal"  },
+    { family: "an", mode: "reverse" },
+    { family: "og", mode: "normal"  },
+    { family: "og", mode: "reverse" },
+    { family: "en", mode: "normal"  },
+    { family: "en", mode: "reverse" },
+    { family: "ug", mode: "normal"  },
+    { family: "ug", mode: "reverse" },
+    { family: "un", mode: "normal"  },
+    { family: "un", mode: "reverse" },
+];
+const PHONEME_MAP = {
+    a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
+    g:"guh", h:"huh", i:"ih", j:"juh", k:"kuh", l:"luh",
+    m:"muh", n:"nuh", o:"oh", p:"puh", r:"rr", s:"ss",
+    t:"tuh", u:"uh", v:"vuh", w:"wuh", x:"ks", y:"yuh", z:"zz",
+};
+
+function playPhonics(word) {
+    const letters = word.toLowerCase().split("");
+    let delay = 0;
+    letters.forEach(letter => {
+        const sound = PHONEME_MAP[letter] || letter;
+        setTimeout(() => speak(sound), delay);
+        delay += 600;
+    });
+    setTimeout(() => speak(word), delay + 400);
+}
 
 const HINDI_ITEMS = [
     { letter: "क", roman: "ka",  audio: "audio/hindi/ka.mp3",  vidStart: 58, image: "images/lotus.png" },
@@ -338,6 +395,7 @@ function setModeChip(mode) {
             hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${c}">अ</span>`,
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${c}">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
+            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">abc</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     } else {
@@ -352,6 +410,7 @@ function setModeChip(mode) {
             hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:#fff">अ</span>`,
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
+            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">abc</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     }
@@ -482,6 +541,25 @@ function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
+
+    if (currentAppMode === "words") {
+        WORD_LEVELS.forEach(({ family, mode }, idx) => {
+            const modeIcon = mode === "normal" ? "🔤" : "🖼️";
+            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                <span style="font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:800;color:inherit;line-height:1">-${family}</span>
+                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${modeIcon}</span>
+            </div>`;
+            grid.appendChild(makeNode({
+                color: tileColor(idx),
+                content,
+                isLocked: false,
+                isCurrent: false,
+                isExam: false,
+                onclick: () => startWordsGame(family, mode),
+            }));
+        });
+        return;
+    }
 
     if (currentAppMode === "saynumbers") {
         const numDefs = [
@@ -1166,6 +1244,8 @@ function showFeedback(correct) {
         text.textContent = `It's ${currentItem.roman}!`;
     } else if (currentAppMode === "blends") {
         text.textContent = `It's ${currentItem.blend}!`;
+    } else if (currentAppMode === "words") {
+        text.textContent = `It's "${currentItem.word}"!`;
     } else {
         text.textContent = `It's ${currentItem.word}!`;
     }
@@ -1914,6 +1994,110 @@ function playBlendsVideo() {
     safetyTimer = setTimeout(() => { clearInterval(videoTimer); hideVideoOverlay(); }, 10000);
 }
 
+// ── Words Game ───────────────────────────────────────────────────────
+
+let wordsMode = "normal";
+let wordsFamilyItems = [];
+
+function startWordsGame(family, mode) {
+    wordsMode = mode;
+    wordsFamilyItems = WORD_ITEMS.filter(it => it.family === family);
+    gameMode = "words-" + mode;
+    currentAppMode = "words";
+    queue = shuffle([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadWordsRound();
+}
+
+function loadWordsRound() {
+    if (currentIndex >= queue.length) { showDone(); return; }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+
+    // 3 wrong options: same family first, fill from others if needed
+    const sameFamily = shuffle(wordsFamilyItems.filter(it => it.word !== currentItem.word));
+    const otherFamily = shuffle(WORD_ITEMS.filter(it => it.family !== currentItem.family));
+    const wrongPool = [...sameFamily, ...otherFamily].slice(0, 3);
+    const options = shuffle([currentItem, ...wrongPool]);
+
+    setLetterDisplayColor("words");
+
+    if (wordsMode === "normal") {
+        // Show written word → pick image
+        letterDisplay.innerHTML = `<div class="big-word">${currentItem.word.toUpperCase()}</div>`;
+        playPhonics(currentItem.word);
+
+        choicesEl.className = "image-choices";
+        options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-img-btn";
+            styleTile(btn, i);
+            btn.innerHTML = `<img src="${opt.image}" alt="${opt.word}">`;
+            btn.dataset.word = opt.word;
+            btn.onclick = () => handleWordsChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        // Show image → pick written word
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`;
+        setTimeout(() => playPhonics(currentItem.word), 400);
+
+        options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            styleTile(btn, i);
+            btn.textContent = opt.word;
+            btn.dataset.word = opt.word;
+            btn.onclick = () => handleWordsChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    }
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleWordsChoice(btn, chosen) {
+    if (answered) return;
+
+    const isCorrect = chosen.word === currentItem.word;
+
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        speak(currentItem.word);
+        setTimeout(() => advanceRound(), 1400);
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        showFeedback(false);
+        answered = false;
+    }
+}
+
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
@@ -1929,6 +2113,8 @@ function advanceRound() {
         loadHindiRound();
     } else if (currentAppMode === "blends") {
         loadBlendsRound();
+    } else if (currentAppMode === "words") {
+        loadWordsRound();
     } else {
         loadRound();
     }
@@ -1938,7 +2124,7 @@ function advanceRound() {
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers"].forEach(m => {
+    ["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers", "words"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === mode);
     });
@@ -1950,13 +2136,14 @@ document.getElementById("tab-kannada").addEventListener("click", () => setActive
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
 document.getElementById("tab-blends").addEventListener("click", () => setActiveTab("blends"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
+document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
 // Reset any stored mode from removed tabs
 if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
     currentAppMode = "quiz";
     localStorage.setItem("lb_mode", "quiz");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers"].forEach(m => {
+["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers", "words"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === currentAppMode);
 });

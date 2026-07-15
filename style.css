@@ -1,6 +1,7 @@
 /* ── LetterBrain — Chalkboard Pop ─────────────────────────────────── */
 
 :root {
+  --neon-coral:  #FF6060;
   --bg:          #23272F;
   --bg-raised:   #2E3340;
   --bg-deep:     #1A1D23;
@@ -142,6 +143,7 @@ header {
 .mode-tab-hindi   { border-color: var(--neon-pink);   color: var(--neon-pink);   }
 .mode-tab-blends  { border-color: var(--neon-purple); color: var(--neon-purple); }
 .mode-tab-numbers { border-color: var(--neon-yellow); color: var(--neon-yellow); font-size: 16px; }
+.mode-tab-words   { border-color: var(--neon-coral);  color: var(--neon-coral);  font-size: 13px; font-weight: 800; }
 
 .mode-tab.active { opacity: 1; border-width: 3px; }
 
@@ -151,6 +153,7 @@ header {
 .mode-tab-hindi.active   { box-shadow: 0 0 14px 2px rgba(255,79,163,0.6); }
 .mode-tab-blends.active  { box-shadow: 0 0 14px 2px rgba(180,124,255,0.6); }
 .mode-tab-numbers.active { box-shadow: 0 0 14px 2px rgba(255,234,0,0.6); }
+.mode-tab-words.active   { box-shadow: 0 0 14px 2px rgba(255,96,96,0.6); }
 
 /* ── Level Grid ──────────────────────────────────────────────────────── */
 #level-grid {
@@ -771,6 +774,17 @@ header {
 .log-actions button:first-child  { border-color: var(--neon-green); color: var(--neon-green); }
 .log-actions button:nth-child(2) { border-color: var(--neon-pink); color: var(--neon-pink); }
 
+/* ── Words mode ──────────────────────────────────────────────────────── */
+.big-word {
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 800;
+  color: inherit;
+  letter-spacing: 6px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 /* ── Caps pairs ──────────────────────────────────────────────────────── */
 .caps-pair { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: inherit; }
 .caps-preview { flex-wrap: wrap; gap: 4px !important; justify-content: center; }
@@ -833,6 +847,8 @@ body.theme-rainbow .mode-tab-kannada.active { background: #B85C38; color: #fff; 
 body.theme-rainbow .mode-tab-hindi.active   { background: #7B5A86; color: #fff; box-shadow: 0 2px 8px rgba(123,90,134,0.35); }
 body.theme-rainbow .mode-tab-blends.active  { background: #1A4226; color: #fff; box-shadow: 0 2px 8px rgba(26,66,38,0.35); }
 body.theme-rainbow .mode-tab-numbers.active { background: #DEA431; color: #fff; box-shadow: 0 2px 8px rgba(222,164,49,0.35); }
+body.theme-rainbow .mode-tab-words   { border-color: #C0392B; color: #C0392B; }
+body.theme-rainbow .mode-tab-words.active   { background: #C0392B; color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,0.35); }
 
 body.theme-rainbow .choice-btn.correct { outline-color: #347046; }
 body.theme-rainbow .feedback.wrong-fb #feedback-text  { color: #B85C38; }
