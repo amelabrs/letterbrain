@@ -2014,45 +2014,33 @@ function startWordsGame(family, mode) {
     loadWordsRound();
 }
 
-function playWordPhonicsChain(word, onDone) {
-    const letters = word.toUpperCase().split("");
-    let idx = 0;
+function playWordInitialPhonic(word, onDone) {
+    const letter = word[0].toUpperCase();
+    const start = PHONETICS_TIMESTAMPS[letter] ?? 0;
+    const end = start + 5;
 
-    const playNext = () => {
-        if (idx >= letters.length) {
-            afterVideoHide = null;
-            onDone();
-            return;
-        }
-        const letter = letters[idx++];
-        const start = PHONETICS_TIMESTAMPS[letter] ?? 0;
-        const end = start + 5;
+    afterVideoHide = onDone;
 
-        afterVideoHide = playNext;
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
 
-        const overlay = document.getElementById("video-overlay");
-        const localPlayer = document.getElementById("local-player");
-        const ytEl = document.getElementById("yt-player");
-        localPlayer.style.display = "none";
-        ytEl.style.display = "block";
-        overlay.className = "video-overlay show";
-        videoShowing = true;
-
-        ytPlayer.loadVideoById({ videoId: PHONETICS_VIDEO_ID, startSeconds: start });
-        clearInterval(videoTimer);
-        videoTimer = setInterval(() => {
-            if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
-                clearInterval(videoTimer);
-                hideVideoOverlay();
-            }
-        }, 200);
-        safetyTimer = setTimeout(() => {
+    ytPlayer.loadVideoById({ videoId: PHONETICS_VIDEO_ID, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
             clearInterval(videoTimer);
             hideVideoOverlay();
-        }, 7000);
-    };
-
-    playNext();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, 7000);
 }
 
 function loadWordsRound() {
@@ -2107,7 +2095,7 @@ function loadWordsRound() {
     };
 
     if (!getVideosDisabled() && ytReady) {
-        playWordPhonicsChain(currentItem.word, buildQuestion);
+        playWordInitialPhonic(currentItem.word, buildQuestion);
     } else {
         buildQuestion();
     }
