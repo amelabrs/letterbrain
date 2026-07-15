@@ -211,13 +211,12 @@ const HINDI_LEVELS = [
 
 // ── Blends ───────────────────────────────────────────────────────────
 const BLENDS_ITEMS = [
-    { blend: "th", word: "Thief" },
-    { blend: "at", word: "Cat"   },
-    { blend: "og", word: "Dog"   },
-    { blend: "un", word: "Sun"   },
+    { blend: "th", word: "Thief", audio: "audio/blends/th.mp3" },
+    { blend: "at", word: "Cat",   audio: "audio/blends/at.mp3" },
+    { blend: "og", word: "Dog",   audio: "audio/blends/og.mp3" },
+    { blend: "un", word: "Sun",   audio: "audio/blends/un.mp3" },
 ];
 const ALL_BLENDS = ["th", "at", "og", "un"];
-const BLEND_SPEAK = { "th": "thuh", "at": "at", "og": "og", "un": "un" };
 const BLENDS_LEVELS = [
     { label: "TH·AT", activeBlends: ["th", "at"] },
     { label: "OG·UN", activeBlends: ["og", "un"] },
@@ -1896,6 +1895,22 @@ function playHindiVideo() {
 
 // ── Blends Game ──────────────────────────────────────────────────────
 
+const _blendAudios = {};
+BLENDS_ITEMS.forEach(item => {
+    const a = new Audio(item.audio);
+    a.preload = "auto";
+    _blendAudios[item.blend] = a;
+});
+
+function playBlendAudio(blend, timesLeft) {
+    const audio = _blendAudios[blend];
+    if (!audio) return;
+    Object.values(_blendAudios).forEach(a => { a.pause(); a.currentTime = 0; });
+    audio.currentTime = 0;
+    audio.onended = timesLeft > 1 ? () => playBlendAudio(blend, timesLeft - 1) : null;
+    audio.play().catch(() => {});
+}
+
 let blendsActiveItems = [];
 
 function startBlendsGame(activeBlends) {
@@ -1928,26 +1943,18 @@ function loadBlendsRound() {
     setLetterDisplayColor("blends");
     letterDisplay.innerHTML = "";
 
-    // Question: replay button + say the blend 3 times
-    const blendSound = BLEND_SPEAK[currentItem.blend] || currentItem.blend;
+    // Question: replay button + play blend 3 times via real audio
     const replayBtn = document.createElement("button");
     replayBtn.style.cssText = "font-size:3.5rem;background:none;border:none;cursor:pointer;line-height:1;display:block;margin:0 auto 4px";
     replayBtn.textContent = "🔊";
-    replayBtn.onclick = () => {
-        speak(blendSound);
-        setTimeout(() => speak(blendSound), 1000);
-        setTimeout(() => speak(blendSound), 2000);
-    };
+    replayBtn.onclick = () => playBlendAudio(currentItem.blend, 3);
     const hintLabel = document.createElement("div");
     hintLabel.className = "letter-label";
     hintLabel.textContent = "Which one?";
     letterDisplay.appendChild(replayBtn);
     letterDisplay.appendChild(hintLabel);
 
-    // Auto-play 3 times on load
-    speak(blendSound);
-    setTimeout(() => speak(blendSound), 1000);
-    setTimeout(() => speak(blendSound), 2000);
+    playBlendAudio(currentItem.blend, 3);
 
     // Always show all 4 options as text buttons
     shuffle(ALL_BLENDS).forEach((b, i) => {
@@ -1980,7 +1987,7 @@ function handleBlendsChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        speak(BLEND_SPEAK[currentItem.blend] || currentItem.blend);
+        playBlendAudio(currentItem.blend, 1);
         setTimeout(() => advanceRound(), 1400);
     } else {
         btn.classList.add("wrong");
