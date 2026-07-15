@@ -2158,7 +2158,8 @@ function handleWordsChoice(btn, chosen) {
         spawnConfetti();
         speak(currentItem.word);
         setTimeout(() => speak(currentItem.word), 700);
-        setTimeout(() => advanceRound(), 1800);
+        setTimeout(() => speak(currentItem.word), 1400);
+        setTimeout(() => advanceRound(), 2400);
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
