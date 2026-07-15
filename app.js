@@ -1999,7 +1999,7 @@ function handleBlendsChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        speak(currentItem.word);
+        speak(currentItem.rime ? currentItem.blend : currentItem.word);
         setTimeout(() => playBlendsVideo(), 1600);
     } else {
         btn.classList.add("wrong");
@@ -2156,9 +2156,9 @@ function handleWordsChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        speak(currentItem.family);
-        setTimeout(() => speak(currentItem.family), 1000);
-        setTimeout(() => speak(currentItem.family), 2000);
+        speak(currentItem.word);
+        setTimeout(() => speak(currentItem.word), 1000);
+        setTimeout(() => speak(currentItem.word), 2000);
         setTimeout(() => advanceRound(), 3200);
     } else {
         btn.classList.add("wrong");
