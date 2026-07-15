@@ -151,7 +151,6 @@ const WORD_ITEMS = [
     { word: "pan", family: "an", image: "images/pan.png" },
     { word: "van", family: "an", image: "images/van.png" },
     { word: "dog", family: "og", image: "images/dog.png" },
-    { word: "frog", family: "og", image: "images/frog.png" },
     { word: "log",  family: "og", image: "images/log.png" },
     { word: "hen", family: "en", image: "images/hen.png" },
     { word: "pen", family: "en", image: "images/pen.png" },
