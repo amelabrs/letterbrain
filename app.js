@@ -213,11 +213,21 @@ const HINDI_LEVELS = [
 // ── Blends ───────────────────────────────────────────────────────────
 const BLENDS_ITEMS = [
     { blend: "th", word: "Thief", image: "images/thief.png", vidStart: 46, videoId: "V-cvlZLNEBM" },
+    { blend: "at", word: "Cat",   image: "images/cat.png",   vidStart: null, rime: true },
+    { blend: "og", word: "Dog",   image: "images/dog.png",   vidStart: null, rime: true },
+    { blend: "un", word: "Sun",   image: "images/sun.png",   vidStart: null, rime: true },
 ];
 const BLENDS_DISTRACTORS = ["sh", "ch", "wh", "ph"];
+const RIMES_DISTRACTORS   = ["it", "ed", "ug", "an"];
 const BLENDS_LEVELS = [
     { label: "1", blends: ["th"], mode: "normal" },
     { label: "2", blends: ["th"], mode: "picture" },
+    { label: "3", blends: ["at"], mode: "normal" },
+    { label: "4", blends: ["at"], mode: "picture" },
+    { label: "5", blends: ["og"], mode: "normal" },
+    { label: "6", blends: ["og"], mode: "picture" },
+    { label: "7", blends: ["un"], mode: "normal" },
+    { label: "8", blends: ["un"], mode: "picture" },
 ];
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -1896,7 +1906,8 @@ function loadBlendsRound() {
 
     // Build 4 options: active blends + distractors
     const activeBlends = blendsActiveItems.map(it => it.blend);
-    const distractors = shuffle(BLENDS_DISTRACTORS.filter(b => !activeBlends.includes(b)));
+    const distPool = currentItem.rime ? RIMES_DISTRACTORS : BLENDS_DISTRACTORS;
+    const distractors = shuffle(distPool.filter(b => !activeBlends.includes(b)));
     const optionBlends = shuffle([...new Set([...activeBlends, ...distractors])]).slice(0, 4);
     if (!optionBlends.includes(currentItem.blend)) {
         optionBlends[optionBlends.length - 1] = currentItem.blend;
@@ -1905,8 +1916,9 @@ function loadBlendsRound() {
 
     if (blendsMode === "normal") {
         // Show blend text → pick image
+        const blendLabel = currentItem.rime ? "What ends with" : "What starts with";
         letterDisplay.innerHTML = `
-            <div class="letter-label">What starts with</div>
+            <div class="letter-label">${blendLabel}</div>
             <div id="big-letter" style="font-size:4rem;font-weight:900;color:inherit">${currentItem.blend.toUpperCase()}</div>
             <div class="letter-label">?</div>
         `;
