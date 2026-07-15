@@ -211,22 +211,16 @@ const HINDI_LEVELS = [
 
 // ── Blends ───────────────────────────────────────────────────────────
 const BLENDS_ITEMS = [
-    { blend: "th", word: "Thief", image: "images/thief.png", vidStart: 46, videoId: "V-cvlZLNEBM" },
-    { blend: "at", word: "Cat",   image: "images/cat.png",   vidStart: null, rime: true },
-    { blend: "og", word: "Dog",   image: "images/dog.png",   vidStart: null, rime: true },
-    { blend: "un", word: "Sun",   image: "images/sun.png",   vidStart: null, rime: true },
+    { blend: "th", word: "Thief" },
+    { blend: "at", word: "Cat"   },
+    { blend: "og", word: "Dog"   },
+    { blend: "un", word: "Sun"   },
 ];
-const BLENDS_DISTRACTORS = ["sh", "ch", "wh", "ph"];
-const RIMES_DISTRACTORS   = ["it", "ed", "ug", "an"];
+const ALL_BLENDS = ["th", "at", "og", "un"];
 const BLENDS_LEVELS = [
-    { label: "1", blends: ["th"], mode: "normal" },
-    { label: "2", blends: ["th"], mode: "picture" },
-    { label: "3", blends: ["at"], mode: "normal" },
-    { label: "4", blends: ["at"], mode: "picture" },
-    { label: "5", blends: ["og"], mode: "normal" },
-    { label: "6", blends: ["og"], mode: "picture" },
-    { label: "7", blends: ["un"], mode: "normal" },
-    { label: "8", blends: ["un"], mode: "picture" },
+    { label: "TH·AT", activeBlends: ["th", "at"] },
+    { label: "OG·UN", activeBlends: ["og", "un"] },
+    { label: "★",     activeBlends: ["th", "at", "og", "un"] },
 ];
 
 // ── Analytics ────────────────────────────────────────────────────────
@@ -680,15 +674,15 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "blends") {
-        BLENDS_LEVELS.forEach(({ label, blends, mode }, idx) => {
-            const firstBlend = blends[0];
+        BLENDS_LEVELS.forEach(({ label, activeBlends }, idx) => {
+            const fontSize = label === "★" ? "36px" : "20px";
             grid.appendChild(makeNode({
                 color: tileColor(idx),
-                content: `<span style="font-family:'Baloo 2',sans-serif;font-size:30px;font-weight:900;color:inherit">${firstBlend.toUpperCase()}</span>`,
+                content: `<span style="font-family:'Baloo 2',sans-serif;font-size:${fontSize};font-weight:900;color:inherit">${label}</span>`,
                 isLocked: false,
                 isCurrent: false,
                 isExam: false,
-                onclick: () => startBlendsGame(blends, mode),
+                onclick: () => startBlendsGame(activeBlends),
             }));
         });
         return;
@@ -1901,13 +1895,11 @@ function playHindiVideo() {
 
 // ── Blends Game ──────────────────────────────────────────────────────
 
-let blendsMode = "normal";
 let blendsActiveItems = [];
 
-function startBlendsGame(blends, mode) {
-    blendsMode = mode;
-    blendsActiveItems = BLENDS_ITEMS.filter(it => blends.includes(it.blend));
-    gameMode = "blends-" + mode;
+function startBlendsGame(activeBlends) {
+    blendsActiveItems = BLENDS_ITEMS.filter(it => activeBlends.includes(it.blend));
+    gameMode = "blends-audio";
     currentAppMode = "blends";
     queue = shuffleNoRepeat([...blendsActiveItems, ...blendsActiveItems, ...blendsActiveItems]);
     currentIndex = 0;
@@ -1932,54 +1924,40 @@ function loadBlendsRound() {
     const choicesEl = document.getElementById("choices");
     choicesEl.innerHTML = "";
 
-    // Build 4 options: active blends + distractors
-    const activeBlends = blendsActiveItems.map(it => it.blend);
-    const distPool = currentItem.rime ? RIMES_DISTRACTORS : BLENDS_DISTRACTORS;
-    const distractors = shuffle(distPool.filter(b => !activeBlends.includes(b)));
-    const optionBlends = shuffle([...new Set([...activeBlends, ...distractors])]).slice(0, 4);
-    if (!optionBlends.includes(currentItem.blend)) {
-        optionBlends[optionBlends.length - 1] = currentItem.blend;
-    }
-    const options = shuffle(optionBlends);
-
-    if (blendsMode === "normal") {
-        // Show blend text → pick image
-        const blendLabel = currentItem.rime ? "What ends with" : "What starts with";
-        letterDisplay.innerHTML = `
-            <div class="letter-label">${blendLabel}</div>
-            <div id="big-letter" style="font-size:4rem;font-weight:900;color:inherit">${currentItem.blend.toUpperCase()}</div>
-            <div class="letter-label">?</div>
-        `;
-        choicesEl.className = "image-choices";
-        const imageOptions = options.map(b => BLENDS_ITEMS.find(it => it.blend === b) || { blend: b, image: null });
-        // Fill missing images with distractor images from ALL_ITEMS
-        const fallbackImgs = shuffle(ALL_ITEMS.filter(it => it.image)).map(it => it.image);
-        let fbIdx = 0;
-        imageOptions.forEach((opt, i) => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-img-btn";
-            styleTile(btn, i);
-            const imgSrc = opt.image || fallbackImgs[fbIdx++] || "";
-            btn.innerHTML = `<img src="${imgSrc}" alt="${opt.blend}">`;
-            btn.dataset.blend = opt.blend;
-            btn.onclick = () => handleBlendsChoice(btn, opt.blend);
-            choicesEl.appendChild(btn);
-        });
-    } else {
-        // Show image → pick blend text
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
-        options.forEach((b, i) => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-letter-btn";
-            styleTile(btn, i);
-            btn.style.fontSize = "2.2rem";
-            btn.textContent = b;
-            btn.onclick = () => handleBlendsChoice(btn, b);
-            choicesEl.appendChild(btn);
-        });
-    }
-
     setLetterDisplayColor("blends");
+
+    // Question: replay button + say the blend 3 times
+    const replayBtn = document.createElement("button");
+    replayBtn.style.cssText = "font-size:3.5rem;background:none;border:none;cursor:pointer;line-height:1;display:block;margin:0 auto 4px";
+    replayBtn.textContent = "🔊";
+    replayBtn.onclick = () => {
+        speak(currentItem.blend);
+        setTimeout(() => speak(currentItem.blend), 1000);
+        setTimeout(() => speak(currentItem.blend), 2000);
+    };
+    const hintLabel = document.createElement("div");
+    hintLabel.className = "letter-label";
+    hintLabel.textContent = "Which one?";
+    letterDisplay.appendChild(replayBtn);
+    letterDisplay.appendChild(hintLabel);
+
+    // Auto-play 3 times on load
+    speak(currentItem.blend);
+    setTimeout(() => speak(currentItem.blend), 1000);
+    setTimeout(() => speak(currentItem.blend), 2000);
+
+    // Always show all 4 options as text buttons
+    shuffle(ALL_BLENDS).forEach((b, i) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-letter-btn";
+        styleTile(btn, i);
+        btn.style.fontSize = "2rem";
+        btn.textContent = b.toUpperCase();
+        btn.dataset.blend = b;
+        btn.onclick = () => handleBlendsChoice(btn, b);
+        choicesEl.appendChild(btn);
+    });
+
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1999,39 +1977,17 @@ function handleBlendsChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        speak(currentItem.rime ? currentItem.blend : currentItem.word);
-        setTimeout(() => playBlendsVideo(), 1600);
+        speak(currentItem.blend);
+        setTimeout(() => advanceRound(), 1400);
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
         roundClean = false;
         roundWrongs++;
         playWrongSound();
+        showFeedback(false);
         answered = false;
     }
-}
-
-function playBlendsVideo() {
-    if (getVideosDisabled()) { advanceRound(); return; }
-    if (!ytReady || currentItem.vidStart == null) { advanceRound(); return; }
-    const overlay = document.getElementById("video-overlay");
-    const localPlayer = document.getElementById("local-player");
-    const ytEl = document.getElementById("yt-player");
-    const start = currentItem.vidStart;
-    const end = start + 5;
-    localPlayer.style.display = "none";
-    ytEl.style.display = "block";
-    overlay.className = "video-overlay show";
-    videoShowing = true;
-    ytPlayer.loadVideoById({ videoId: currentItem.videoId, startSeconds: start });
-    clearInterval(videoTimer);
-    videoTimer = setInterval(() => {
-        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
-            clearInterval(videoTimer);
-            hideVideoOverlay();
-        }
-    }, 200);
-    safetyTimer = setTimeout(() => { clearInterval(videoTimer); hideVideoOverlay(); }, 10000);
 }
 
 // ── Words Game ───────────────────────────────────────────────────────
