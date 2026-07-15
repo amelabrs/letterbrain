@@ -217,6 +217,7 @@ const BLENDS_ITEMS = [
     { blend: "un", word: "Sun"   },
 ];
 const ALL_BLENDS = ["th", "at", "og", "un"];
+const BLEND_SPEAK = { "th": "thuh", "at": "at", "og": "og", "un": "un" };
 const BLENDS_LEVELS = [
     { label: "TH·AT", activeBlends: ["th", "at"] },
     { label: "OG·UN", activeBlends: ["og", "un"] },
@@ -1925,15 +1926,17 @@ function loadBlendsRound() {
     choicesEl.innerHTML = "";
 
     setLetterDisplayColor("blends");
+    letterDisplay.innerHTML = "";
 
     // Question: replay button + say the blend 3 times
+    const blendSound = BLEND_SPEAK[currentItem.blend] || currentItem.blend;
     const replayBtn = document.createElement("button");
     replayBtn.style.cssText = "font-size:3.5rem;background:none;border:none;cursor:pointer;line-height:1;display:block;margin:0 auto 4px";
     replayBtn.textContent = "🔊";
     replayBtn.onclick = () => {
-        speak(currentItem.blend);
-        setTimeout(() => speak(currentItem.blend), 1000);
-        setTimeout(() => speak(currentItem.blend), 2000);
+        speak(blendSound);
+        setTimeout(() => speak(blendSound), 1000);
+        setTimeout(() => speak(blendSound), 2000);
     };
     const hintLabel = document.createElement("div");
     hintLabel.className = "letter-label";
@@ -1942,9 +1945,9 @@ function loadBlendsRound() {
     letterDisplay.appendChild(hintLabel);
 
     // Auto-play 3 times on load
-    speak(currentItem.blend);
-    setTimeout(() => speak(currentItem.blend), 1000);
-    setTimeout(() => speak(currentItem.blend), 2000);
+    speak(blendSound);
+    setTimeout(() => speak(blendSound), 1000);
+    setTimeout(() => speak(blendSound), 2000);
 
     // Always show all 4 options as text buttons
     shuffle(ALL_BLENDS).forEach((b, i) => {
@@ -1977,7 +1980,7 @@ function handleBlendsChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        speak(currentItem.blend);
+        speak(BLEND_SPEAK[currentItem.blend] || currentItem.blend);
         setTimeout(() => advanceRound(), 1400);
     } else {
         btn.classList.add("wrong");
