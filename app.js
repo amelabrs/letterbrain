@@ -611,12 +611,12 @@ function buildLevelGrid() {
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
         const isLocked = gl.pair > unlockedPair;
         const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && GAME_LEVELS[idx + 1].pair > unlockedPair;
-        const firstItem = items[0];
+        const displayItem = gl.mode === "reverse" ? items[items.length - 1] : items[0];
         const color = tileColor(idx);
 
-        const content = firstItem?.image
-            ? `<img src="${firstItem.image}" alt="${firstItem.word}">`
-            : `<span style="font-family:'Baloo 2',sans-serif;font-size:34px;font-weight:700;color:inherit">${firstItem?.letter || '?'}</span>`;
+        const content = displayItem?.image
+            ? `<img src="${displayItem.image}" alt="${displayItem.word}">`
+            : `<span style="font-family:'Baloo 2',sans-serif;font-size:34px;font-weight:700;color:inherit">${displayItem?.letter || '?'}</span>`;
 
         grid.appendChild(makeNode({
             color,
