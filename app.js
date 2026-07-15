@@ -378,6 +378,27 @@ function shuffle(arr) {
     return a;
 }
 
+// Shuffle and ensure no two adjacent items share the same key (word/letter/blend)
+function shuffleNoRepeat(arr, keyFn = x => x?.word ?? x?.letter ?? x?.blend ?? x) {
+    const a = shuffle(arr);
+    for (let i = 1; i < a.length; i++) {
+        if (keyFn(a[i]) === keyFn(a[i - 1])) {
+            // Find the next item further ahead that's different, swap it in
+            let swapped = false;
+            for (let j = i + 1; j < a.length; j++) {
+                if (keyFn(a[j]) !== keyFn(a[i - 1])) {
+                    [a[i], a[j]] = [a[j], a[i]];
+                    swapped = true;
+                    break;
+                }
+            }
+            // If nothing different is ahead, insert behind (won't happen with 3 copies)
+            if (!swapped && i >= 2) [a[i], a[i - 2]] = [a[i - 2], a[i]];
+        }
+    }
+    return a;
+}
+
 function showScreen(id) {
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
@@ -823,7 +844,7 @@ function startGame(gameLevelIdx) {
     // Combined pool for distractor selection
     levelItems = [...newItems, ...reviewItems];
     // Queue: 3x new + review, shuffled
-    queue = shuffle([...repeatedNew, ...reviewItems]);
+    queue = shuffleNoRepeat([...repeatedNew, ...reviewItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -1404,7 +1425,7 @@ function startCapsGame(capsLevelIdx) {
         const priorItems = cumItems.filter(it => !gl.letters.includes(it.letter));
         const reviewItems = shuffle(priorItems).slice(0, 4);
         levelItems = [...ALL_ITEMS]; // full alphabet for distractor pool
-        queue = shuffle([...targetItems, ...targetItems, ...targetItems, ...reviewItems]);
+        queue = shuffleNoRepeat([...targetItems, ...targetItems, ...targetItems, ...reviewItems]);
     }
 
     currentIndex = 0;
@@ -1595,7 +1616,7 @@ function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "
     isExamMode = false;
     currentGameLevelIdx = -1;
     gameMode = "kannada";
-    queue = shuffle([...kannadaActiveItems, ...kannadaActiveItems, ...kannadaActiveItems]);
+    queue = shuffleNoRepeat([...kannadaActiveItems, ...kannadaActiveItems, ...kannadaActiveItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -1732,7 +1753,7 @@ function startHindiGame(letters = HINDI_ITEMS.map(it => it.letter), mode = "see"
     isExamMode = false;
     currentGameLevelIdx = -1;
     gameMode = "hindi";
-    queue = shuffle([...hindiActiveItems, ...hindiActiveItems, ...hindiActiveItems]);
+    queue = shuffleNoRepeat([...hindiActiveItems, ...hindiActiveItems, ...hindiActiveItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -1880,7 +1901,7 @@ function startBlendsGame(blends, mode) {
     blendsActiveItems = BLENDS_ITEMS.filter(it => blends.includes(it.blend));
     gameMode = "blends-" + mode;
     currentAppMode = "blends";
-    queue = shuffle([...blendsActiveItems, ...blendsActiveItems, ...blendsActiveItems]);
+    queue = shuffleNoRepeat([...blendsActiveItems, ...blendsActiveItems, ...blendsActiveItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -2015,7 +2036,7 @@ function startWordsGame(family, mode) {
     wordsFamilyItems = WORD_ITEMS.filter(it => it.family === family);
     gameMode = "words-" + mode;
     currentAppMode = "words";
-    queue = shuffle([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
@@ -2128,7 +2149,8 @@ function handleWordsChoice(btn, chosen) {
         showFeedback(true);
         spawnConfetti();
         speak(currentItem.word);
-        setTimeout(() => advanceRound(), 1400);
+        setTimeout(() => speak(currentItem.word), 700);
+        setTimeout(() => advanceRound(), 1800);
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
@@ -2276,7 +2298,7 @@ function startSayIt(gameLevelIdx) {
     const reviewItems = shuffle(reviewPool).slice(0, 2);
     // Boosted letters (H) get 6 reps; others get 4
     const repeatedNew = newItems.flatMap(it => Array(it.boost ? 6 : 4).fill(it));
-    queue = shuffle([...repeatedNew, ...reviewItems]);
+    queue = shuffleNoRepeat([...repeatedNew, ...reviewItems]);
     currentIndex = 0;
     stars = 0;
     sayItWrongs = 0;
