@@ -499,22 +499,30 @@ function applyTheme(theme) {
     buildLevelGrid();
 }
 
-// Pick a friendly female/child voice
+// Pick a deep male voice with a neutral accent
 let friendlyVoice = null;
 function pickVoice() {
     const voices = speechSynthesis.getVoices();
-    // Prefer these friendly voices (macOS/iOS have great ones)
-    const preferred = ["Samantha", "Karen", "Moira", "Fiona", "Tessa", "Victoria",
-                       "Google UK English Female", "Google US English"];
+    // Prefer deep male voices — clear neutral accent, understandable for Indian children
+    // Alex: macOS/iOS neutral American male (deep, authoritative)
+    // Daniel: macOS/iOS British male (clear, warm)
+    // Google UK English Male: Chrome on Android/desktop
+    // Microsoft David: Windows neutral American male
+    // Tom: macOS older male voice
+    const preferred = [
+        "Alex", "Daniel", "Tom",
+        "Google UK English Male",
+        "Microsoft David", "Microsoft Mark",
+    ];
     for (const name of preferred) {
-        const v = voices.find((v) => v.name.includes(name));
+        const v = voices.find(v => v.name.includes(name));
         if (v) { friendlyVoice = v; return; }
     }
-    // Fallback: any English female voice
-    const female = voices.find((v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("female"));
-    if (female) { friendlyVoice = female; return; }
-    // Fallback: any English voice
-    friendlyVoice = voices.find((v) => v.lang.startsWith("en")) || null;
+    // Fallback: any English male voice
+    const male = voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("male"));
+    if (male) { friendlyVoice = male; return; }
+    // Final fallback: any English voice
+    friendlyVoice = voices.find(v => v.lang.startsWith("en")) || null;
 }
 if ("speechSynthesis" in window) {
     speechSynthesis.onvoiceschanged = pickVoice;
@@ -526,8 +534,8 @@ function speak(text) {
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     if (friendlyVoice) utter.voice = friendlyVoice;
-    utter.rate = 0.9;
-    utter.pitch = 1.35;
+    utter.rate = 0.85;   // slightly slower for clarity
+    utter.pitch = 0.85;  // lower pitch for deep male resonance
     utter.volume = 1.0;
     utter.lang = "en-US";
     speechSynthesis.speak(utter);
