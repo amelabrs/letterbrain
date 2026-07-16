@@ -143,7 +143,7 @@ const KANNADA_LEVELS = [
 // ── Word Families ────────────────────────────────────────────────────
 const WORD_ITEMS = [
     { word: "cat", family: "at", image: "images/cat.png" },
-    { word: "bat", family: "at", image: "images/bat.png" },
+    { word: "bat", family: "at", image: "images/bat.jpg" },
     { word: "dog", family: "og", image: "images/dog.png" },
     { word: "log", family: "og", image: "images/log.png" },
     { word: "sun", family: "un", image: "images/sun.png" },
