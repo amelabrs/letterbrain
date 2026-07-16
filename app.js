@@ -2063,7 +2063,7 @@ function loadWordsRound() {
     // 3 wrong options: same family first, fill from others if needed
     const sameFamily = shuffle(wordsFamilyItems.filter(it => it.word !== currentItem.word));
     const otherFamily = shuffle(WORD_ITEMS.filter(it => it.family !== currentItem.family));
-    const wrongPool = [...sameFamily, ...otherFamily].slice(0, 3);
+    const wrongPool = [...sameFamily, ...otherFamily].slice(0, 1);
     const options = shuffle([currentItem, ...wrongPool]);
 
     const buildQuestion = () => {
