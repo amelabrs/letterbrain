@@ -90,21 +90,20 @@ const QTYPE_ICONS = {
     video:  `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
 };
 
-function qTypeColor(mode) {
+function qTypeColor(mode, isTest = false) {
     const pal = QTYPE_COLORS[currentTheme] ?? QTYPE_COLORS.chalkboard;
-    // Yellow = image is the PROMPT (child sees image, picks letter)
-    if (["picture", "reverse"].includes(mode)) return pal.image;
+    if (isTest) return pal.test;
+    // Yellow = image/video is the PROMPT (child sees picture or video, picks letter)
+    if (["picture", "reverse", "video-letter"].includes(mode)) return pal.image;
     if (mode === "hear") return pal.audio;
     if (mode === "caps-test") return pal.test;
-    // Blue = letter is the PROMPT (child sees letter, picks image); also video-letter, normal
+    // Blue = letter is the PROMPT (child sees letter, picks image)
     return pal.letter;
 }
 
 function qTypeIcon(mode, isTest) {
-    if (isTest) return "★";
-    if (["picture", "reverse"].includes(mode)) return QTYPE_ICONS.image;
+    if (["picture", "reverse", "video-letter"].includes(mode)) return QTYPE_ICONS.image;
     if (mode === "hear") return QTYPE_ICONS.audio;
-    if (mode === "video-letter") return QTYPE_ICONS.video;
     return QTYPE_ICONS.letter;
 }
 
@@ -470,7 +469,7 @@ function setModeChip(mode) {
             hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${c}">अ</span>`,
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${c}">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
-            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">abc</span>`,
+            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">cat</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     } else {
@@ -485,7 +484,7 @@ function setModeChip(mode) {
             hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:#fff">अ</span>`,
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
-            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">abc</span>`,
+            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">cat</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     }
@@ -648,19 +647,12 @@ function buildLevelGrid() {
 
     if (currentAppMode === "saynumbers") {
         const numDefs = [
-            { label: "1–2", range: [1, 2],  mode: "normal" },
             { label: "1–2", range: [1, 2],  mode: "hear" },
-            { label: "3–4", range: [3, 4],  mode: "normal" },
             { label: "3–4", range: [3, 4],  mode: "hear" },
-            { label: "1–4", range: [1, 4],  mode: "normal" },
             { label: "1–4", range: [1, 4],  mode: "hear" },
-            { label: "5–6", range: [5, 6],  mode: "normal" },
             { label: "5–6", range: [5, 6],  mode: "hear" },
-            { label: "1–6", range: [1, 6],  mode: "normal" },
             { label: "1–6", range: [1, 6],  mode: "hear" },
-            { label: "7–8", range: [7, 8],  mode: "normal" },
             { label: "7–8", range: [7, 8],  mode: "hear" },
-            { label: "1–8", range: [1, 8],  mode: "normal" },
             { label: "1–8", range: [1, 8],  mode: "hear" },
         ];
         numDefs.forEach(({ label, range, mode }) => {
@@ -681,7 +673,7 @@ function buildLevelGrid() {
 
     if (currentAppMode === "kannada") {
         KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const color = qTypeColor(mode);
+            const color = qTypeColor(mode, isTest);
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
                 : letters.slice(0, 2).join('');
@@ -705,7 +697,7 @@ function buildLevelGrid() {
 
     if (currentAppMode === "hindi") {
         HINDI_LEVELS.forEach(({ label, letters, mode, isTest }) => {
-            const color = qTypeColor(mode);
+            const color = qTypeColor(mode, isTest);
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
                 : letters.slice(0, 2).join('');
