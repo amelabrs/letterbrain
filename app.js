@@ -119,8 +119,8 @@ const KANNADA_ITEMS = [
     { letter: "ಈ", roman: "ii", audio: "audio/kannada/ii.mp3", vidStart: null, image: "images/fly.png" },
     { letter: "ಉ", roman: "u",  audio: "audio/kannada/u.mp3",  vidStart: 79,  image: "images/ring.png" },
     { letter: "ಊ", roman: "uu", audio: "audio/kannada/uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
-    { letter: "ಋ", roman: "ru", audio: "audio/kannada/ru.mp3", vidStart: 109 },
-    { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 125 },
+    { letter: "ಋ", roman: "ru", audio: "audio/kannada/ru.mp3", vidStart: 79,  image: "images/saint.jpg" },
+    { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 121, image: "images/leaf.png" },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -138,6 +138,11 @@ const KANNADA_LEVELS = [
     { label: "11", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "letter-image", isTest: true },
     { label: "12", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
     { label: "13", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
+    { label: "14", letters: ["ಋ", "ಎ"], mode: "letter-image" },
+    { label: "15", letters: ["ಋ", "ಎ"], mode: "video-letter" },
+    { label: "16", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "video-letter", isTest: true },
+    { label: "17", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "letter-image", isTest: true },
+    { label: "18", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "hear",         isTest: true },
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
@@ -1578,7 +1583,9 @@ function getKannadaOptions(correctLetter, levelLetters = [], isTest = false, lev
         "ಅ": ["ಅ", "ಆ"],
         "ಆ": ["ಅ", "ಆ"],
         "ಇ": ["ಇ", "ಈ"],
-        "ಈ": ["ಇ", "ಈ"]
+        "ಈ": ["ಇ", "ಈ"],
+        "ಋ": ["ಋ", "ಎ"],
+        "ಎ": ["ಋ", "ಎ"],
     };
     const pairLetters = pairMap[correct] || [correct];
 

@@ -1,8 +1,6 @@
 # LetterBrain — Implementation Reference
 
-## Overview
-
-LetterBrain is a **vanilla JS PWA** (no framework) that teaches young children the alphabet through letter-image association quizzes. It is fully client-side and deployable to any static host (GitHub Pages, Render).
+> Last updated: 2026-07-17. Reflects app.js v38.
 
 ---
 
@@ -11,463 +9,474 @@ LetterBrain is a **vanilla JS PWA** (no framework) that teaches young children t
 ```
 letterbrain/
 ├── index.html              — Single HTML shell; all screens live here as hidden divs
-├── app.js                  — All game logic (~1700 lines)
-├── style.css               — All styling; Comic Sans / child-friendly palette
-├── manifest.json           — PWA install metadata
-├── WordVideos.json         — Video reward data (loaded at runtime via fetch)
+├── app.js                  — All game logic (~2200 lines)
+├── style.css               — Chalkboard Pop theme (dark bg, neon borders) + Rainbow Trail toggle
+├── manifest.json           — PWA metadata
 │
-├── images/                 — PNG assets (A-Z letters + Kannada: prince, elephant, rat, fly)
-├── videos/                 — Local mp4 overrides: fensi.mp4 (F), guitar.mp4 (G), icecream.mp4 (I)
+├── images/                 — PNG/JPG assets (A–Z letters, Kannada, Hindi, word family images)
+├── videos/                 — Local mp4 overrides (only ee.mp4 for ಈ special case)
 ├── audio/
-│   ├── kannada.mp3         — Kannada vowel pronunciation audio (used in-game)
-│   └── Phonics A-Z Mouth Shapes.mp3  — Reference only
+│   ├── kannada.mp3         — Full Kannada vowel recording (source for splicing)
+│   ├── kannada/            — Pre-spliced individual vowel clips: a.mp3, aa.mp3, i.mp3, …
+│   ├── hindi/              — Pre-spliced individual consonant clips: ka.mp3, kha.mp3, …
+│   └── blends/             — Pre-spliced blend clips: at.mp3, og.mp3, un.mp3, th.mp3
 │
-├── docs/                   — Documentation
+├── docs/
 │   ├── IMPLEMENTATION.md   — This file
-│   ├── word-videos.md      — Video system docs
-│   └── video_backup.md     — Archive video timestamp records
+│   └── word-videos.md      — Video reward system docs
 │
-├── scripts/
-│   └── extract_channel_videos.py  — Utility for extracting YouTube Shorts IDs
-└── .github/workflows/pages.yml    — GitHub Pages auto-deploy on push to main
+└── scripts/
+    └── extract_channel_videos.py
 ```
 
 ---
 
 ## Architecture
 
-### Screen System
-
-There are no routes or page navigations. All screens are `<div class="screen">` elements; only one has `class="active"` at a time. Switching is done via `showScreen(id)`.
+Vanilla JS PWA. No framework, no build step. All screens are `<div class="screen">` elements; only one carries `class="active"` at a time. Switching via `showScreen(id)`.
 
 ```
-#start-screen   — Level selection grid + settings toggles
-#quiz-screen    — Active gameplay (letter display + 4-choice buttons)
-#done-screen    — Post-round score + unlock message
+#start-screen   — Tab selector + level grid + settings
+#quiz-screen    — Active gameplay: letter/image display + choice buttons
+#done-screen    — Post-round score
 ```
 
-Two overlay layers sit above all screens (z-index 300):
-- `#video-overlay` — per-letter phonics/word clip (YouTube IFrame or local `<video>`)
-- `#shorts-overlay` — cartoon reward for perfect/near-perfect scores (YouTube Shorts via `<iframe>`)
+Two overlay layers (z-index 300):
+- `#video-overlay` — per-letter teaching clip (YouTube IFrame or local `<video>`)
+- `#shorts-overlay` — cartoon reward after perfect/near-perfect scores
 
 ---
 
-## Data Model
+## Themes
 
-### ALL_ITEMS (app.js:3–41)
+Two visual themes toggled at runtime. Stored in `localStorage` key `lb_theme`.
 
-Static array of 26 letter objects. Each has:
+| Theme | Body class | Background | Tile colours |
+|-------|------------|------------|--------------|
+| Chalkboard Pop (default) | — | `#23272F` dark | Neon borders: green, cyan, yellow, pink, orange, purple |
+| Rainbow Trail | `theme-rainbow` | `#F4EDDF` warm cream | Earthy: `#347046`, `#DEA431`, `#2E5E6E`, `#B85C38` |
 
-| field    | type   | description                                   |
-|----------|--------|-----------------------------------------------|
-| `letter` | string | Uppercase letter (A–Z)                        |
-| `word`   | string | Associated word (e.g. "Apple")                |
-| `image`  | string | Path to image asset (e.g. `images/apple.png`) |
-| `level`  | number | Content level group (1–11)                    |
-
-At startup, `initWordVideos()` fetches `WordVideos.json` and merges in:
-
-| field       | type   | source           | description                            |
-|-------------|--------|------------------|----------------------------------------|
-| `vidStart`  | number | WordVideos.json  | Archive video start timestamp (sec)    |
-| `vidEnd`    | number | WordVideos.json  | Archive video end timestamp (sec)      |
-| `localVid`  | string | WordVideos.json  | Path to local mp4 (overrides archive)  |
-| `funnyShort`| string | WordVideos.json  | YouTube Shorts ID                      |
-| `funnyStart`| number | WordVideos.json  | Start offset within Short (sec)        |
-
-### Content Levels (letter groupings)
-
-| Level | Letters | Notes                        |
-|-------|---------|------------------------------|
-| 1     | A–F     | 6 letters — foundational set |
-| 2     | G–H     | 2 new                        |
-| 3     | I–J     | 2 new                        |
-| 4     | K–L     | 2 new                        |
-| 5     | M–N     | 2 new                        |
-| 6     | O–P     | 2 new                        |
-| 7     | Q–R     | 2 new                        |
-| 8     | S–T     | 2 new                        |
-| 9     | U–V     | 2 new                        |
-| 10    | W–X     | 2 new                        |
-| 11    | Y–Z     | 2 new                        |
-
-### GAME_LEVELS (app.js:49–54)
-
-Each content level generates **2 game levels** (one per mode), so there are 22 total game levels. Each game level belongs to a **pair** (normal + reverse together).
-
-```js
-{ contentLevel: 1, mode: "normal",  pair: 1 }   // Game level 1
-{ contentLevel: 1, mode: "reverse", pair: 1 }   // Game level 2
-{ contentLevel: 2, mode: "normal",  pair: 2 }   // Game level 3
-// ...
-```
-
-**Pair = the unlock unit.** Completing a pair at ≥80% score unlocks the next pair.
+`applyTheme(name)` adds/removes the body class and persists the choice.
 
 ---
 
 ## Tabs
 
-The start screen has five mode tabs (in order):
-
-| Tab | ID | Description |
-|-----|----|-------------|
-| 📝 Quiz | `tab-quiz` | Main A–Z alphabet quiz |
-| 🔠 Case | `tab-matchcaps` | Uppercase ↔ lowercase matching |
-| ಕನ್ನಡ | `tab-kannada` | Kannada vowel recognition |
-| हिंदी | `tab-hindi` | Hindi vowel recognition |
-| 🔢 Numbers | `tab-saynumbers` | Number recognition 1–6 |
-
-Active tab is tracked in `currentAppMode`. Switching calls `setActiveTab(mode)` and rebuilds the level grid.
+| Tab | ID | `currentAppMode` | Description |
+|-----|----|-----------------|-------------|
+| Quiz | `tab-quiz` | `"quiz"` | A–Z alphabet: letter ↔ image |
+| Case | `tab-matchcaps` | `"matchcaps"` | Upper ↔ lowercase matching |
+| ಕನ್ನಡ | `tab-kannada` | `"kannada"` | Kannada vowels |
+| हिंदी | `tab-hindi` | `"hindi"` | Hindi consonants |
+| Blends | `tab-blends` | `"blends"` | Phonics rimes/blends (audio) |
+| Numbers | `tab-saynumbers` | `"saynumbers"` | Number recognition 1–6 |
+| Words | `tab-words` | `"words"` | CVC word families |
 
 ---
 
-## Settings
+## Kannada Tab
 
-One toggle remains on the start screen:
+### Overview
 
-| Toggle | ID | Stored in | Effect |
-|--------|----|-----------|--------|
-| 🔬 Phonetics | `phonetics-real-toggle` | `lb_phonetics` | ON → plays phonetics clip (`MbO6vGBkx48`); OFF → plays phonics clip (`svmmuYQPrI4`) |
+Teaches Kannada vowels (ಸ್ವರಗಳು) in pairs. Each pair gets two levels:
+1. **letter-image** — see the letter, pick the matching image
+2. **video-letter** — watch the teaching video clip, then see image, pick the letter
 
-All other previous toggles (Learning Video, Be Funny, Disable Video, Disable Old Levels) have been removed.
+After every two pairs, a block of three cumulative test levels runs.
 
 ---
 
-## Game Modes
+### KANNADA_ITEMS (app.js ~line 115)
 
-### Quiz Tab (📝)
+All eight current vowels:
 
-| Mode      | Prompt        | Child picks     |
-|-----------|---------------|-----------------|
-| `normal`  | Big letter     | Image (4 choices) |
-| `reverse` | Image + word  | Letter (4 choices) |
+| Letter | Roman | Audio file | `vidStart` (sec) | Image |
+|--------|-------|------------|-----------------|-------|
+| ಅ | a  | `audio/kannada/a.mp3`  | 14 (override → 18s in code) | `images/prince.png` |
+| ಆ | aa | `audio/kannada/aa.mp3` | 31 (override → 32s in code) | `images/elephant.png` |
+| ಇ | i  | `audio/kannada/i.mp3`  | 96 (override → 47s in code) | `images/rat.png` |
+| ಈ | ii | `audio/kannada/ii.mp3` | null (local mp4 used) | `images/fly.png` |
+| ಉ | u  | `audio/kannada/u.mp3`  | 79  | `images/ring.png` |
+| ಊ | uu | `audio/kannada/uu.mp3` | 94  | `images/sadhya.png` |
+| ಋ | ru | `audio/kannada/ru.mp3` | 79  | `images/saint.jpg` |
+| ಎ | e  | `audio/kannada/e.mp3`  | 121 | `images/leaf.png` |
 
-In both modes, 4 choices are shown: 1 correct + 3 distractors sampled from `levelItems`. An **Exam level** (A–X, gold card) always appears at the end of the level grid — it cycles through A–X once with no repetition.
+> **Note on ಅ/ಆ/ಇ overrides**: `playKannadaVideo()` contains hardcoded start-second overrides for ಅ (18), ಆ (32), ಇ (47) that supersede the `vidStart` field. This is because the field values were set to an earlier version of the video.
 
-### Case Tab (🔠)
+> **Note on ಈ**: Uses a local mp4 (`videos/only ee.mp4`) instead of the YouTube video — `playKannadaVideo()` special-cases this letter.
 
-Teaches uppercase ↔ lowercase letter matching. 39 levels total (13 letter pairs × 3 levels each):
+---
 
-| Level type | Mode key | Prompt | Child picks |
-|------------|----------|--------|-------------|
-| Normal | `caps-normal` | Uppercase letter | Lowercase (4 choices) |
-| Reverse | `caps-reverse` | Lowercase letter | Uppercase (4 choices) |
-| Test | `caps-test` | Mixed upper/lower | Opposite case (4 choices) |
+### Audio — splicing from kannada.mp3
 
-- **Letter pairs**: A/B, C/D, E/F, G/H, I/J, K/L, M/N, O/P, Q/R, S/T, U/V, W/X, Y/Z
-- **Distractors**: adjacent letters (sliding window of 4 from A–Z alphabet)
-- **All levels always unlocked** — no progression gate
-- **Always plays phonetics video** after correct answer; no TTS speech after correct
+Each vowel's pronunciation is stored as a pre-spliced individual MP3 under `audio/kannada/`. The source file is `audio/kannada.mp3` (50.9 seconds total).
 
-Defined by `CAPS_GROUPS` and `CAPS_LEVELS` arrays. Each test level has a `cumulative` array (all letters seen so far) for future use.
+Splicing is done **offline with ffmpeg** before committing:
 
-### Numbers Tab (🔢)
+```bash
+# General pattern:
+ffmpeg -y -i audio/kannada.mp3 -ss <START_SECONDS> -t 3 -q:a 2 audio/kannada/<roman>.mp3
 
-5 levels, child sees a number and picks from 4 choices:
-
-| Level | Range | Notes |
-|-------|-------|-------|
-| 1 | 1–2 | Intro to 1 and 2 |
-| 2 | 3–4 | Intro to 3 and 4 |
-| 3 | 1–4 | Mixed review |
-| 4 | 5–6 | Intro to 5 and 6 |
-| 5 | 1–6 | Full mixed test |
-
-Distractors are drawn dynamically from within the full 1–6 range.
-
-### Kannada Tab (ಕನ್ನಡ)
-
-Teaches the first four Kannada vowels using two modes per vowel pair, then a cumulative test.
-
-#### KANNADA_ITEMS
-
-```js
-{ letter: “ಅ”, roman: “a”,  start: 0,  vidStart: 14,   image: “images/prince.png”   }
-{ letter: “ಆ”, roman: “aa”, start: 3,  vidStart: 31,   image: “images/elephant.png” }
-{ letter: “ಇ”, roman: “i”,  start: 6,  vidStart: 96,   image: “images/rat.png”      }
-{ letter: “ಈ”, roman: “ii”, start: 9,  vidStart: null, image: “images/fly.png”      }
+# All current clips (source timestamps in kannada.mp3):
+# a.mp3   → spliced from kannada.mp3 (original session, exact start unknown)
+# aa.mp3  → spliced from kannada.mp3 (original session)
+# i.mp3   → spliced from kannada.mp3 (original session)
+# ii.mp3  → spliced from kannada.mp3 (original session)
+# u.mp3   → spliced from kannada.mp3 (original session)
+# uu.mp3  → spliced from kannada.mp3 (original session)
+# ru.mp3  → ffmpeg -ss 20 -t 3   (spliced 2026-07-17)
+# e.mp3   → ffmpeg -ss 25 -t 3   (spliced 2026-07-17)
 ```
 
-- `start` — offset (seconds) in `audio/kannada.mp3` for pronunciation clip
-- `vidStart` — offset (seconds) in `KANNADA_VIDEO_ID` (`KMNRrw5fPCY`) for video reward; `null` = skip
-- `image` — illustration used in picture mode levels
-
-#### KANNADA_LEVELS (5 levels)
-
-| Level | Letters | Mode | What child sees | Child picks |
-|-------|---------|------|-----------------|-------------|
-| 1 🔊 | ಅ, ಆ | hear | 🔊 button | Kannada letter (4 choices) |
-| 2 🖼️ | ಅ, ಆ | picture | Image (prince / elephant) | Kannada letter (4 choices) |
-| 3 🔊 | ಇ, ಈ | hear | 🔊 button | Kannada letter (4 choices) |
-| 4 🖼️ | ಇ, ಈ | picture | Image (rat / fly) | Kannada letter (4 choices) |
-| 5 ⭐ | all 4 | hear | 🔊 button | Kannada letter (4 choices) |
-
-All choices always show all 4 Kannada letters regardless of which letters are being tested.
-
-#### Audio
-
-`playKannadaClip(letter)` → HTML5 `Audio` → `audio/kannada.mp3`, seeks to `item.start`, plays 2.5 seconds.
-
-#### On correct answer
-
-- **Hear mode**: video plays after 1600ms
-- **Picture mode**: audio clip plays immediately (to confirm the letter), then video plays after 1800ms
-
-#### Video rewards
-
-`playKannadaVideo()` — YouTube video `KMNRrw5fPCY`, clips play for 8 seconds from `vidStart`. ಈ (`vidStart: null`) skips video and advances immediately.
-
----
-
-### Hindi Tab (हिंदी)
-
-Teaches the first four Hindi vowels. Same 5-level structure as Kannada (hear/picture pairs + test).
-
-#### HINDI_ITEMS
+At runtime, `playKannadaClip(letter)` plays the file from position 0 and pauses after **2500ms** via a `setTimeout` (the audio file may be longer; the timer caps playback):
 
 ```js
-{ letter: “अ”, roman: “a”,  start: 0, vidStart: 0,  image: “images/mango.png”    }
-{ letter: “आ”, roman: “aa”, start: 3, vidStart: 5,  image: “images/elephant.png” }
-{ letter: “इ”, roman: “i”,  start: 6, vidStart: 9,  image: “images/rat.png”      }
-{ letter: “ई”, roman: “ii”, start: 9, vidStart: 15, image: “images/fly.png”      }
+function playKannadaClip(letter) {
+    // Stops all other clips, plays the target clip for 2500ms
+    audio.currentTime = 0;
+    audio.play();
+    _kannadaClipTimer = setTimeout(() => audio.pause(), 2500);
+}
 ```
 
-- `start` — offset in audio file for pronunciation
-- `vidStart` — offset (seconds) in `HINDI_VIDEO_ID` (`0EfSycgslF0`); clip plays for 5 seconds
-
-#### HINDI_LEVELS (5 levels)
-
-| Level | Letters | Mode | What child sees | Child picks |
-|-------|---------|------|-----------------|-------------|
-| 1 🔊 | अ, आ | hear | 🔊 button | Hindi letter (4 choices) |
-| 2 🖼️ | अ, आ | picture | Image (mango / elephant) | Hindi letter (4 choices) |
-| 3 🔊 | इ, ई | hear | 🔊 button | Hindi letter (4 choices) |
-| 4 🖼️ | इ, ई | picture | Image (rat / fly) | Hindi letter (4 choices) |
-| 5 ⭐ | all 4 | hear | 🔊 button | Hindi letter (4 choices) |
-
-#### Known issues (as of 2026-07-01)
-
-- **Audio**: `playHindiClip` currently points at `audio/kannada.mp3` — this is a placeholder. A dedicated Hindi pronunciation file is needed.
-- **Videos**: clips are 5 seconds from `vidStart`. If timestamps in `HINDI_ITEMS` don't match the actual video content, the video will appear to play the wrong segment. Needs user verification.
-- **Images**: picture mode images are shared with Kannada tab for now; may need Hindi-specific illustrations later.
-
-#### HINDI_LEVELS
-
-| Level | Letters | Mode | Notes |
-|-------|---------|------|-------|
-| 1 | अ, आ | hear | Audio → pick letter |
-| 2 | अ, आ | picture | Picture → pick letter |
-| 3 | इ, ई | hear | Audio → pick letter |
-| 4 | इ, ई | picture | Picture → pick letter |
-| 5 ⭐ | all 4 | hear | Cumulative test (gold card) |
-
-#### Audio
-
-`playHindiClip(letter)` reuses `audio/kannada.mp3` and seeks to the item’s `start` offset.
-
-#### Video rewards
-
-`playHindiVideo()` plays a clip from YouTube video `0EfSycgslF0` using the requested timestamps:
-- अ → 0:00
-- आ → 0:05
-- इ → 0:09
-- ई → 0:15
-
-Each item can also override the video ID via `vidId` field (currently unused; previously tested for ಈ).
+All clips are preloaded at startup via `new Audio(item.audio)` with `preload = "auto"`.
 
 ---
 
-## Game Flow
+### Video — KANNADA_VIDEO_ID
 
-### startGame(gameLevelIdx) — app.js:307
+YouTube video: `KMNRrw5fPCY`  
+URL: `https://www.youtube.com/watch?v=KMNRrw5fPCY`
 
-1. Sets `currentLevel`, `gameMode` from `GAME_LEVELS[gameLevelIdx]`
-2. Builds `queue`:
-   - New letters for this level × 3 repetitions each
-   - 4 random review letters from all prior levels
-   - All shuffled together
-3. Resets counters (`stars`, `currentIndex`, `sessionStats`)
-4. Calls `loadRound()`
+`playKannadaVideo()` plays a **5-second clip** from `vidStart`:
+```js
+const end = start + 5;
+ytPlayer.loadVideoById({ videoId, startSeconds: start });
+// polls getCurrentTime() every 200ms; hides overlay when >= end
+// safetyTimer at 10s cancels if polling stalls
+```
 
-### loadRound() — app.js:331
-
-1. If `currentIndex >= queue.length` → `showDone()`
-2. Sets `currentItem = queue[currentIndex]`
-3. Renders `#letter-display` (big letter or image+word label depending on mode)
-4. Generates 4 choice buttons and adds `onclick → handleChoice()`
-5. Calls `speak()` with the letter or word
-6. Updates progress bar
-
-### handleChoice(btn, chosen) — app.js:411
-
-**Correct answer:**
-- `answered = true` (blocks further clicks)
-- If `roundClean` (no prior wrong guess this round): `stars++`
-- Pushes to `sessionStats`
-- Plays correct chime, speaks `"X for Word!"`
-- Shows feedback overlay + confetti
-- If video is enabled and clip exists: calls `playVideoReward()` after 1600ms (video handles advancing)
-- Otherwise: `currentIndex++`, `loadRound()` after 2200ms
-
-**Wrong answer:**
-- Marks button red + disabled
-- `roundClean = false`, `roundWrongs++`
-- Plays wrong tone, speaks `"Try again!"`
-- Does NOT advance — child retries same question
-
-### showDone() — app.js:726
-
-1. Displays final score
-2. Checks unlock threshold: `stars >= ceil(queue.length * 0.8)` AND `gl.pair === unlockedPair`
-3. If threshold met: `setUnlockedLevel(unlockedPair + 1)`, shows unlock message
-4. If `stars >= queue.length - 1`: triggers `playCartoonReward()` after 2.5s
-5. Calls `sendStats()` (analytics)
+After the overlay hides, `hideVideoOverlay()` fires `afterVideoHide` callback if set, otherwise calls `advanceRound()`.
 
 ---
 
-## Audio System
+### KANNADA_LEVELS (app.js ~line 127)
 
-### Text-to-Speech (app.js:139–170)
+18 levels total as of v38:
 
-Uses the Web Speech API (`SpeechSynthesisUtterance`). Voice selection prefers: Samantha, Karen, Moira, Fiona, Tessa, Victoria, Google UK English Female, Google US English. Falls back to any English voice.
+| Level | Letters | Mode | Child sees | Child picks |
+|-------|---------|------|-----------|-------------|
+| 1  | ಅ, ಆ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
+| 2  | ಅ, ಆ | `video-letter` | Teaching video → then image | Kannada letter (4 choices) |
+| 3  | ಇ, ಈ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
+| 4  | ಇ, ಈ | `video-letter` | Teaching video → then image | Kannada letter (4 choices) |
+| 5  | ಅ ಆ ಇ ಈ | `video-letter` ⭐ | Teaching video → image | Kannada letter (4 choices) |
+| 6  | ಅ ಆ ಇ ಈ | `letter-image` ⭐ | Big letter | Image (4 choices) |
+| 7  | ಅ ಆ ಇ ಈ | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
+| 8  | ಉ, ಊ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
+| 9  | ಉ, ಊ | `video-letter` | Teaching video → image | Kannada letter (4 choices) |
+| 10 | ಅ ಆ ಇ ಈ ಉ ಊ | `video-letter` ⭐ | Teaching video → image | Kannada letter (4 choices) |
+| 11 | ಅ ಆ ಇ ಈ ಉ ಊ | `letter-image` ⭐ | Big letter | Image (4 choices) |
+| 12 | ಅ ಆ ಇ ಈ ಉ ಊ | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
+| 13 | ಅ ಆ ಇ ಈ ಉ ಊ | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
+| 14 | ಋ, ಎ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
+| 15 | ಋ, ಎ | `video-letter` | Teaching video → image | Kannada letter (4 choices) |
+| 16 | all 8 | `video-letter` ⭐ | Teaching video → image | Kannada letter (4 choices) |
+| 17 | all 8 | `letter-image` ⭐ | Big letter | Image (4 choices) |
+| 18 | all 8 | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
 
-Settings: `rate: 0.9`, `pitch: 1.35` (higher and slower than default — child-friendly).
+⭐ = cumulative test (`isTest: true`)
 
-Triggered:
-- On `loadRound()` — speaks the letter (normal mode) or word (reverse mode)
-- After a correct answer — speaks `"X for Word!"`
-- After a wrong answer — speaks `"Try again!"`
+---
 
-### Sound Effects (app.js:90–113)
+### Game Modes (Kannada)
 
-Generated via Web Audio API oscillators (no audio files needed):
+**`letter-image`** — Letter shown silently, child picks image:
+- Display: large Kannada letter (5rem, Noto Sans Kannada)
+- Choices: 4 image buttons (from KANNADA_ITEMS)
+- On correct: `playKannadaClip()` → 1800ms → `playKannadaVideo()`
 
-| Event   | Notes                     | Frequencies      |
-|---------|---------------------------|------------------|
-| Correct | Ascending 4-note chime    | C5 E5 G5 C6 (523–1047 Hz) |
-| Wrong   | Gentle 2-note descending  | 440 → 349 Hz     |
+**`video-letter`** — Teaching video plays first, then image question:
+- On load: `afterVideoHide` callback is set, then `playKannadaVideo()` fires immediately
+- After video hides: image appears + `playKannadaClip()` fires + 4 letter buttons appear
+- On correct: `advanceRound()` after 1200ms (video was the teaching moment; no repeat)
+
+**`picture`** — Image shown, child picks letter (used sparingly in test levels):
+- Display: image (130×130px)
+- `playKannadaClip()` fires 400ms after display
+- On correct: `playKannadaClip()` → 1800ms → `playKannadaVideo()`
+
+**`hear`** — Audio-only question:
+- Display: 🔊 button (tappable to replay), "tap to hear again" label
+- `playKannadaClip()` fires 400ms after display
+- On correct: `playKannadaVideo()` after 1600ms
+
+---
+
+### Choice Options — getKannadaOptions()
+
+Always shows **4 choices**. Logic:
+1. Start with the pair of the current letter (e.g. ಅ→ [ಅ, ಆ], ಋ→ [ಋ, ಎ])
+2. Fill remaining slots from `levelLetterSet` (letters active this level), then from the full `KANNADA_ITEMS` pool
+3. ಅ is suppressed from distractors unless `isTest=true` or `levelIndex === 0`
+
+Pair map (kept in sync with `getKannadaOptions`):
+
+```js
+{ "ಅ": ["ಅ","ಆ"], "ಆ": ["ಅ","ಆ"],
+  "ಇ": ["ಇ","ಈ"], "ಈ": ["ಇ","ಈ"],
+  "ಋ": ["ಋ","ಎ"], "ಎ": ["ಋ","ಎ"] }
+```
+
+ಉ and ಊ are not in the pairMap; they appear together because both are in `levelLetterSet`.
+
+---
+
+### How to Add a New Kannada Vowel
+
+Follow this checklist exactly:
+
+#### 1. Record / identify audio
+- Source file: `audio/kannada.mp3` (the full recorded pronunciation track)
+- Note the timestamp (in seconds) where the new vowel is spoken
+- Splice with ffmpeg:
+  ```bash
+  ffmpeg -y -i audio/kannada.mp3 -ss <START_SEC> -t 3 -q:a 2 audio/kannada/<roman>.mp3
+  ```
+  Use `-t 3` (3 seconds) for a clean clip. Adjust if the natural pause is shorter.
+
+#### 2. Find the video timestamp
+- Video: `https://www.youtube.com/watch?v=KMNRrw5fPCY`
+- Play the video, find where the new vowel is introduced
+- Note the timestamp in seconds (e.g. 2:01 = 121 seconds)
+- This becomes `vidStart` in KANNADA_ITEMS
+
+#### 3. Choose or create the image
+- Fluent Emoji 3D style preferred (256×256 PNG from Microsoft's emoji CDN)
+- Or any clear photo/illustration the child recognises
+- Store in `images/<name>.png` (or `.jpg`)
+- The image should unambiguously represent the word/concept used in the video
+
+#### 4. Add to KANNADA_ITEMS
+```js
+{ letter: "ಏ", roman: "ee", audio: "audio/kannada/ee.mp3", vidStart: <sec>, image: "images/<name>.png" },
+```
+Keep the array in canonical Kannada vowel order: ಅ ಆ ಇ ಈ ಉ ಊ ಋ ಎ ಏ ಐ ಒ ಓ ಔ …
+
+#### 5. Update getKannadaOptions pairMap
+Add both directions so choices always include the pair:
+```js
+"ಏ": ["ಏ", "ಐ"],
+"ಐ": ["ಏ", "ಐ"],
+```
+If adding a lone vowel without a pair yet, omit from pairMap — it will fall through to the general pool.
+
+#### 6. Update shouldPlayKannadaDoubleCue (if needed)
+If the vowel should get the double-cue audio behaviour, add it to the array in `shouldPlayKannadaDoubleCue()`.
+
+#### 7. Add KANNADA_LEVELS entries
+Follow the pattern: two intro levels (letter-image + video-letter), then three cumulative test levels covering all vowels seen so far:
+```js
+{ label: "19", letters: ["ಏ", "ಐ"], mode: "letter-image" },
+{ label: "20", letters: ["ಏ", "ಐ"], mode: "video-letter" },
+{ label: "21", letters: ["ಅ","ಆ","ಇ","ಈ","ಉ","ಊ","ಋ","ಎ","ಏ","ಐ"], mode: "video-letter", isTest: true },
+{ label: "22", letters: ["ಅ","ಆ","ಇ","ಈ","ಉ","ಊ","ಋ","ಎ","ಏ","ಐ"], mode: "letter-image", isTest: true },
+{ label: "23", letters: ["ಅ","ಆ","ಇ","ಈ","ಉ","ಊ","ಋ","ಎ","ಏ","ಐ"], mode: "hear",         isTest: true },
+```
+
+#### 8. Bump the version in index.html
+```html
+<script src="app.js?v=39"></script>
+```
+
+#### 9. Commit and push
+```bash
+git add audio/kannada/<roman>.mp3 app.js index.html
+git commit -m "Kannada: add ಏ/ಐ (levels 19–23)"
+git push
+```
+
+---
+
+## Hindi Tab
+
+### Overview
+
+Teaches Hindi **consonants** (व्यंजन), not vowels. Currently covers the first four: क, ख, ग, घ (ka, kha, ga, gha). Structure mirrors Kannada but simpler — 5 levels only.
+
+---
+
+### HINDI_ITEMS (app.js ~line 190)
+
+| Letter | Roman | Audio file | `vidStart` (sec) | Image |
+|--------|-------|------------|-----------------|-------|
+| क | ka  | `audio/hindi/ka.mp3`  | 58 | `images/lotus.png` |
+| ख | kha | `audio/hindi/kha.mp3` | 63 | `images/rabbit.png` |
+| ग | ga  | `audio/hindi/ga.mp3`  | 67 | `images/cow.png` |
+| घ | gha | `audio/hindi/gha.mp3` | 71 | `images/clock.png` |
+
+---
+
+### Audio — hindi/ clips
+
+Individual MP3 files in `audio/hindi/`. Each was pre-spliced offline from a Hindi consonant audio recording. At runtime, `playHindiClip(letter)` plays the file from position 0 and stops after **1000ms**:
+
+```js
+function playHindiClip(letter) {
+    audio.currentTime = 0;
+    audio.play();
+    _hindiClipTimer = setTimeout(() => audio.pause(), 1000);
+}
+```
+
+Note: Hindi clips are capped at 1000ms (vs 2500ms for Kannada) because consonant clips are shorter.
+
+---
+
+### Video — HINDI_VIDEO_ID
+
+YouTube video: `0EfSycgslF0`  
+URL: `https://www.youtube.com/watch?v=0EfSycgslF0`
+
+`playHindiVideo()` plays a **4-second clip** from `vidStart` (end = `start + 4`). Optional `vidEnd` field on an item overrides the default +4 duration.
+
+---
+
+### HINDI_LEVELS (app.js ~line 197)
+
+5 levels:
+
+| Level | Letters | Mode | Child sees | Child picks |
+|-------|---------|------|-----------|-------------|
+| 1 | क, ख | `hear` | 🔊 button | Hindi letter (4 choices) |
+| 2 | क, ख | `video-letter` | Teaching video → image | Hindi letter (4 choices) |
+| 3 | ग, घ | `hear` | 🔊 button | Hindi letter (4 choices) |
+| 4 | ग, घ | `video-letter` | Teaching video → image | Hindi letter (4 choices) |
+| 5 | all 4 | `hear` ⭐ | 🔊 button | Hindi letter (4 choices) |
+
+⭐ = cumulative test (`isTest: true`)
+
+---
+
+### Game Modes (Hindi)
+
+**`hear`** — Audio clip plays automatically:
+- Display: 🔊 button + "tap to hear again"
+- `playHindiClip()` fires 400ms after display
+- 4 choice buttons = all HINDI_ITEMS (always all 4, no distractor logic)
+- On correct: `playHindiVideo()` after 1600ms
+
+**`video-letter`** — Teaching video plays first:
+- `afterVideoHide` callback is set, then `playHindiVideo()` fires 300ms after display
+- After video hides: image (or letter fallback) appears + `playHindiClip()` + 4 letter buttons
+- On correct: `advanceRound()` after 1200ms
+
+**`picture`** — Image shown silently, child picks letter:
+- On correct: `playHindiClip()` → 1800ms → `playHindiVideo()`
+
+---
+
+### Choices (Hindi)
+
+Unlike Kannada, Hindi does **not** use `getKannadaOptions`. It simply shuffles all `HINDI_ITEMS` and shows all 4 as buttons — no distractor pool logic. This means if more letters are added, the choice count increases automatically.
+
+---
+
+### How to Add a New Hindi Consonant
+
+#### 1. Audio
+- Splice from source file at the known timestamp:
+  ```bash
+  ffmpeg -y -i audio/<source>.mp3 -ss <START_SEC> -t 2 -q:a 2 audio/hindi/<roman>.mp3
+  ```
+  Use `-t 2` (2 seconds) — consonant clips are shorter than vowel clips.
+
+#### 2. Video timestamp
+- Video: `https://www.youtube.com/watch?v=0EfSycgslF0`
+- Note timestamp in seconds for the letter's clip → becomes `vidStart`
+
+#### 3. Image
+- Choose a clear illustration the child recognises for this consonant's word
+- Store in `images/<name>.png`
+
+#### 4. Add to HINDI_ITEMS
+```js
+{ letter: "ङ", roman: "nga", audio: "audio/hindi/nga.mp3", vidStart: <sec>, image: "images/<name>.png" },
+```
+
+#### 5. Add HINDI_LEVELS entries
+The first two new letters get 2 intro levels + the test expands to all known letters:
+```js
+{ label: "6", letters: ["ङ", "च"], mode: "hear" },
+{ label: "7", letters: ["ङ", "च"], mode: "video-letter" },
+{ label: "8", letters: ["क","ख","ग","घ","ङ","च"], mode: "hear", isTest: true },
+```
+
+#### 6. Bump version, commit, push.
 
 ---
 
 ## Video Reward System
 
-### Per-letter clip (after correct answer)
+### Per-letter clip (during gameplay)
 
-Called by `playVideoReward()`:
+| Tab | Function | Video ID | Clip duration |
+|-----|----------|----------|--------------|
+| Quiz (phonics off) | `playPhonicsClip()` | `svmmuYQPrI4` | 5 sec |
+| Quiz (phonics on) | `playPhoneticClip()` | `MbO6vGBkx48` | 5 sec |
+| Kannada | `playKannadaVideo()` | `KMNRrw5fPCY` | 5 sec (ಈ = local mp4) |
+| Hindi | `playHindiVideo()` | `0EfSycgslF0` | 4 sec |
 
-| Phonetics toggle | Function called | Video | Duration |
-|-----------------|-----------------|-------|----------|
-| ON | `playPhoneticClip()` | `MbO6vGBkx48` (real phonetics mouth shapes) | 5 sec from `PHONETICS_TIMESTAMPS[letter]` |
-| OFF | `playPhonicsClip()` | `svmmuYQPrI4` (phonics archive) | 5 sec from `PHONICS_TIMESTAMPS[letter]` |
-
-For the **Case tab**, `playPhoneticClip()` is always called regardless of the toggle.
-
-For the **Kannada tab**, `playKannadaVideo()` is called with video `KMNRrw5fPCY`, playing 8 seconds from the item's `vidStart`.
-
-All per-letter clips use `#video-overlay` and auto-advance to the next round when done.
+All use the YouTube IFrame API via the single `#yt-player` element. The `hideVideoOverlay()` function fires `afterVideoHide` if set, else calls `advanceRound()`.
 
 ### Shorts reward (after perfect/near-perfect score)
-
-Called by `playCartoonReward()`:
-- Selects from `SHORTS_IDS` (50 YouTube Shorts IDs) sequentially
-- Resumes from `lb_cartoon` localStorage state (persists across sessions)
-- Plays for up to 5 minutes; child can skip with "Done ✖" button
-- Uses `#shorts-overlay` (separate from per-letter overlay)
-
-### Timestamps
-
-**PHONETICS_TIMESTAMPS** — video `MbO6vGBkx48` (real phonetics, mouth shapes):
-```js
-{ A:0, B:7, C:16, D:23, E:31, F:39, G:46, H:53,
-  I:60, J:66, K:74, L:80, M:88, N:94, O:100, P:107,
-  Q:113, R:122, S:130, T:138, U:145, V:152, W:158, X:166,
-  Y:172, Z:179 }
-```
-
-**PHONICS_TIMESTAMPS** — video `svmmuYQPrI4` (phonics archive):
-```js
-{ A:0, B:13, C:27, D:40, E:52, F:64, G:79, H:93,
-  I:106, J:118, K:131, L:145, M:157, N:169, O:182,
-  P:196, Q:211, R:224, S:238, T:254, U:268, V:280,
-  W:295, X:309, Y:323, Z:337 }
-```
-
-All clip durations: `start + 5` seconds (Kannada clips: `start + 8` seconds).
+- 50 sequential YouTube Shorts IDs in `SHORTS_IDS`
+- Resumes from `lb_cartoon` localStorage (`{ index, position }`)
+- Plays up to 5 minutes; child skips with "Done ✖"
 
 ---
 
-## Progression & Unlocking
+## Audio Clip Duration Reference
 
-| Key              | Default | Description                                  |
-|------------------|---------|----------------------------------------------|
-| `lb_unlocked`    | `"3"`   | Highest unlocked pair number (not level)     |
-| Unlock threshold | 80%     | `Math.ceil(queue.length * 0.8)` stars needed |
-| Min visible      | 4 pairs | Always show ≥8 game levels on start screen   |
-
-Unlock only triggers when: score ≥ threshold AND child is playing the **current frontier pair** (not replaying old levels).
+| Tab | Clip file | Play duration (ms) |
+|-----|-----------|-------------------|
+| Kannada | `audio/kannada/*.mp3` | 2500 |
+| Hindi | `audio/hindi/*.mp3` | 1000 |
+| Blends | `audio/blends/*.mp3` | full (via `onended`) |
 
 ---
 
-## State / Persistence
+## Queue Building
 
-All state is in `localStorage`:
-
-| Key              | Type    | Description                           |
-|------------------|---------|---------------------------------------|
-| `lb_unlocked`    | string  | Current unlocked pair number (Quiz tab) — defaults to max (all unlocked) |
-| `lb_caps_unlocked` | string | Current unlocked pair number (Case tab) — defaults to max (all unlocked) |
-| `lb_deviceId`    | string  | UUID for analytics                    |
-| `lb_deviceName`  | string  | Optional caregiver label              |
-| `lb_phonetics`   | `"0"/"1"` | Phonetics video mode (default ON)   |
-| `lb_cartoon`     | JSON    | `{ index, position }` for shorts resume |
-
-In-session state (global JS variables, not persisted):
+All tabs build `queue` as N copies of the active items, then call `shuffleNoRepeat()` to guarantee no consecutive duplicates:
 
 ```js
-currentGameLevelIdx  // index into GAME_LEVELS
-currentLevel         // content level (1–11)
-gameMode             // "normal" | "reverse"
-levelItems           // letters usable as distractors this round
-queue                // shuffled question array
-currentIndex         // progress through queue
-currentItem          // current question's item object
-stars                // score for this session
-answered             // true while waiting for video/advance
-roundClean           // false if any wrong guess this round
-roundWrongs          // count of wrong guesses this round
-sessionStats         // array of { letter, word, firstTry, wrongs }
+queue = shuffleNoRepeat([...activeItems, ...activeItems, ...activeItems]); // 3× repeat
 ```
+
+`shuffleNoRepeat()` runs Fisher-Yates then walks the array, swapping any adjacent duplicate further ahead.
 
 ---
 
-## Analytics
+## TTS Voice
 
-Sends a POST (mode: `no-cors`) to a Google Apps Script webhook after each session:
+`speak(text)` uses the Web Speech API. Voice priority (deep male, neutral accent):
 
-```json
-{
-  "timestamp": "ISO string",
-  "deviceId": "uuid",
-  "deviceName": "optional string",
-  "mode": "normal | reverse",
-  "level": 2,
-  "stars": 8,
-  "total": 10,
-  "perfect": false,
-  "letters": [
-    { "letter": "G", "word": "Guitar", "firstTry": true, "wrongs": 0 },
-    { "letter": "H", "word": "House",  "firstTry": false, "wrongs": 2 }
-  ]
-}
-```
+1. Alex (macOS neutral American)
+2. Daniel (macOS/iOS British)
+3. Tom (macOS older male)
+4. Google UK English Male
+5. Microsoft David / Mark (Windows)
+6. Any English male voice → any English voice
+
+Settings: `rate: 0.85`, `pitch: 0.85`.
 
 ---
 
-## CSS / UI Notes
+## Settings Toggles
 
-- Font: Comic Sans MS with fallbacks (Chalkboard SE, Marker Felt)
-- Palette: purple gradient background (`#667eea → #764ba2`), white cards
-- Max content width: 500px (centered, mobile-first)
-- Key animations: `popIn` (0.4s scale-in on letter/image), `wiggle` (0.5s on correct), `bounce` (infinite on big emoji), `fall` (confetti)
-- `z-index` layers: screens (base) → feedback overlay (100) → confetti (200) → video overlays (300)
+| Toggle | `localStorage` key | Effect |
+|--------|--------------------|--------|
+| 🔬 Phonetics | `lb_phonetic` | ON: phonetic-sound video; OFF: phonics-name video (Quiz tab only) |
+| 🚫 No Videos | `lb_novideo` | Skips all video overlays; `proceedFromVideo()` fires immediately |
+| 🌙 Chalkboard / 🌿 Rainbow | `lb_theme` | Visual theme |
