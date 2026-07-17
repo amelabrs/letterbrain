@@ -77,6 +77,51 @@ function modeColor(mode) {
     return map[mode] || map.quiz;
 }
 
+// ── Question-type colours: Yellow=Image  Blue=Letter  Orange=Audio ────
+const QTYPE_COLORS = {
+    chalkboard: { image: "#FFEA00", letter: "#00E5FF", audio: "#FF8A3D" },
+    rainbow:    { image: "#DEA431", letter: "#2E5E6E", audio: "#B85C38" },
+};
+// Inline SVGs – all use stroke="currentColor" so they inherit tile text colour
+const QTYPE_ICONS = {
+    image:  `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+    audio:  `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`,
+    letter: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>`,
+    video:  `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+};
+
+function qTypeColor(mode) {
+    const pal = QTYPE_COLORS[currentTheme] ?? QTYPE_COLORS.chalkboard;
+    if (["letter-image", "picture", "reverse"].includes(mode)) return pal.image;
+    if (mode === "hear") return pal.audio;
+    return pal.letter; // normal, video-letter, caps-*, blends, numbers-normal
+}
+
+function qTypeIcon(mode, isTest) {
+    if (isTest) return "★";
+    if (["letter-image", "picture", "reverse"].includes(mode)) return QTYPE_ICONS.image;
+    if (mode === "hear") return QTYPE_ICONS.audio;
+    if (mode === "video-letter") return QTYPE_ICONS.video;
+    return QTYPE_ICONS.letter;
+}
+
+function buildLegend() {
+    const el = document.getElementById("mode-legend");
+    if (!el) return;
+    const pal = QTYPE_COLORS[currentTheme] ?? QTYPE_COLORS.chalkboard;
+    const items = [
+        { label: "Image",  color: pal.image,  icon: QTYPE_ICONS.image  },
+        { label: "Letter", color: pal.letter, icon: QTYPE_ICONS.letter },
+        { label: "Audio",  color: pal.audio,  icon: QTYPE_ICONS.audio  },
+    ];
+    el.innerHTML = items.map(({ label, color, icon }) =>
+        `<span class="legend-item">
+            <span class="legend-dot" style="background:${color}28;border:2px solid ${color};box-shadow:0 0 8px ${color}88;color:${color}">${icon}</span>
+            <span class="legend-label" style="color:${color}">${label}</span>
+        </span>`
+    ).join('');
+}
+
 // ── Game levels: pairs of (normal, reverse) for each letter group ──
 const CONTENT_LEVELS = [...new Set(ALL_ITEMS.map(it => it.level))].sort((a, b) => a - b);
 const GAME_LEVELS = [];
@@ -202,9 +247,13 @@ const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
     { label: "1", letters: ["क", "ख"], mode: "hear" },
     { label: "2", letters: ["क", "ख"], mode: "video-letter" },
-    { label: "3", letters: ["ग", "घ"], mode: "hear" },
-    { label: "4", letters: ["ग", "घ"], mode: "video-letter" },
-    { label: "5", letters: ["क", "ख", "ग", "घ"], mode: "hear", isTest: true },
+    { label: "3", letters: ["क", "ख"], mode: "picture" },
+    { label: "4", letters: ["ग", "घ"], mode: "hear" },
+    { label: "5", letters: ["ग", "घ"], mode: "video-letter" },
+    { label: "6", letters: ["ग", "घ"], mode: "picture" },
+    { label: "7", letters: ["क","ख","ग","घ"], mode: "hear",         isTest: true },
+    { label: "8", letters: ["क","ख","ग","घ"], mode: "video-letter", isTest: true },
+    { label: "9", letters: ["क","ख","ग","घ"], mode: "picture",      isTest: true },
 ];
 
 // ── Blends ───────────────────────────────────────────────────────────
@@ -489,6 +538,7 @@ function applyTheme(theme) {
         b.classList.toggle("active", b.dataset.theme === theme);
     });
     buildLevelGrid();
+    buildLegend();
 }
 
 // Pick a deep male voice with a neutral accent
@@ -546,7 +596,7 @@ function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
         if (currentTheme === "chalkboard") {
             const borderW = isCurrent ? "4px" : "3px";
             const glow = isCurrent ? `0 0 24px 4px ${color}CC` : `0 0 16px 2px ${color}80`;
-            node.style.background = "#23272F";
+            node.style.background = `${color}28`;
             node.style.border     = `${borderW} solid ${color}`;
             node.style.boxShadow  = glow;
             node.style.color      = color;
@@ -573,14 +623,15 @@ function buildLevelGrid() {
     grid.innerHTML = "";
 
     if (currentAppMode === "words") {
-        WORD_LEVELS.forEach(({ family, mode }, idx) => {
-            const modeIcon = mode === "normal" ? "🔤" : "🖼️";
+        WORD_LEVELS.forEach(({ family, mode }) => {
+            const color = qTypeColor(mode);
+            const icon = qTypeIcon(mode, false);
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:800;color:inherit;line-height:1">-${family}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${modeIcon}</span>
+                <span style="font-size:11px;line-height:1">${icon}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: tileColor(idx),
+                color,
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -608,11 +659,12 @@ function buildLevelGrid() {
             { label: "1–8", range: [1, 8],  mode: "normal" },
             { label: "1–8", range: [1, 8],  mode: "hear" },
         ];
-        numDefs.forEach(({ label, range, mode }, idx) => {
-            const icon = mode === "hear" ? "🔊" : "#";
-            const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px;opacity:0.8">${mode === "hear" ? "🔊" : "🔢"}</span></span>`;
+        numDefs.forEach(({ label, range, mode }) => {
+            const color = qTypeColor(mode);
+            const icon = qTypeIcon(mode, false);
+            const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px">${icon}</span></span>`;
             grid.appendChild(makeNode({
-                color: tileColor(idx),
+                color,
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -625,18 +677,18 @@ function buildLevelGrid() {
 
     if (currentAppMode === "kannada") {
         KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const modeIcon = mode === "hear" ? "🔊" : mode === "video-letter" ? "▶" : mode === "letter-image" ? "✎" : "";
+            const color = qTypeColor(mode);
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
                 : letters.slice(0, 2).join('');
             const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
-            const sublabel = isTest ? "★" : modeIcon;
+            const sublabel = qTypeIcon(mode, isTest);
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:inherit;line-height:1.15">${letterStr}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
+                <span style="font-size:11px;line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: tileColor(idx),
+                color,
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -648,19 +700,19 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "hindi") {
-        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const modeIcon = mode === "hear" ? "🔊" : mode === "video-letter" ? "▶" : mode === "picture" ? "🖼️" : "";
+        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }) => {
+            const color = qTypeColor(mode);
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
                 : letters.slice(0, 2).join('');
             const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
-            const sublabel = isTest ? "★" : modeIcon;
+            const sublabel = qTypeIcon(mode, isTest);
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:inherit;line-height:1.15">${letterStr}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
+                <span style="font-size:11px;line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: tileColor(idx),
+                color,
                 content,
                 isLocked: false,
                 isCurrent: false,
@@ -672,11 +724,18 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "blends") {
-        BLENDS_LEVELS.forEach(({ label, activeBlends }, idx) => {
-            const fontSize = label === "★" ? "36px" : "20px";
+        const audioColor = qTypeColor("hear");
+        BLENDS_LEVELS.forEach(({ label, activeBlends }) => {
+            const isAll = label === "★";
+            const content = isAll
+                ? `<span style="font-family:'Baloo 2',sans-serif;font-size:36px;font-weight:900;color:inherit">★</span>`
+                : `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                    <span style="font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:900;color:inherit;line-height:1.1">${label}</span>
+                    <span style="font-size:11px;line-height:1">${QTYPE_ICONS.audio}</span>
+                  </div>`;
             grid.appendChild(makeNode({
-                color: tileColor(idx),
-                content: `<span style="font-family:'Baloo 2',sans-serif;font-size:${fontSize};font-weight:900;color:inherit">${label}</span>`,
+                color: audioColor,
+                content,
                 isLocked: false,
                 isCurrent: false,
                 isExam: false,
@@ -688,21 +747,21 @@ function buildLevelGrid() {
 
     if (currentAppMode === "matchcaps") {
         const unlockedPair = getCapsUnlockedLevel();
+        const letterColor = qTypeColor("normal");
         CAPS_LEVELS.forEach((gl, idx) => {
             const isLocked = gl.pair > unlockedPair;
             const isTest = gl.mode === "caps-test";
-            const displayColor = tileColor(idx);
             const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && CAPS_LEVELS[idx + 1].pair > unlockedPair;
             const rangeStr = isTest
                 ? `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`
                 : `${gl.letters[0]}–${gl.letters[gl.letters.length - 1]}`;
-            const sublabel = isTest ? "★" : "Aa";
+            const sublabel = isTest ? "★" : QTYPE_ICONS.letter;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:700;color:inherit;line-height:1.15">${rangeStr}</span>
-                <span style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1">${sublabel}</span>
+                <span style="font-size:11px;line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: displayColor,
+                color: letterColor,
                 content,
                 isLocked,
                 isCurrent,
@@ -720,7 +779,7 @@ function buildLevelGrid() {
         const isLocked = gl.pair > unlockedPair;
         const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && GAME_LEVELS[idx + 1].pair > unlockedPair;
         const displayItem = gl.mode === "reverse" ? items[items.length - 1] : items[0];
-        const color = tileColor(idx);
+        const color = qTypeColor(gl.mode);
 
         const content = displayItem?.image
             ? `<img src="${displayItem.image}" alt="${displayItem.word}">`
@@ -749,6 +808,7 @@ function buildLevelGrid() {
             onclick: () => startExam(mode),
         }));
     });
+    buildLegend();
 }
 
 // Load WordVideos.json, merge video data into ALL_ITEMS, then build grid
@@ -778,11 +838,17 @@ phoneticsRealToggle.addEventListener("change", () => setPhoneticMode(phoneticsRe
 
 const videoBeforeToggle = document.getElementById("video-before-toggle");
 videoBeforeToggle.checked = getVideoBeforeQuestion();
-videoBeforeToggle.addEventListener("change", () => setVideoBeforeQuestion(videoBeforeToggle.checked));
+videoBeforeToggle.addEventListener("change", () => {
+    setVideoBeforeQuestion(videoBeforeToggle.checked);
+    if (videoBeforeToggle.checked) { noVideoToggle.checked = false; setVideosDisabled(false); }
+});
 
 const noVideoToggle = document.getElementById("no-video-toggle");
 noVideoToggle.checked = getVideosDisabled();
-noVideoToggle.addEventListener("change", () => setVideosDisabled(noVideoToggle.checked));
+noVideoToggle.addEventListener("change", () => {
+    setVideosDisabled(noVideoToggle.checked);
+    if (noVideoToggle.checked) { videoBeforeToggle.checked = false; setVideoBeforeQuestion(false); }
+});
 
 
 
