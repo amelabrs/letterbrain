@@ -79,8 +79,8 @@ function modeColor(mode) {
 
 // ── Question-type colours: Yellow=Image  Blue=Letter  Orange=Audio ────
 const QTYPE_COLORS = {
-    chalkboard: { image: "#FFEA00", letter: "#00E5FF", audio: "#FF8A3D" },
-    rainbow:    { image: "#DEA431", letter: "#2E5E6E", audio: "#B85C38" },
+    chalkboard: { image: "#FFEA00", letter: "#00E5FF", audio: "#FF8A3D", test: "#B47CFF" },
+    rainbow:    { image: "#DEA431", letter: "#2E5E6E", audio: "#B85C38", test: "#7B5A86" },
 };
 // Inline SVGs – all use stroke="currentColor" so they inherit tile text colour
 const QTYPE_ICONS = {
@@ -94,7 +94,8 @@ function qTypeColor(mode) {
     const pal = QTYPE_COLORS[currentTheme] ?? QTYPE_COLORS.chalkboard;
     if (["letter-image", "picture", "reverse"].includes(mode)) return pal.image;
     if (mode === "hear") return pal.audio;
-    return pal.letter; // normal, video-letter, caps-*, blends, numbers-normal
+    if (mode === "caps-test") return pal.test;
+    return pal.letter; // normal, video-letter, caps-normal, blends, numbers-normal
 }
 
 function qTypeIcon(mode, isTest) {
@@ -113,6 +114,7 @@ function buildLegend() {
         { label: "Image",  color: pal.image,  icon: QTYPE_ICONS.image  },
         { label: "Letter", color: pal.letter, icon: QTYPE_ICONS.letter },
         { label: "Audio",  color: pal.audio,  icon: QTYPE_ICONS.audio  },
+        { label: "Test",   color: pal.test,   icon: "★"                },
     ];
     el.innerHTML = items.map(({ label, color, icon }) =>
         `<span class="legend-item">
@@ -747,10 +749,10 @@ function buildLevelGrid() {
 
     if (currentAppMode === "matchcaps") {
         const unlockedPair = getCapsUnlockedLevel();
-        const letterColor = qTypeColor("normal");
         CAPS_LEVELS.forEach((gl, idx) => {
             const isLocked = gl.pair > unlockedPair;
             const isTest = gl.mode === "caps-test";
+            const color = qTypeColor(gl.mode);
             const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && CAPS_LEVELS[idx + 1].pair > unlockedPair;
             const rangeStr = isTest
                 ? `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`
@@ -761,7 +763,7 @@ function buildLevelGrid() {
                 <span style="font-size:11px;line-height:1">${sublabel}</span>
             </div>`;
             grid.appendChild(makeNode({
-                color: letterColor,
+                color,
                 content,
                 isLocked,
                 isCurrent,
