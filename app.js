@@ -776,6 +776,10 @@ const phoneticsRealToggle = document.getElementById("phonetics-real-toggle");
 phoneticsRealToggle.checked = getPhoneticMode();
 phoneticsRealToggle.addEventListener("change", () => setPhoneticMode(phoneticsRealToggle.checked));
 
+const videoBeforeToggle = document.getElementById("video-before-toggle");
+videoBeforeToggle.checked = getVideoBeforeQuestion();
+videoBeforeToggle.addEventListener("change", () => setVideoBeforeQuestion(videoBeforeToggle.checked));
+
 const noVideoToggle = document.getElementById("no-video-toggle");
 noVideoToggle.checked = getVideosDisabled();
 noVideoToggle.addEventListener("change", () => setVideosDisabled(noVideoToggle.checked));
@@ -868,75 +872,82 @@ function loadRound() {
 
     const letterDisplay = document.getElementById("letter-display");
 
-    if (gameMode === "reverse") {
-        // Reverse mode: show image, pick the letter
-        letterDisplay.innerHTML = `
-            <div class="letter-label">${currentItem.word}</div>
-            <img id="big-image" class="big-quiz-image" src="${currentItem.image}" alt="?">
-        `;
-        const bigImg = document.getElementById("big-image");
-        bigImg.style.animation = "none";
-        void bigImg.offsetWidth;
-        bigImg.style.animation = "popIn 0.4s ease-out";
+    const buildQuizQuestion = () => {
+        if (gameMode === "reverse") {
+            // Reverse mode: show image, pick the letter
+            letterDisplay.innerHTML = `
+                <div class="letter-label">${currentItem.word}</div>
+                <img id="big-image" class="big-quiz-image" src="${currentItem.image}" alt="?">
+            `;
+            const bigImg = document.getElementById("big-image");
+            bigImg.style.animation = "none";
+            void bigImg.offsetWidth;
+            bigImg.style.animation = "popIn 0.4s ease-out";
 
-        speak(`${currentItem.word}`);
+            speak(`${currentItem.word}`);
 
-        // Pick 3 wrong letters from the round's pool (levelItems)
-        const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
-        const options = shuffle([currentItem, ...wrong]);
+            const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
+            const options = shuffle([currentItem, ...wrong]);
 
-        const choicesEl = document.getElementById("choices");
-        choicesEl.innerHTML = "";
-        options.forEach((opt, i) => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn choice-letter-btn";
-            styleTile(btn, i);
-            btn.dataset.letter = opt.letter;
-            btn.textContent = opt.letter;
-            btn.onclick = () => handleChoice(btn, opt);
-            choicesEl.appendChild(btn);
-        });
-    } else {
-        // Normal mode: show letter, pick the image
-        letterDisplay.innerHTML = `
-            <div id="big-letter">A</div>
-        `;
-        const bigLetter = document.getElementById("big-letter");
-        bigLetter.textContent = currentItem.letter;
-        bigLetter.style.animation = "none";
-        void bigLetter.offsetWidth;
-        bigLetter.style.animation = "popIn 0.4s ease-out";
+            const choicesEl = document.getElementById("choices");
+            choicesEl.innerHTML = "";
+            options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "choice-btn choice-letter-btn";
+                styleTile(btn, i);
+                btn.dataset.letter = opt.letter;
+                btn.textContent = opt.letter;
+                btn.onclick = () => handleChoice(btn, opt);
+                choicesEl.appendChild(btn);
+            });
+        } else {
+            // Normal mode: show letter, pick the image
+            letterDisplay.innerHTML = `
+                <div id="big-letter">A</div>
+            `;
+            const bigLetter = document.getElementById("big-letter");
+            bigLetter.textContent = currentItem.letter;
+            bigLetter.style.animation = "none";
+            void bigLetter.offsetWidth;
+            bigLetter.style.animation = "popIn 0.4s ease-out";
 
-        speak(`${currentItem.letter.toLowerCase()}`);
+            speak(`${currentItem.letter.toLowerCase()}`);
 
-        // Pick 3 wrong choices from the round's pool (levelItems)
-        const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
-        const options = shuffle([currentItem, ...wrong]);
+            const wrong = shuffle(levelItems.filter((it) => it.letter !== currentItem.letter)).slice(0, 3);
+            const options = shuffle([currentItem, ...wrong]);
 
-        const choicesEl = document.getElementById("choices");
-        choicesEl.innerHTML = "";
-        options.forEach((opt, i) => {
-            const btn = document.createElement("button");
-            btn.className = "choice-btn";
-            styleTile(btn, i);
-            btn.dataset.letter = opt.letter;
-            if (opt.image) {
-                btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
-            } else {
-                btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
-            }
-            btn.onclick = () => handleChoice(btn, opt);
-            choicesEl.appendChild(btn);
-        });
+            const choicesEl = document.getElementById("choices");
+            choicesEl.innerHTML = "";
+            options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "choice-btn";
+                styleTile(btn, i);
+                btn.dataset.letter = opt.letter;
+                if (opt.image) {
+                    btn.innerHTML = `<img class="choice-img" src="${opt.image}" alt="${opt.word}">`;
+                } else {
+                    btn.innerHTML = `<span class="choice-emoji">${opt.emoji}</span>`;
+                }
+                btn.onclick = () => handleChoice(btn, opt);
+                choicesEl.appendChild(btn);
+            });
 
-        if (window.twemoji) twemoji.parse(choicesEl, { folder: 'svg', ext: '.svg' });
+            if (window.twemoji) twemoji.parse(choicesEl, { folder: 'svg', ext: '.svg' });
+        }
+
+        setLetterDisplayColor(currentAppMode);
+
+        document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+        document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+    };
+
+    if (!getVideosDisabled() && getVideoBeforeQuestion() && ytReady) {
+        afterVideoHide = buildQuizQuestion;
+        playVideoReward();
+        return;
     }
 
-    setLetterDisplayColor(currentAppMode);
-
-    // Update progress
-    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
-    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+    buildQuizQuestion();
 }
 
 function handleChoice(btn, chosen) {
@@ -972,7 +983,11 @@ function handleChoice(btn, chosen) {
         showFeedback(true);
         spawnConfetti();
 
-        setTimeout(() => playVideoReward(), 1600);
+        if (getVideoBeforeQuestion() && !getVideosDisabled()) {
+            setTimeout(() => advanceRound(), 1200);
+        } else {
+            setTimeout(() => playVideoReward(), 1600);
+        }
         return;
     } else {
         btn.classList.add("wrong");
@@ -1024,6 +1039,13 @@ function getVideosDisabled() {
 }
 function setVideosDisabled(val) {
     localStorage.setItem("lb_novideo", val ? "1" : "0");
+}
+
+function getVideoBeforeQuestion() {
+    return localStorage.getItem("lb_video_before") === "1";
+}
+function setVideoBeforeQuestion(val) {
+    localStorage.setItem("lb_video_before", val ? "1" : "0");
 }
 
 function getPhonicsClip(letter) {
@@ -1658,8 +1680,7 @@ function loadKannadaRound() {
         });
     };
 
-    if (kannadaMode === "letter-image") {
-        // Show big Kannada letter silently → child picks matching image
+    const showKannadaLetterImage = () => {
         letterDisplay.innerHTML = `
             <div style="font-size:5rem;font-family:'Noto Sans Kannada',serif;animation:popIn 0.4s ease-out">${currentItem.letter}</div>
         `;
@@ -1674,6 +1695,38 @@ function loadKannadaRound() {
             btn.onclick = () => handleKannadaChoice(btn, { letter: opt });
             choicesEl.appendChild(btn);
         });
+        setLetterDisplayColor("kannada");
+    };
+
+    const showKannadaPicture = () => {
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        setTimeout(() => playKannadaClip(currentItem.letter), 400);
+        addKannadaLetterBtns(options);
+        setLetterDisplayColor("kannada");
+    };
+
+    const showKannadaHear = () => {
+        letterDisplay.innerHTML = `
+            <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+        `;
+        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
+        setTimeout(() => playKannadaClip(currentItem.letter), 400);
+        addKannadaLetterBtns(options);
+        setLetterDisplayColor("kannada");
+    };
+
+    const videoBefore = getVideoBeforeQuestion() && !getVideosDisabled();
+
+    if (kannadaMode === "letter-image") {
+        if (videoBefore) {
+            letterDisplay.innerHTML = "";
+            choicesEl.innerHTML = "";
+            afterVideoHide = showKannadaLetterImage;
+            setTimeout(() => playKannadaVideo(), 300);
+        } else {
+            showKannadaLetterImage();
+        }
     } else if (kannadaMode === "video-letter") {
         // Play teaching video first → then show image question + 4 letter choices
         letterDisplay.innerHTML = "";
@@ -1688,21 +1741,26 @@ function loadKannadaRound() {
         };
         setTimeout(() => playKannadaVideo(), 300);
     } else if (kannadaMode === "picture") {
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
-        setTimeout(() => playKannadaClip(currentItem.letter), 400);
-        addKannadaLetterBtns(options);
+        if (videoBefore) {
+            letterDisplay.innerHTML = "";
+            choicesEl.innerHTML = "";
+            afterVideoHide = showKannadaPicture;
+            setTimeout(() => playKannadaVideo(), 300);
+        } else {
+            showKannadaPicture();
+        }
     } else {
         // hear mode
-        letterDisplay.innerHTML = `
-            <div id="kannada-hear-btn" class="kannada-listen-btn">🔊</div>
-            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
-        `;
-        document.getElementById("kannada-hear-btn").addEventListener("click", () => playKannadaClip(currentItem.letter));
-        setTimeout(() => playKannadaClip(currentItem.letter), 400);
-        addKannadaLetterBtns(options);
+        if (videoBefore) {
+            letterDisplay.innerHTML = "";
+            choicesEl.innerHTML = "";
+            afterVideoHide = showKannadaHear;
+            setTimeout(() => playKannadaVideo(), 300);
+        } else {
+            showKannadaHear();
+        }
     }
 
-    setLetterDisplayColor("kannada");
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1725,13 +1783,11 @@ function handleKannadaChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        if (kannadaMode === "letter-image") {
+        const videoAlreadyPlayed = kannadaMode === "video-letter" || (getVideoBeforeQuestion() && !getVideosDisabled());
+        if (videoAlreadyPlayed) {
             playKannadaClip(currentItem.letter);
-            setTimeout(() => playKannadaVideo(), 1800);
-        } else if (kannadaMode === "video-letter") {
-            // Video was already shown before the question; just advance
             setTimeout(() => advanceRound(), 1200);
-        } else if (kannadaMode === "picture") {
+        } else if (kannadaMode === "letter-image" || kannadaMode === "picture") {
             playKannadaClip(currentItem.letter);
             setTimeout(() => playKannadaVideo(), 1800);
         } else {
@@ -1793,6 +1849,25 @@ function loadHindiRound() {
         });
     };
 
+    const showHindiPicture = () => {
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        buildHindiChoices();
+        setLetterDisplayColor("hindi");
+    };
+
+    const showHindiHear = () => {
+        letterDisplay.innerHTML = `
+            <div id="hindi-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
+        `;
+        document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter));
+        setTimeout(() => playHindiClip(currentItem.letter), 400);
+        buildHindiChoices();
+        setLetterDisplayColor("hindi");
+    };
+
+    const videoBefore = getVideoBeforeQuestion() && !getVideosDisabled();
+
     if (hindiMode === "video-letter") {
         // Play teaching video first → after it hides, show image prompt + letter choices
         letterDisplay.innerHTML = "";
@@ -1807,23 +1882,25 @@ function loadHindiRound() {
         };
         setTimeout(() => playHindiVideo(), 300);
     } else if (hindiMode === "picture") {
-        // Show image silently → child picks letter
-        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
-        buildHindiChoices();
+        if (videoBefore) {
+            letterDisplay.innerHTML = "";
+            choicesEl.innerHTML = "";
+            afterVideoHide = showHindiPicture;
+            setTimeout(() => playHindiVideo(), 300);
+        } else {
+            showHindiPicture();
+        }
     } else {
-        // hear mode — play audio clip then show 🔊 button + letter choices
-        letterDisplay.innerHTML = "";
-        choicesEl.innerHTML = "";
-        letterDisplay.innerHTML = `
-            <div id="hindi-hear-btn" class="kannada-listen-btn">🔊</div>
-            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
-        `;
-        document.getElementById("hindi-hear-btn").addEventListener("click", () => playHindiClip(currentItem.letter));
-        setTimeout(() => playHindiClip(currentItem.letter), 400);
-        buildHindiChoices();
+        // hear mode
+        if (videoBefore) {
+            letterDisplay.innerHTML = "";
+            choicesEl.innerHTML = "";
+            afterVideoHide = showHindiHear;
+            setTimeout(() => playHindiVideo(), 300);
+        } else {
+            showHindiHear();
+        }
     }
-
-    if (hindiMode !== "video-letter") setLetterDisplayColor("hindi");
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
@@ -1846,8 +1923,9 @@ function handleHindiChoice(btn, chosen) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        if (hindiMode === "video-letter") {
-            // Video was already shown as the question; just advance
+        const videoAlreadyPlayed = hindiMode === "video-letter" || (getVideoBeforeQuestion() && !getVideosDisabled());
+        if (videoAlreadyPlayed) {
+            playHindiClip(currentItem.letter);
             setTimeout(() => advanceRound(), 1200);
         } else if (hindiMode === "picture") {
             playHindiClip(currentItem.letter);
@@ -2100,7 +2178,7 @@ function loadWordsRound() {
         document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
     };
 
-    if (!getVideosDisabled() && ytReady) {
+    if (!getVideosDisabled() && getVideoBeforeQuestion() && ytReady) {
         playWordInitialPhonic(currentItem.word, buildQuestion);
     } else {
         buildQuestion();
@@ -2125,7 +2203,11 @@ function handleWordsChoice(btn, chosen) {
         speak(currentItem.word);
         setTimeout(() => speak(currentItem.word), 1000);
         setTimeout(() => speak(currentItem.word), 2000);
-        setTimeout(() => advanceRound(), 3200);
+        if (!getVideosDisabled() && !getVideoBeforeQuestion() && ytReady) {
+            setTimeout(() => playWordInitialPhonic(currentItem.word, () => advanceRound()), 3200);
+        } else {
+            setTimeout(() => advanceRound(), 3200);
+        }
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
