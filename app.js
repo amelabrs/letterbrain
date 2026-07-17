@@ -92,15 +92,17 @@ const QTYPE_ICONS = {
 
 function qTypeColor(mode) {
     const pal = QTYPE_COLORS[currentTheme] ?? QTYPE_COLORS.chalkboard;
-    if (["letter-image", "picture", "reverse"].includes(mode)) return pal.image;
+    // Yellow = image is the PROMPT (child sees image, picks letter)
+    if (["picture", "reverse"].includes(mode)) return pal.image;
     if (mode === "hear") return pal.audio;
     if (mode === "caps-test") return pal.test;
-    return pal.letter; // normal, video-letter, caps-normal, blends, numbers-normal
+    // Blue = letter is the PROMPT (child sees letter, picks image); also video-letter, normal
+    return pal.letter;
 }
 
 function qTypeIcon(mode, isTest) {
     if (isTest) return "★";
-    if (["letter-image", "picture", "reverse"].includes(mode)) return QTYPE_ICONS.image;
+    if (["picture", "reverse"].includes(mode)) return QTYPE_ICONS.image;
     if (mode === "hear") return QTYPE_ICONS.audio;
     if (mode === "video-letter") return QTYPE_ICONS.video;
     return QTYPE_ICONS.letter;
