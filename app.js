@@ -195,32 +195,22 @@ const KANNADA_LEVELS = [
 
 // ── Word Families ────────────────────────────────────────────────────
 const WORD_ITEMS = [
-    { word: "cat", family: "at", image: "images/cat.png" },
-    { word: "bat", family: "at", image: "images/bat.jpg" },
-    { word: "dog", family: "og", image: "images/dog.png" },
-    { word: "log", family: "og", image: "images/log.png" },
-    { word: "sun", family: "un", image: "images/sun.png" },
-    { word: "bun", family: "un", image: "images/bun.png" },
-    { word: "can", family: "an", image: "images/can.png" },
-    { word: "fan", family: "an", image: "images/fan.png" },
-    { word: "hen", family: "en", image: "images/hen.png" },
-    { word: "pen", family: "en", image: "images/pen.png" },
-    { word: "bug", family: "ug", image: "images/bug.png" },
-    { word: "mug", family: "ug", image: "images/mug.png" },
+    { word: "cat", image: "images/cat.png" },
+    { word: "bat", image: "images/bat.jpg" },
+    { word: "mat", image: "images/mat.png" },
+    { word: "hat", image: "images/hat.png" },
+    { word: "rat", image: "images/rat.png" },
 ];
 const WORD_LEVELS = [
-    { family: "at", mode: "normal"  },
-    { family: "at", mode: "reverse" },
-    { family: "og", mode: "normal"  },
-    { family: "og", mode: "reverse" },
-    { family: "un", mode: "normal"  },
-    { family: "un", mode: "reverse" },
-    { family: "an", mode: "normal"  },
-    { family: "an", mode: "reverse" },
-    { family: "en", mode: "normal"  },
-    { family: "en", mode: "reverse" },
-    { family: "ug", mode: "normal"  },
-    { family: "ug", mode: "reverse" },
+    { label: "1",  words: ["cat", "bat"],                     mode: "normal"  },
+    { label: "1a", words: ["cat", "bat"],                     mode: "reverse" },
+    { label: "2",  words: ["mat", "hat"],                     mode: "normal"  },
+    { label: "2a", words: ["mat", "hat"],                     mode: "reverse" },
+    { label: "3",  words: ["cat", "bat", "mat", "hat"],       mode: "normal",  isTest: true },
+    { label: "3a", words: ["cat", "bat", "mat", "hat"],       mode: "reverse", isTest: true },
+    { label: "5",  words: ["rat", "mat"],                     mode: "normal"  },
+    { label: "6",  words: ["cat", "bat", "mat", "hat", "rat"], mode: "normal",  isTest: true },
+    { label: "7",  words: ["cat", "bat", "mat", "hat", "rat"], mode: "reverse", isTest: true },
 ];
 const PHONEME_MAP = {
     a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
@@ -243,7 +233,7 @@ function playPhonics(word) {
 const HINDI_ITEMS = [
     { letter: "क", roman: "ka",  audio: "audio/hindi/ka.mp3",  vidStart: 58, image: "images/lotus.png" },
     { letter: "ख", roman: "kha", audio: "audio/hindi/kha.mp3", vidStart: 63, image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",  audio: "audio/hindi/ga.mp3",  vidStart: 67, image: "images/cow.png" },
+    { letter: "ग", roman: "ga",  audio: "audio/hindi/ga.mp3",  vidStart: 67.05, image: "images/cow.png" },
     { letter: "घ", roman: "gha", audio: "audio/hindi/gha.mp3", vidStart: 71, image: "images/clock.png" },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
@@ -626,11 +616,11 @@ function buildLevelGrid() {
     grid.innerHTML = "";
 
     if (currentAppMode === "words") {
-        WORD_LEVELS.forEach(({ family, mode }) => {
-            const color = qTypeColor(mode);
+        WORD_LEVELS.forEach(({ label, words, mode, isTest }) => {
+            const color = qTypeColor(mode, isTest);
             const icon = qTypeIcon(mode, false);
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:800;color:inherit;line-height:1">-${family}</span>
+                <span style="font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:800;color:inherit;line-height:1">${label}</span>
                 <span style="font-size:11px;line-height:1">${icon}</span>
             </div>`;
             grid.appendChild(makeNode({
@@ -638,8 +628,8 @@ function buildLevelGrid() {
                 content,
                 isLocked: false,
                 isCurrent: false,
-                isExam: false,
-                onclick: () => startWordsGame(family, mode),
+                isExam: !!isTest,
+                onclick: () => startWordsGame(words, mode),
             }));
         });
         return;
@@ -649,22 +639,22 @@ function buildLevelGrid() {
         const numDefs = [
             { label: "1–2", range: [1, 2],  mode: "hear" },
             { label: "3–4", range: [3, 4],  mode: "hear" },
-            { label: "1–4", range: [1, 4],  mode: "hear" },
+            { label: "1–4", range: [1, 4],  mode: "hear", isTest: true },
             { label: "5–6", range: [5, 6],  mode: "hear" },
             { label: "1–6", range: [1, 6],  mode: "hear" },
             { label: "7–8", range: [7, 8],  mode: "hear" },
-            { label: "1–8", range: [1, 8],  mode: "hear" },
+            { label: "1–8", range: [1, 8],  mode: "hear", isTest: true },
         ];
-        numDefs.forEach(({ label, range, mode }) => {
-            const color = qTypeColor(mode);
-            const icon = qTypeIcon(mode, false);
+        numDefs.forEach(({ label, range, mode, isTest }) => {
+            const color = qTypeColor(mode, isTest);
+            const icon = isTest ? "★" : qTypeIcon(mode, false);
             const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px">${icon}</span></span>`;
             grid.appendChild(makeNode({
                 color,
                 content,
                 isLocked: false,
                 isCurrent: false,
-                isExam: false,
+                isExam: isTest,
                 onclick: () => startNumbers(mode, range),
             }));
         });
@@ -2145,9 +2135,9 @@ function handleBlendsChoice(btn, chosen) {
 let wordsMode = "normal";
 let wordsFamilyItems = [];
 
-function startWordsGame(family, mode) {
+function startWordsGame(words, mode) {
     wordsMode = mode;
-    wordsFamilyItems = WORD_ITEMS.filter(it => it.family === family);
+    wordsFamilyItems = WORD_ITEMS.filter(it => words.includes(it.word));
     gameMode = "words-" + mode;
     currentAppMode = "words";
     queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
@@ -2200,10 +2190,7 @@ function loadWordsRound() {
 
     setLetterDisplayColor("words");
 
-    // 3 wrong options: same family first, fill from others if needed
-    const sameFamily = shuffle(wordsFamilyItems.filter(it => it.word !== currentItem.word));
-    const otherFamily = shuffle(WORD_ITEMS.filter(it => it.family !== currentItem.family));
-    const wrongPool = [...sameFamily, ...otherFamily].slice(0, 1);
+    const wrongPool = shuffle(wordsFamilyItems.filter(it => it.word !== currentItem.word)).slice(0, 1);
     const options = shuffle([currentItem, ...wrongPool]);
 
     const buildQuestion = () => {
