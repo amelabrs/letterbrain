@@ -169,6 +169,8 @@ const KANNADA_ITEMS = [
     { letter: "ಊ", roman: "uu", audio: "audio/kannada/uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
     { letter: "ಋ", roman: "ru", audio: "audio/kannada/ru.mp3", vidStart: 107, image: "images/saint.jpg" },
     { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 122, image: "images/leaf.png" },
+    { letter: "ಏ", roman: "E",  audio: "audio/kannada/E.mp3",  vidStart: 138, image: "images/crab.png" },
+    { letter: "ಐ", roman: "ai", audio: "audio/kannada/ai.mp3", vidStart: 154, image: "images/five.png" },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -191,6 +193,11 @@ const KANNADA_LEVELS = [
     { label: "16", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "video-letter", isTest: true },
     { label: "17", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "letter-image", isTest: true },
     { label: "18", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "hear",         isTest: true },
+    { label: "19", letters: ["ಏ", "ಐ"], mode: "letter-image" },
+    { label: "20", letters: ["ಏ", "ಐ"], mode: "video-letter" },
+    { label: "21", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "video-letter", isTest: true },
+    { label: "22", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "letter-image", isTest: true },
+    { label: "23", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "hear",         isTest: true },
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
@@ -202,15 +209,15 @@ const WORD_ITEMS = [
     { word: "rat", image: "images/rat.png" },
 ];
 const WORD_LEVELS = [
-    { label: "1",  words: ["cat", "bat"],                     mode: "normal"  },
-    { label: "1a", words: ["cat", "bat"],                     mode: "reverse" },
-    { label: "2",  words: ["mat", "hat"],                     mode: "normal"  },
-    { label: "2a", words: ["mat", "hat"],                     mode: "reverse" },
-    { label: "3",  words: ["cat", "bat", "mat", "hat"],       mode: "normal",  isTest: true },
-    { label: "3a", words: ["cat", "bat", "mat", "hat"],       mode: "reverse", isTest: true },
-    { label: "5",  words: ["rat", "mat"],                     mode: "normal"  },
-    { label: "6",  words: ["cat", "bat", "mat", "hat", "rat"], mode: "normal",  isTest: true },
-    { label: "7",  words: ["cat", "bat", "mat", "hat", "rat"], mode: "reverse", isTest: true },
+    { label: "cat\nbat", words: ["cat", "bat"],                      mode: "normal"  },
+    { label: "cat\nbat", words: ["cat", "bat"],                      mode: "reverse" },
+    { label: "mat\nhat", words: ["mat", "hat"],                      mode: "normal"  },
+    { label: "mat\nhat", words: ["mat", "hat"],                      mode: "reverse" },
+    { label: "all 4",   words: ["cat", "bat", "mat", "hat"],        mode: "normal",  isTest: true },
+    { label: "all 4",   words: ["cat", "bat", "mat", "hat"],        mode: "reverse", isTest: true },
+    { label: "rat\nmat", words: ["rat", "mat"],                      mode: "normal"  },
+    { label: "all 5",   words: ["cat", "bat", "mat", "hat", "rat"], mode: "normal",  isTest: true },
+    { label: "all 5",   words: ["cat", "bat", "mat", "hat", "rat"], mode: "reverse", isTest: true },
 ];
 const PHONEME_MAP = {
     a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
@@ -231,22 +238,31 @@ function playPhonics(word) {
 }
 
 const HINDI_ITEMS = [
-    { letter: "क", roman: "ka",  audio: "audio/hindi/ka.mp3",  vidStart: 58, image: "images/lotus.png" },
-    { letter: "ख", roman: "kha", audio: "audio/hindi/kha.mp3", vidStart: 63, image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",  audio: "audio/hindi/ga.mp3",  vidStart: 67.05, image: "images/cow.png" },
-    { letter: "घ", roman: "gha", audio: "audio/hindi/gha.mp3", vidStart: 71, image: "images/clock.png" },
+    { letter: "क", roman: "ka",   audio: "audio/hindi/ka.mp3",   vidStart: 58,   image: "images/lotus.png" },
+    { letter: "ख", roman: "kha",  audio: "audio/hindi/kha.mp3",  vidStart: 63,   image: "images/rabbit.png" },
+    { letter: "ग", roman: "ga",   audio: "audio/hindi/ga.mp3",   vidStart: 67.05, image: "images/cow.png" },
+    { letter: "घ", roman: "gha",  audio: "audio/hindi/gha.mp3",  vidStart: 71,   image: "images/clock.png" },
+    { letter: "ङ", roman: "nga",  audio: "audio/hindi/nga.mp3",  vidStart: 76,   image: "images/color.png" },
+    { letter: "च", roman: "cha",  audio: "audio/hindi/cha.mp3",  vidStart: 81,   image: "images/spoon.png" },
+    { letter: "छ", roman: "chha", audio: "audio/hindi/chha.mp3", vidStart: null, image: "images/umbrella.png" },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
-    { label: "1", letters: ["क", "ख"], mode: "hear" },
-    { label: "2", letters: ["क", "ख"], mode: "video-letter" },
-    { label: "3", letters: ["क", "ख"], mode: "picture" },
-    { label: "4", letters: ["ग", "घ"], mode: "hear" },
-    { label: "5", letters: ["ग", "घ"], mode: "video-letter" },
-    { label: "6", letters: ["ग", "घ"], mode: "picture" },
-    { label: "7", letters: ["क","ख","ग","घ"], mode: "hear",         isTest: true },
-    { label: "8", letters: ["क","ख","ग","घ"], mode: "video-letter", isTest: true },
-    { label: "9", letters: ["क","ख","ग","घ"], mode: "picture",      isTest: true },
+    { label: "1",  letters: ["क", "ख"], mode: "hear" },
+    { label: "2",  letters: ["क", "ख"], mode: "video-letter" },
+    { label: "3",  letters: ["क", "ख"], mode: "picture" },
+    { label: "4",  letters: ["ग", "घ"], mode: "hear" },
+    { label: "5",  letters: ["ग", "घ"], mode: "video-letter" },
+    { label: "6",  letters: ["ग", "घ"], mode: "picture" },
+    { label: "7",  letters: ["क","ख","ग","घ"], mode: "hear",         isTest: true },
+    { label: "8",  letters: ["क","ख","ग","घ"], mode: "video-letter", isTest: true },
+    { label: "9",  letters: ["क","ख","ग","घ"], mode: "picture",      isTest: true },
+    { label: "10", letters: ["ङ", "च"], mode: "hear" },
+    { label: "11", letters: ["ङ", "च"], mode: "video-letter" },
+    { label: "12", letters: ["ङ", "च"], mode: "picture" },
+    { label: "13", letters: ["छ"],      mode: "hear" },
+    { label: "14", letters: ["छ"],      mode: "video-letter" },
+    { label: "15", letters: ["छ"],      mode: "picture" },
 ];
 
 // ── Blends ───────────────────────────────────────────────────────────
@@ -619,8 +635,13 @@ function buildLevelGrid() {
         WORD_LEVELS.forEach(({ label, words, mode, isTest }) => {
             const color = qTypeColor(mode, isTest);
             const icon = qTypeIcon(mode, false);
+            const lines = label.split("\n");
+            const isMulti = lines.length > 1;
+            const labelHtml = isMulti
+                ? lines.map(w => `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:inherit;line-height:1.1;display:block">${w}</span>`).join("")
+                : `<span style="font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:800;color:inherit;line-height:1">${label}</span>`;
             const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:800;color:inherit;line-height:1">${label}</span>
+                ${labelHtml}
                 <span style="font-size:11px;line-height:1">${icon}</span>
             </div>`;
             grid.appendChild(makeNode({
