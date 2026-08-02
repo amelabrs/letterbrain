@@ -279,6 +279,49 @@ const BLENDS_LEVELS = [
     { label: "★",     activeBlends: ["th", "at", "og", "un"] },
 ];
 
+// ── Numbers ──────────────────────────────────────────────────────────
+const NUMBER_LEVELS = [
+    { label: "1–2", range: [1, 2],  mode: "hear" },
+    { label: "3–4", range: [3, 4],  mode: "hear" },
+    { label: "1–4", range: [1, 4],  mode: "hear", isTest: true },
+    { label: "5–6", range: [5, 6],  mode: "hear" },
+    { label: "1–6", range: [1, 6],  mode: "hear" },
+    { label: "7–8", range: [7, 8],  mode: "hear" },
+    { label: "1–8", range: [1, 8],  mode: "hear", isTest: true },
+];
+
+// ── Homework Mode ────────────────────────────────────────────────────
+// A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
+// to it so a child only ever sees content that's actually been taught.
+const HOMEWORK_TABS = ["quiz", "matchcaps", "kannada", "hindi", "saynumbers", "words"];
+
+function isHomeworkMode() {
+    return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
+}
+function setHomeworkModeEnabled(on) {
+    localStorage.setItem("lb_homework_mode", on ? "1" : "0");
+}
+function getHomeworkCeiling(tab) {
+    const stored = localStorage.getItem(`lb_hw_ceiling_${tab}`);
+    return stored !== null ? parseInt(stored) : 1; // unset = safest default, first level only
+}
+function setHomeworkCeiling(tab, count) {
+    localStorage.setItem(`lb_hw_ceiling_${tab}`, String(count));
+}
+function homeworkLocked(tab, idx) {
+    return isHomeworkMode() && idx >= getHomeworkCeiling(tab);
+}
+function getLevelsForTab(tab) {
+    switch (tab) {
+        case "quiz": return GAME_LEVELS;
+        case "matchcaps": return CAPS_LEVELS;
+        case "kannada": return KANNADA_LEVELS;
+        case "hindi": return HINDI_LEVELS;
+        case "saynumbers": return NUMBER_LEVELS;
+        case "words": return WORD_LEVELS;
+    }
+}
+
 // ── Analytics ────────────────────────────────────────────────────────
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby0EcuYgQHwKb8rze8aA6TjhPsQDwalUJ-VB-NG9Bs7G7O9Ew7eIlpBPhEn2Jw_LRizVw/exec";
 
@@ -630,9 +673,10 @@ function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
+    updateHomeworkBanner();
 
     if (currentAppMode === "words") {
-        WORD_LEVELS.forEach(({ label, words, mode, isTest }) => {
+        WORD_LEVELS.forEach(({ label, words, mode, isTest }, idx) => {
             const color = qTypeColor(mode, isTest);
             const icon = qTypeIcon(mode, false);
             const lines = label.split("\n");
@@ -647,7 +691,7 @@ function buildLevelGrid() {
             grid.appendChild(makeNode({
                 color,
                 content,
-                isLocked: false,
+                isLocked: homeworkLocked("words", idx),
                 isCurrent: false,
                 isExam: !!isTest,
                 onclick: () => startWordsGame(words, mode),
@@ -657,23 +701,14 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "saynumbers") {
-        const numDefs = [
-            { label: "1–2", range: [1, 2],  mode: "hear" },
-            { label: "3–4", range: [3, 4],  mode: "hear" },
-            { label: "1–4", range: [1, 4],  mode: "hear", isTest: true },
-            { label: "5–6", range: [5, 6],  mode: "hear" },
-            { label: "1–6", range: [1, 6],  mode: "hear" },
-            { label: "7–8", range: [7, 8],  mode: "hear" },
-            { label: "1–8", range: [1, 8],  mode: "hear", isTest: true },
-        ];
-        numDefs.forEach(({ label, range, mode, isTest }) => {
+        NUMBER_LEVELS.forEach(({ label, range, mode, isTest }, idx) => {
             const color = qTypeColor(mode, isTest);
             const icon = isTest ? "★" : qTypeIcon(mode, false);
             const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px">${icon}</span></span>`;
             grid.appendChild(makeNode({
                 color,
                 content,
-                isLocked: false,
+                isLocked: homeworkLocked("saynumbers", idx),
                 isCurrent: false,
                 isExam: isTest,
                 onclick: () => startNumbers(mode, range),
@@ -697,7 +732,7 @@ function buildLevelGrid() {
             grid.appendChild(makeNode({
                 color,
                 content,
-                isLocked: false,
+                isLocked: homeworkLocked("kannada", idx),
                 isCurrent: false,
                 isExam: isTest,
                 onclick: () => startKannadaGame(letters, mode, isTest, idx),
@@ -707,7 +742,7 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "hindi") {
-        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }) => {
+        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
             const color = qTypeColor(mode, isTest);
             const letterStr = isTest
                 ? `${letters[0]}–${letters[letters.length - 1]}`
@@ -721,7 +756,7 @@ function buildLevelGrid() {
             grid.appendChild(makeNode({
                 color,
                 content,
-                isLocked: false,
+                isLocked: homeworkLocked("hindi", idx),
                 isCurrent: false,
                 isExam: isTest,
                 onclick: () => startHindiGame(letters, mode),
@@ -754,11 +789,12 @@ function buildLevelGrid() {
 
     if (currentAppMode === "matchcaps") {
         const unlockedPair = getCapsUnlockedLevel();
+        const capsLockedAt = i => CAPS_LEVELS[i].pair > unlockedPair || homeworkLocked("matchcaps", i);
         CAPS_LEVELS.forEach((gl, idx) => {
-            const isLocked = gl.pair > unlockedPair;
+            const isLocked = capsLockedAt(idx);
             const isTest = gl.mode === "caps-test";
             const color = qTypeColor(gl.mode);
-            const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && CAPS_LEVELS[idx + 1].pair > unlockedPair;
+            const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && capsLockedAt(idx + 1);
             const rangeStr = isTest
                 ? `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`
                 : `${gl.letters[0]}–${gl.letters[gl.letters.length - 1]}`;
@@ -780,11 +816,12 @@ function buildLevelGrid() {
     }
 
     const unlockedPair = getUnlockedLevel();
+    const quizLockedAt = i => GAME_LEVELS[i].pair > unlockedPair || homeworkLocked("quiz", i);
 
     GAME_LEVELS.forEach((gl, idx) => {
         const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
-        const isLocked = gl.pair > unlockedPair;
-        const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && GAME_LEVELS[idx + 1].pair > unlockedPair;
+        const isLocked = quizLockedAt(idx);
+        const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && quizLockedAt(idx + 1);
         const displayItem = gl.mode === "reverse" ? items[items.length - 1] : items[0];
         const color = qTypeColor(gl.mode);
 
@@ -861,8 +898,9 @@ noVideoToggle.addEventListener("change", () => {
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
 document.getElementById("settings-btn").addEventListener("click", () => {
+    const hwLine = "4 — Turn Homework Mode " + (isHomeworkMode() ? "OFF" : "ON");
     const action = prompt(
-        "Settings:\n1 — Name this device\n2 — Reset progress\n\nEnter 1 or 2:"
+        `Settings:\n1 — Name this device\n2 — Reset progress\n3 — Set what's been learned (Homework)\n${hwLine}\n\nEnter a number:`
     );
     if (!action) return;
     if (action.trim() === "1") {
@@ -878,8 +916,106 @@ document.getElementById("settings-btn").addEventListener("click", () => {
             showScreen("start-screen");
             speak("Progress reset!");
         }
+    } else if (action.trim() === "3") {
+        openHomeworkSetup();
+    } else if (action.trim() === "4") {
+        setHomeworkModeEnabled(!isHomeworkMode());
+        buildLevelGrid();
+        speak(isHomeworkMode() ? "Homework mode on" : "Homework mode off");
     }
 });
+
+// ── Homework Setup Screen ───────────────────────────────────────────
+let hwActiveTab = "quiz";
+
+function updateHomeworkBanner() {
+    const banner = document.getElementById("homework-banner");
+    if (banner) banner.style.display = isHomeworkMode() ? "block" : "none";
+}
+
+function tabIconLabel(tab) {
+    return { quiz: "🔤", matchcaps: "🔡", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "cat" }[tab];
+}
+
+function tabLevelLabel(tab, level) {
+    switch (tab) {
+        case "quiz": {
+            const items = ALL_ITEMS.filter(it => it.level === level.contentLevel);
+            const it = level.mode === "reverse" ? items[items.length - 1] : items[0];
+            return it?.letter || "?";
+        }
+        case "matchcaps":
+            return level.mode === "caps-test"
+                ? `${level.cumulative[0]}–${level.cumulative[level.cumulative.length - 1]}`
+                : level.letters.join("");
+        case "kannada":
+        case "hindi":
+            return level.letters.slice(0, 2).join("");
+        case "saynumbers":
+            return level.label;
+        case "words":
+            return level.label.split("\n")[0];
+    }
+}
+
+function buildHomeworkTabs() {
+    const wrap = document.getElementById("hw-tabs");
+    wrap.innerHTML = "";
+    HOMEWORK_TABS.forEach(tab => {
+        const btn = document.createElement("button");
+        btn.className = "hw-tab-btn" + (tab === hwActiveTab ? " active" : "");
+        btn.textContent = tabIconLabel(tab);
+        btn.addEventListener("click", () => {
+            hwActiveTab = tab;
+            buildHomeworkTabs();
+            buildHomeworkGrid();
+        });
+        wrap.appendChild(btn);
+    });
+}
+
+function buildHomeworkGrid() {
+    const grid = document.getElementById("hw-level-grid");
+    grid.innerHTML = "";
+    const levels = getLevelsForTab(hwActiveTab);
+    const ceiling = getHomeworkCeiling(hwActiveTab);
+    levels.forEach((level, idx) => {
+        const learned = idx < ceiling;
+        const node = document.createElement("div");
+        node.className = "hw-node" + (learned ? " learned" : "");
+        node.innerHTML = `<span>${tabLevelLabel(hwActiveTab, level)}</span>${learned ? '<span class="hw-check">✓</span>' : ''}`;
+        node.addEventListener("click", () => {
+            setHomeworkCeiling(hwActiveTab, idx + 1);
+            buildHomeworkGrid();
+        });
+        grid.appendChild(node);
+    });
+}
+
+function updateHomeworkModeToggleBtn() {
+    const btn = document.getElementById("hw-mode-toggle");
+    if (!btn) return;
+    btn.textContent = isHomeworkMode()
+        ? "🔓 Turn Homework Mode OFF (show everything)"
+        : "🔒 Turn Homework Mode ON";
+}
+
+function toggleHomeworkModeFromSetup() {
+    setHomeworkModeEnabled(!isHomeworkMode());
+    updateHomeworkModeToggleBtn();
+}
+
+function openHomeworkSetup() {
+    buildHomeworkTabs();
+    buildHomeworkGrid();
+    updateHomeworkModeToggleBtn();
+    showScreen("homework-screen");
+}
+
+function closeHomeworkSetup() {
+    showScreen("start-screen");
+    buildLevelGrid();
+}
 
 // ── Game Flow ───────────────────────────────────────────────────────
 
@@ -1911,7 +2047,8 @@ function loadHindiRound() {
     choicesEl.innerHTML = "";
 
     const buildHindiChoices = () => {
-        shuffle([...HINDI_ITEMS]).forEach((opt, i) => {
+        const wrong = shuffle(HINDI_ITEMS.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
+        shuffle([currentItem, ...wrong]).forEach((opt, i) => {
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-letter-btn";
             styleTile(btn, i);
@@ -2312,32 +2449,48 @@ function advanceRound() {
 }
 
 // ── Mode Tabs ─────────────────────────────────────────────────────────
+// "matchcaps" has no nav button of its own — it lives inside the Quiz tab
+// behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
+function navTabFor(mode) {
+    return mode === "matchcaps" ? "quiz" : mode;
+}
+function updateQuizCaseToggle() {
+    const wrap = document.getElementById("quiz-case-toggle");
+    const isQuizFamily = currentAppMode === "quiz" || currentAppMode === "matchcaps";
+    wrap.style.display = isQuizFamily ? "flex" : "none";
+    document.getElementById("toggle-quiz").classList.toggle("active", currentAppMode === "quiz");
+    document.getElementById("toggle-case").classList.toggle("active", currentAppMode === "matchcaps");
+}
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
-    ["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers", "words"].forEach(m => {
+    const activeNavTab = navTabFor(mode);
+    ["quiz", "kannada", "hindi", "saynumbers", "words"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
-        if (el) el.classList.toggle("active", m === mode);
+        if (el) el.classList.toggle("active", m === activeNavTab);
     });
+    updateQuizCaseToggle();
     buildLevelGrid();
 }
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
-document.getElementById("tab-matchcaps").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
-document.getElementById("tab-blends").addEventListener("click", () => setActiveTab("blends"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
-// Reset any stored mode from removed tabs
-if (["sayit", "saywords", "sayletters"].includes(currentAppMode)) {
+document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
+document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
+// Reset any stored mode from removed/retired tabs
+if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode)) {
     currentAppMode = "quiz";
     localStorage.setItem("lb_mode", "quiz");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
-["quiz", "matchcaps", "kannada", "hindi", "blends", "saynumbers", "words"].forEach(m => {
+const initialNavTab = navTabFor(currentAppMode);
+["quiz", "kannada", "hindi", "saynumbers", "words"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
-    if (el) el.classList.toggle("active", m === currentAppMode);
+    if (el) el.classList.toggle("active", m === initialNavTab);
 });
+updateQuizCaseToggle();
 
 // Apply saved theme on load
 document.body.classList.toggle("theme-rainbow", currentTheme === "rainbow");

@@ -105,7 +105,6 @@ header {
 #start-screen {
   gap: 0;
   padding: 0 0 32px;
-  overflow-y: auto;
 }
 
 /* ── Mode Tabs ───────────────────────────────────────────────────────── */
@@ -113,14 +112,19 @@ header {
   display: flex;
   justify-content: center;
   gap: 8px;
-  padding: 6px 16px 18px;
-  background: var(--bg);
+  padding: 10px 16px 14px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .mode-tab {
-  width: 42px;
-  height: 42px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: var(--bg);
   border: 2px solid transparent;
@@ -128,10 +132,10 @@ header {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.4;
+  opacity: 0.65;
   transition: opacity 0.2s, box-shadow 0.2s;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
   -webkit-tap-highlight-color: transparent;
@@ -142,8 +146,8 @@ header {
 .mode-tab-kannada { border-color: var(--neon-orange); color: var(--neon-orange); }
 .mode-tab-hindi   { border-color: var(--neon-pink);   color: var(--neon-pink);   }
 .mode-tab-blends  { border-color: var(--neon-purple); color: var(--neon-purple); }
-.mode-tab-numbers { border-color: var(--neon-yellow); color: var(--neon-yellow); font-size: 16px; }
-.mode-tab-words   { border-color: var(--neon-coral);  color: var(--neon-coral);  font-size: 13px; font-weight: 800; }
+.mode-tab-numbers { border-color: var(--neon-yellow); color: var(--neon-yellow); font-size: 20px; }
+.mode-tab-words   { border-color: var(--neon-coral);  color: var(--neon-coral);  font-size: 16px; font-weight: 800; }
 
 .mode-tab.active { opacity: 1; border-width: 3px; }
 
@@ -154,6 +158,171 @@ header {
 .mode-tab-blends.active  { box-shadow: 0 0 14px 2px rgba(180,124,255,0.6); }
 .mode-tab-numbers.active { box-shadow: 0 0 14px 2px rgba(255,234,0,0.6); }
 .mode-tab-words.active   { box-shadow: 0 0 14px 2px rgba(255,96,96,0.6); }
+
+/* ── Quiz/Case Segmented Toggle ─────────────────────────────────────── */
+.segmented-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 4px 16px 10px;
+}
+
+.segmented-btn {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 8px 22px;
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.segmented-btn[data-mode="quiz"]      { border-color: var(--neon-green); color: var(--neon-green); }
+.segmented-btn[data-mode="matchcaps"] { border-color: var(--neon-cyan);  color: var(--neon-cyan); }
+.segmented-btn.active { opacity: 1; border-width: 3px; }
+.segmented-btn[data-mode="quiz"].active      { box-shadow: 0 0 14px 2px rgba(124,255,107,0.6); }
+.segmented-btn[data-mode="matchcaps"].active { box-shadow: 0 0 14px 2px rgba(0,229,255,0.6); }
+
+body.theme-rainbow .segmented-btn { opacity: 0.6; }
+body.theme-rainbow .segmented-btn[data-mode="quiz"]      { border-color: #347046; color: #347046; }
+body.theme-rainbow .segmented-btn[data-mode="matchcaps"] { border-color: #2E5E6E; color: #2E5E6E; }
+body.theme-rainbow .segmented-btn.active { opacity: 1; }
+body.theme-rainbow .segmented-btn[data-mode="quiz"].active      { background: #347046; color: #fff; box-shadow: 0 2px 8px rgba(52,112,70,0.35); }
+body.theme-rainbow .segmented-btn[data-mode="matchcaps"].active { background: #2E5E6E; color: #fff; box-shadow: 0 2px 8px rgba(46,94,110,0.35); }
+
+/* ── Homework Mode Banner ────────────────────────────────────────────── */
+.homework-banner {
+  margin: 0 16px 10px;
+  padding: 9px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-raised);
+  border: 1.5px dashed var(--line);
+  color: var(--fg-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  display: none;
+}
+
+/* ── Homework Setup Screen ───────────────────────────────────────────── */
+#homework-screen {
+  padding: 56px 16px 32px;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.hw-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-align: center;
+  color: var(--fg);
+}
+
+.hw-sub {
+  font-size: 13px;
+  color: var(--fg-soft);
+  text-align: center;
+  padding: 0 16px 4px;
+  max-width: 340px;
+}
+
+#hw-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0 12px;
+}
+
+.hw-tab-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--fg-soft);
+  opacity: 0.55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-family: var(--font-display);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hw-tab-btn.active {
+  opacity: 1;
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+#hw-level-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 64px);
+  gap: 12px;
+  justify-content: center;
+  padding: 8px 16px;
+}
+
+.hw-node {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  border: 3px dashed var(--fg-faint);
+  color: var(--fg-faint);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hw-node.learned {
+  border: 3px solid var(--neon-green);
+  color: var(--neon-green);
+  background: rgba(124,255,107,0.12);
+}
+
+.hw-mode-toggle-btn {
+  margin: 4px auto 16px;
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--fg-soft);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hw-node .hw-check {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--neon-green);
+  color: #111;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* ── Level Grid ──────────────────────────────────────────────────────── */
 #level-grid {
@@ -868,7 +1037,7 @@ body.theme-rainbow .start-btn {
 /* Rainbow tab styling: solid colored circles */
 body.theme-rainbow .mode-tab {
   background: transparent;
-  opacity: 0.5;
+  opacity: 0.75;
 }
 body.theme-rainbow .mode-tab.active { opacity: 1; border-width: 2px; }
 
