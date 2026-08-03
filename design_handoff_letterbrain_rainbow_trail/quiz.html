@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/tokens/fonts.css">
+<link rel="stylesheet" href="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/tokens/colors.css">
+<link rel="stylesheet" href="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/tokens/typography.css">
+<link rel="stylesheet" href="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/tokens/spacing.css">
+<link rel="stylesheet" href="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/tokens/base.css">
+<link rel="stylesheet" href="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/styles.css">
+<script src="../_ds/garden-swap-design-system-0373cf76-6d2c-40a9-a55f-7bb2bf4ae25a/_ds_bundle.js"></script>
+<script src="../image-slot.js"></script>
+<style>
+  body{margin:0;background:var(--paper);font-family:var(--font-sans);color:var(--ink)}
+  a{color:var(--fern-600)}
+  a:hover{color:var(--pine-700)}
+</style>
+</helmet>
+<div style="padding:40px;display:flex;flex-direction:column;gap:20px;align-items:flex-start">
+<div style="font-family:var(--font-serif);font-size:22px;color:var(--pine-700)">LetterBrain — Rainbow Trail — Quiz tab</div>
+<div style="display:flex;gap:24px;flex-wrap:wrap">
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" width="340" height="736" hint-size="340,736">
+<div style="height:100%;display:flex;flex-direction:column;background:var(--paper);font-family:var(--font-sans);box-sizing:border-box">
+  <div style="padding:56px 20px 10px;display:flex;align-items:center;justify-content:center;gap:8px">
+    <x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="sparkles" size="20" color="var(--honey-500)" fill="var(--honey-500)" hint-size="20,20"></x-import>
+    <div style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--pine-700);white-space:nowrap">My Garden</div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:6px;padding:6px 14px 14px">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--fern-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-hover);outline:3px solid var(--mint-100)"><x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="sprout" size="18" color="#fff" hint-size="18,18"></x-import></div>
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--denim-600);opacity:0.5;display:flex;align-items:center;justify-content:center"><x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="repeat" size="17" color="#fff" hint-size="17,17"></x-import></div>
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--clay-600);opacity:0.5;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:17px;color:#fff">ಅ</div>
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--plum-500);opacity:0.5;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:17px;color:#fff">अ</div>
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--honey-500);opacity:0.5;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:15px;font-weight:700;color:#fff">3</div>
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--pine-700);opacity:0.5;display:flex;align-items:center;justify-content:center"><x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="trees" size="17" color="#fff" hint-size="17,17"></x-import></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:10px 26px 36px;display:flex;flex-direction:column;gap:22px;align-items:center">
+    <div style="align-self:flex-start;width:78px;height:78px;border-radius:50%;background:var(--fern-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-hover)">
+      <image-slot id="q-a" style="width:54px;height:54px" shape="circle" placeholder="Apple"></image-slot>
+    </div>
+    <div style="width:78px;height:78px;border-radius:50%;background:var(--honey-500);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-hover)">
+      <image-slot id="q-b" style="width:54px;height:54px" shape="circle" placeholder="Ball"></image-slot>
+    </div>
+    <div style="align-self:flex-end;width:88px;height:88px;border-radius:50%;background:var(--denim-600);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-fab);outline:5px solid var(--honey-200)">
+      <image-slot id="q-c" style="width:60px;height:60px" shape="circle" placeholder="Cat"></image-slot>
+    </div>
+    <div style="width:70px;height:70px;border-radius:50%;background:var(--paper-raised);border:2px dashed var(--line-strong);display:flex;align-items:center;justify-content:center">
+      <x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="lock" size="22" color="var(--ink-faint)" hint-size="22,22"></x-import>
+    </div>
+  </div>
+</div>
+</x-import>
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" width="340" height="736" hint-size="340,736">
+<div style="height:100%;display:flex;flex-direction:column;background:var(--paper);font-family:var(--font-sans);box-sizing:border-box">
+  <div style="padding:56px 20px 10px;display:flex;justify-content:center">
+    <div style="display:flex;gap:6px"><div style="width:36px;height:8px;border-radius:99px;background:var(--fern-500)"></div><div style="width:36px;height:8px;border-radius:99px;background:var(--fern-500)"></div><div style="width:36px;height:8px;border-radius:99px;background:var(--line)"></div></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 22px 8px;gap:20px">
+    <div style="width:140px;height:140px;border-radius:36px;background:var(--fern-600);box-shadow:var(--shadow-hover);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:80px;font-weight:700;color:#fff">B</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%">
+      <div style="background:var(--honey-500);border-radius:26px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 0 5px var(--honey-100)">
+        <div style="position:absolute;top:-12px;right:-12px;width:30px;height:30px;border-radius:50%;background:var(--fern-600);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)"><x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="check" size="16" color="#fff" hint-size="16,16"></x-import></div>
+        <image-slot id="q-ball" style="width:68px;height:68px" shape="circle" placeholder="Ball"></image-slot>
+      </div>
+      <div style="background:var(--denim-600);border-radius:26px;aspect-ratio:1;display:flex;align-items:center;justify-content:center"><image-slot id="q-apple" style="width:68px;height:68px" shape="circle" placeholder="Apple"></image-slot></div>
+      <div style="background:var(--clay-600);border-radius:26px;aspect-ratio:1;display:flex;align-items:center;justify-content:center"><image-slot id="q-cat" style="width:68px;height:68px" shape="circle" placeholder="Cat"></image-slot></div>
+      <div style="background:var(--plum-500);border-radius:26px;aspect-ratio:1;display:flex;align-items:center;justify-content:center"><image-slot id="q-dog" style="width:68px;height:68px" shape="circle" placeholder="Dog"></image-slot></div>
+    </div>
+  </div>
+  <div style="margin:0 20px 26px;background:var(--fern-600);border-radius:24px;padding:16px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--shadow-hover)">
+    <x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="sparkles" size="24" color="var(--honey-200)" fill="var(--honey-200)" hint-size="24,24"></x-import>
+    <x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="star" size="20" color="#fff" fill="#fff" hint-size="20,20"></x-import>
+    <x-import component-from-global-scope="GardenSwapDesignSystem_0373cf.Icon" name="sparkles" size="24" color="var(--honey-200)" fill="var(--honey-200)" hint-size="24,24"></x-import>
+  </div>
+</div>
+</x-import>
+</div>
+</div>
+
+</x-dc>
+</body>
+</html>

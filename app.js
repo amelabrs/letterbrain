@@ -171,6 +171,9 @@ const KANNADA_ITEMS = [
     { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 122, image: "images/leaf.png" },
     { letter: "ಏ", roman: "E",  audio: "audio/kannada/E.mp3",  vidStart: 138, image: "images/crab.png" },
     { letter: "ಐ", roman: "ai", audio: "audio/kannada/ai.mp3", vidStart: 154, image: "images/five.png" },
+    { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 170, image: "images/camel.png" },
+    { letter: "ಓ", roman: "oo", audio: "audio/kannada/oo.mp3", vidStart: 186, image: "images/run.png" },
+    { letter: "ಔ", roman: "au", audio: "audio/kannada/au.mp3", vidStart: 202, image: "images/medicine.png" },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -198,6 +201,13 @@ const KANNADA_LEVELS = [
     { label: "21", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "video-letter", isTest: true },
     { label: "22", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "letter-image", isTest: true },
     { label: "23", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "hear",         isTest: true },
+    { label: "24", letters: ["ಒ", "ಓ"], mode: "letter-image" },
+    { label: "25", letters: ["ಒ", "ಓ"], mode: "video-letter" },
+    { label: "26", letters: ["ಔ"],      mode: "letter-image" },
+    { label: "27", letters: ["ಔ"],      mode: "video-letter" },
+    { label: "28", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "video-letter", isTest: true },
+    { label: "29", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "letter-image", isTest: true },
+    { label: "30", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "hear",         isTest: true },
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
@@ -238,13 +248,46 @@ function playPhonics(word) {
 }
 
 const HINDI_ITEMS = [
-    { letter: "क", roman: "ka",   audio: "audio/hindi/ka.mp3",   vidStart: 58,   image: "images/lotus.png" },
-    { letter: "ख", roman: "kha",  audio: "audio/hindi/kha.mp3",  vidStart: 63,   image: "images/rabbit.png" },
-    { letter: "ग", roman: "ga",   audio: "audio/hindi/ga.mp3",   vidStart: 67.05, image: "images/cow.png" },
-    { letter: "घ", roman: "gha",  audio: "audio/hindi/gha.mp3",  vidStart: 71,   image: "images/clock.png" },
-    { letter: "ङ", roman: "nga",  audio: "audio/hindi/nga.mp3",  vidStart: 76,   image: "images/color.png" },
-    { letter: "च", roman: "cha",  audio: "audio/hindi/cha.mp3",  vidStart: 81,   image: "images/spoon.png" },
-    { letter: "छ", roman: "chha", audio: "audio/hindi/chha.mp3", vidStart: null, image: "images/umbrella.png" },
+    // ka-varga
+    { letter: "क", roman: "ka",   audio: "audio/hindi/ka.mp3",   vidStart: 58,  image: "images/lotus.png"    },
+    { letter: "ख", roman: "kha",  audio: "audio/hindi/kha.mp3",  vidStart: 63,  image: "images/sword.png"    },
+    { letter: "ग", roman: "ga",   audio: "audio/hindi/ga.mp3",   vidStart: 67,  image: "images/watch.png"    },
+    { letter: "घ", roman: "gha",  audio: "audio/hindi/gha.mp3",  vidStart: 71,  image: "images/bell.png"     },
+    { letter: "ङ", roman: "nga",  audio: "audio/hindi/nga.mp3",  vidStart: 76,  image: "images/color.png"    },
+    // cha-varga
+    { letter: "च", roman: "cha",  audio: "audio/hindi/cha.mp3",  vidStart: 81,  image: "images/spoon.png"    },
+    { letter: "छ", roman: "chha", audio: "audio/hindi/chha.mp3", vidStart: 85,  image: "images/umbrella.png" },
+    { letter: "ज", roman: "ja",   audio: "audio/hindi/ja.mp3",   vidStart: 94,  image: "images/ship.png"     },
+    { letter: "झ", roman: "jha",  audio: "audio/hindi/jha.mp3",  vidStart: 99,  image: "images/waterfall.png"},
+    { letter: "ञ", roman: "nya",  audio: "audio/hindi/nya.mp3",  vidStart: 103, image: null                  },
+    // ta-varga (retroflex)
+    { letter: "ट", roman: "ta",   audio: "audio/hindi/ta2.mp3",  vidStart: 108, image: "images/ram.png"      },
+    { letter: "ठ", roman: "tha",  audio: "audio/hindi/tha2.mp3", vidStart: 113, image: "images/stamp.png"    },
+    { letter: "ड", roman: "da",   audio: "audio/hindi/da2.mp3",  vidStart: 118, image: "images/drum.png"     },
+    { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 122, image: "images/drum.png"     },
+    { letter: "ण", roman: "na",   audio: "audio/hindi/na2.mp3",  vidStart: 127, image: "images/fly.png"      },
+    // ta-varga (dental)
+    { letter: "त", roman: "ta",   audio: "audio/hindi/ta.mp3",   vidStart: 131, image: "images/scale.png"    },
+    { letter: "थ", roman: "tha",  audio: "audio/hindi/tha.mp3",  vidStart: 136, image: "images/thermos.png"  },
+    { letter: "द", roman: "da",   audio: "audio/hindi/da.mp3",   vidStart: 141, image: "images/cow.png"      },
+    { letter: "ध", roman: "dha",  audio: "audio/hindi/dha.mp3",  vidStart: 145, image: "images/arrow.png"    },
+    { letter: "न", roman: "na",   audio: "audio/hindi/na.mp3",   vidStart: 151, image: "images/tap.png"      },
+    // pa-varga
+    { letter: "प", roman: "pa",   audio: "audio/hindi/pa.mp3",   vidStart: 154, image: "images/kite.png"     },
+    { letter: "फ", roman: "pha",  audio: "audio/hindi/pha.mp3",  vidStart: 159, image: "images/fruit.png"    },
+    { letter: "ब", roman: "ba",   audio: "audio/hindi/ba.mp3",   vidStart: 164, image: "images/color.png"    },
+    { letter: "भ", roman: "bha",  audio: "audio/hindi/bha.mp3",  vidStart: 168, image: "images/dance.png"    },
+    { letter: "म", roman: "ma",   audio: "audio/hindi/ma.mp3",   vidStart: 173, image: "images/tree.png"     },
+    // antastha
+    { letter: "य", roman: "ya",   audio: "audio/hindi/ya.mp3",   vidStart: 177, image: "images/mask.png"     },
+    { letter: "र", roman: "ra",   audio: "audio/hindi/ra.mp3",   vidStart: 182, image: "images/sun.png"      },
+    { letter: "ल", roman: "la",   audio: "audio/hindi/la.mp3",   vidStart: 187, image: "images/laddoo.png"   },
+    { letter: "व", roman: "va",   audio: "audio/hindi/va.mp3",   vidStart: 191, image: "images/diamond.png"  },
+    // ushma + ha
+    { letter: "श", roman: "sha",  audio: "audio/hindi/sha.mp3",  vidStart: 195, image: "images/conch.png"    },
+    { letter: "ष", roman: "sha2", audio: "audio/hindi/sha2.mp3", vidStart: 200, image: "images/hexagon.png"  },
+    { letter: "स", roman: "sa",   audio: "audio/hindi/sa.mp3",   vidStart: 205, image: "images/snake.png"    },
+    { letter: "ह", roman: "ha",   audio: "audio/hindi/ha.mp3",   vidStart: 210, image: "images/swan.png"     },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
@@ -260,9 +303,51 @@ const HINDI_LEVELS = [
     { label: "10", letters: ["ङ", "च"], mode: "hear" },
     { label: "11", letters: ["ङ", "च"], mode: "video-letter" },
     { label: "12", letters: ["ङ", "च"], mode: "picture" },
-    { label: "13", letters: ["छ"],      mode: "hear" },
-    { label: "14", letters: ["छ"],      mode: "video-letter" },
-    { label: "15", letters: ["छ"],      mode: "picture" },
+    { label: "13", letters: ["छ", "ज"], mode: "hear" },
+    { label: "14", letters: ["छ", "ज"], mode: "video-letter" },
+    { label: "15", letters: ["छ", "ज"], mode: "picture" },
+    { label: "16", letters: ["झ", "ट"], mode: "hear" },
+    { label: "17", letters: ["झ", "ट"], mode: "video-letter" },
+    { label: "18", letters: ["झ", "ट"], mode: "picture" },
+    { label: "19", letters: ["ठ", "ड"], mode: "hear" },
+    { label: "20", letters: ["ठ", "ड"], mode: "video-letter" },
+    { label: "21", letters: ["ठ", "ड"], mode: "picture" },
+    { label: "22", letters: ["ढ", "ण"], mode: "hear" },
+    { label: "23", letters: ["ढ", "ण"], mode: "video-letter" },
+    { label: "24", letters: ["ढ", "ण"], mode: "picture" },
+    { label: "25", letters: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"], mode: "hear",         isTest: true },
+    { label: "26", letters: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"], mode: "video-letter", isTest: true },
+    { label: "27", letters: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"], mode: "picture",      isTest: true },
+    { label: "28", letters: ["त", "थ"], mode: "hear" },
+    { label: "29", letters: ["त", "थ"], mode: "video-letter" },
+    { label: "30", letters: ["त", "थ"], mode: "picture" },
+    { label: "31", letters: ["द", "ध"], mode: "hear" },
+    { label: "32", letters: ["द", "ध"], mode: "video-letter" },
+    { label: "33", letters: ["द", "ध"], mode: "picture" },
+    { label: "34", letters: ["न", "प"], mode: "hear" },
+    { label: "35", letters: ["न", "प"], mode: "video-letter" },
+    { label: "36", letters: ["न", "प"], mode: "picture" },
+    { label: "37", letters: ["फ", "ब"], mode: "hear" },
+    { label: "38", letters: ["फ", "ब"], mode: "video-letter" },
+    { label: "39", letters: ["फ", "ब"], mode: "picture" },
+    { label: "40", letters: ["भ", "म"], mode: "hear" },
+    { label: "41", letters: ["भ", "म"], mode: "video-letter" },
+    { label: "42", letters: ["भ", "म"], mode: "picture" },
+    { label: "43", letters: ["त","थ","द","ध","न","प","फ","ब","भ","म"], mode: "hear",         isTest: true },
+    { label: "44", letters: ["त","थ","द","ध","न","प","फ","ब","भ","म"], mode: "video-letter", isTest: true },
+    { label: "45", letters: ["त","थ","द","ध","न","प","फ","ब","भ","म"], mode: "picture",      isTest: true },
+    { label: "46", letters: ["य", "र"], mode: "hear" },
+    { label: "47", letters: ["य", "र"], mode: "video-letter" },
+    { label: "48", letters: ["य", "र"], mode: "picture" },
+    { label: "49", letters: ["ल", "व"], mode: "hear" },
+    { label: "50", letters: ["ल", "व"], mode: "video-letter" },
+    { label: "51", letters: ["ल", "व"], mode: "picture" },
+    { label: "52", letters: ["श", "ष"], mode: "hear" },
+    { label: "53", letters: ["श", "ष"], mode: "video-letter" },
+    { label: "54", letters: ["श", "ष"], mode: "picture" },
+    { label: "55", letters: ["स", "ह"], mode: "hear" },
+    { label: "56", letters: ["स", "ह"], mode: "video-letter" },
+    { label: "57", letters: ["स", "ह"], mode: "picture" },
 ];
 
 // ── Blends ───────────────────────────────────────────────────────────
