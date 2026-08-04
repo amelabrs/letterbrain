@@ -163,8 +163,8 @@ function setCapsUnlockedLevel(lvl) {
 const KANNADA_ITEMS = [
     { letter: "ಅ", roman: "a",  audio: "audio/kannada/a.mp3",  vidStart: 14,  image: "images/prince.png" },
     { letter: "ಆ", roman: "aa", audio: "audio/kannada/aa.mp3", vidStart: 31,  image: "images/elephant.png" },
-    { letter: "ಇ", roman: "i",  audio: "audio/kannada/i.mp3",  vidStart: 96,  image: "images/rat.png" },
-    { letter: "ಈ", roman: "ii", audio: "audio/kannada/ii.mp3", vidStart: null, image: "images/fly.png" },
+    { letter: "ಇ", roman: "i",  audio: "audio/kannada/i.mp3",  vidStart: 44,  image: "images/rat.png" },
+    { letter: "ಈ", roman: "ii", audio: "audio/kannada/ii.mp3", vidStart: 60,  image: "images/fly.png" },
     { letter: "ಉ", roman: "u",  audio: "audio/kannada/u.mp3",  vidStart: 79,  image: "images/ring.png" },
     { letter: "ಊ", roman: "uu", audio: "audio/kannada/uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
     { letter: "ಋ", roman: "ru", audio: "audio/kannada/ru.mp3", vidStart: 107, image: "images/saint.jpg" },
@@ -174,6 +174,8 @@ const KANNADA_ITEMS = [
     { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 170, image: "images/camel.png" },
     { letter: "ಓ", roman: "oo", audio: "audio/kannada/oo.mp3", vidStart: 186, image: "images/run.png" },
     { letter: "ಔ", roman: "au", audio: "audio/kannada/au.mp3", vidStart: 202, image: "images/medicine.png" },
+    { letter: "ಅಂ", roman: "am", audio: "audio/kannada/am.mp3", vidStart: 218, image: "images/shop.png"     },
+    { letter: "ಅಃ", roman: "ah", audio: "audio/kannada/ah.mp3", vidStart: 234, image: "images/tea.png"      },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -208,6 +210,57 @@ const KANNADA_LEVELS = [
     { label: "28", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "video-letter", isTest: true },
     { label: "29", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "letter-image", isTest: true },
     { label: "30", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "hear",         isTest: true },
+    { label: "31", letters: ["ಅಂ", "ಅಃ"], mode: "letter-image" },
+    { label: "32", letters: ["ಅಂ", "ಅಃ"], mode: "video-letter" },
+    { label: "33", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ", "ಅಂ", "ಅಃ"], mode: "video-letter", isTest: true },
+    { label: "34", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ", "ಅಂ", "ಅಃ"], mode: "letter-image", isTest: true },
+    { label: "35", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ", "ಅಂ", "ಅಃ"], mode: "hear",         isTest: true },
+];
+
+// ── Kannada Consonants ────────────────────────────────────────────────
+const KANNADA_CONSONANT_ITEMS = [
+    // ka-varga
+    { letter: "ಕ",  roman: "ka",   audio: "audio/kannada/ka.mp3",   vidStart: 250, image: "images/lotus.png"    },
+    { letter: "ಖ",  roman: "kha",  audio: "audio/kannada/kha.mp3",  vidStart: 263, image: "images/sword.png"    },
+    { letter: "ಗ",  roman: "ga",   audio: "audio/kannada/ga.mp3",   vidStart: 276, image: "images/watch.png"    },
+    { letter: "ಘ",  roman: "gha",  audio: "audio/kannada/gha.mp3",  vidStart: 289, image: "images/bell.png"     },
+    { letter: "ಙ",  roman: "nga",  audio: "audio/kannada/nga.mp3",  vidStart: 302, image: "images/color.png"    },
+    // cha-varga
+    { letter: "ಚ",  roman: "cha",  audio: "audio/kannada/cha.mp3",  vidStart: 315, image: "images/spoon.png"    },
+    { letter: "ಛ",  roman: "chha", audio: "audio/kannada/chha.mp3", vidStart: 328, image: "images/umbrella.png" },
+    { letter: "ಜ",  roman: "ja",   audio: "audio/kannada/ja.mp3",   vidStart: 341, image: "images/ship.png"     },
+    { letter: "ಝ",  roman: "jha",  audio: "audio/kannada/jha.mp3",  vidStart: 355, image: "images/waterfall.png"},
+    { letter: "ಞ",  roman: "nya",  audio: "audio/kannada/nya.mp3",  vidStart: 362, image: null                  },
+    // ta-varga (retroflex)
+    { letter: "ಟ",  roman: "Ta",   audio: "audio/kannada/Ta.mp3",   vidStart: 371, image: "images/ram.png"      },
+    { letter: "ಠ",  roman: "Tha",  audio: "audio/kannada/Tha.mp3",  vidStart: 380, image: "images/stamp.png"    },
+    { letter: "ಡ",  roman: "Da",   audio: "audio/kannada/Da.mp3",   vidStart: 391, image: "images/drum.png"     },
+    { letter: "ಢ",  roman: "Dha",  audio: "audio/kannada/Dha.mp3",  vidStart: 402, image: "images/damaru.png"   },
+    { letter: "ಣ",  roman: "Na",   audio: "audio/kannada/Na.mp3",   vidStart: 424, image: "images/fly.png"      },
+    // ta-varga (dental)
+    { letter: "ತ",  roman: "ta",   audio: "audio/kannada/ta.mp3",   vidStart: 441, image: "images/scale.png"    },
+    { letter: "ಥ",  roman: "tha",  audio: "audio/kannada/tha.mp3",  vidStart: 457, image: "images/thermos.png"  },
+    { letter: "ದ",  roman: "da",   audio: "audio/kannada/da.mp3",   vidStart: 474, image: "images/cow.png"      },
+    { letter: "ಧ",  roman: "dha",  audio: "audio/kannada/dha.mp3",  vidStart: 490, image: "images/arrow.png"    },
+    { letter: "ನ",  roman: "na",   audio: "audio/kannada/na.mp3",   vidStart: 507, image: "images/peacock.png"  },
+    // pa-varga
+    { letter: "ಪ",  roman: "pa",   audio: "audio/kannada/pa.mp3",   vidStart: 527, image: "images/kite.png"     },
+    { letter: "ಫ",  roman: "pha",  audio: "audio/kannada/pha.mp3",  vidStart: 542, image: "images/fruit.png"    },
+    { letter: "ಬ",  roman: "ba",   audio: "audio/kannada/ba.mp3",   vidStart: 558, image: "images/color.png"    },
+    { letter: "ಭ",  roman: "bha",  audio: "audio/kannada/bha.mp3",  vidStart: 574, image: "images/dance.png"    },
+    { letter: "ಮ",  roman: "ma",   audio: "audio/kannada/ma.mp3",   vidStart: 590, image: "images/tree.png"     },
+    // antastha
+    { letter: "ಯ",  roman: "ya",   audio: "audio/kannada/ya.mp3",   vidStart: 605, image: "images/mask.png"     },
+    { letter: "ರ",  roman: "ra",   audio: "audio/kannada/ra.mp3",   vidStart: 615, image: "images/sun.png"      },
+    { letter: "ಲ",  roman: "la",   audio: "audio/kannada/la.mp3",   vidStart: 636, image: "images/laddoo.png"   },
+    { letter: "ವ",  roman: "va",   audio: "audio/kannada/va.mp3",   vidStart: 631, image: "images/diamond.png"  },
+    // ushma + ha
+    { letter: "ಶ",  roman: "sha",  audio: "audio/kannada/sha.mp3",  vidStart: 667, image: "images/conch.png"    },
+    { letter: "ಷ",  roman: "sha2", audio: "audio/kannada/sha2.mp3", vidStart: 681, image: "images/hexagon.png"  },
+    { letter: "ಸ",  roman: "sa",   audio: "audio/kannada/sa.mp3",   vidStart: 699, image: "images/snake.png"    },
+    { letter: "ಹ",  roman: "ha",   audio: "audio/kannada/ha.mp3",   vidStart: 714, image: "images/swan.png"     },
+    // special
+    { letter: "ಳ",  roman: "La",   audio: "audio/kannada/La.mp3",   vidStart: null, image: "images/tap.png"     },
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
@@ -264,7 +317,7 @@ const HINDI_ITEMS = [
     { letter: "ट", roman: "ta",   audio: "audio/hindi/ta2.mp3",  vidStart: 108, image: "images/ram.png"      },
     { letter: "ठ", roman: "tha",  audio: "audio/hindi/tha2.mp3", vidStart: 113, image: "images/stamp.png"    },
     { letter: "ड", roman: "da",   audio: "audio/hindi/da2.mp3",  vidStart: 118, image: "images/drum.png"     },
-    { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 122, image: "images/drum.png"     },
+    { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 122, image: "images/damaru.png"  },
     { letter: "ण", roman: "na",   audio: "audio/hindi/na2.mp3",  vidStart: 127, image: "images/fly.png"      },
     // ta-varga (dental)
     { letter: "त", roman: "ta",   audio: "audio/hindi/ta.mp3",   vidStart: 131, image: "images/scale.png"    },

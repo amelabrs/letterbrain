@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LetterBrain — Video Clip Tester</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #111; color: #e8e4d4; padding: 2rem 1rem; }
+  h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+       color: #D4940E; border-bottom: 2px solid #D4940E; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+  .card { background: #1c1a26; border-radius: 10px; overflow: hidden; border: 1px solid #2e2b3a; }
+  .card-head { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid #2e2b3a; }
+  .letter { font-family: "Noto Sans Kannada", sans-serif; font-size: 2.2rem; line-height: 1; }
+  .meta { font-size: 0.8rem; color: #807888; }
+  .meta strong { color: #e8e4d4; display: block; }
+  .embed-wrap { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+  .embed-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .null-note { padding: 1rem; font-size: 0.8rem; color: #E0604A; font-style: italic; }
+  .ts-info { padding: 0.5rem 1rem; font-size: 0.75rem; color: #807888; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<h1>Kannada — Video Clip Tester (4-second clips)</h1>
+<h2 style="color:#807888;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 1rem">Vowels</h2>
+<div class="grid" id="grid-vowels"></div>
+<h2 style="color:#807888;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;margin:2rem 0 1rem">Consonants <span style="font-size:0.65rem;color:#E0604A">(timestamps estimated — verify below)</span></h2>
+<div class="grid" id="grid-consonants"></div>
+
+<script>
+const VIDEO_ID = "KMNRrw5fPCY";
+const CLIP_DUR = 4;
+
+const VOWELS = [
+  { letter:"ಅ",  roman:"a",   vidStart:14  },
+  { letter:"ಆ",  roman:"aa",  vidStart:31  },
+  { letter:"ಇ",  roman:"i",   vidStart:44  },
+  { letter:"ಈ",  roman:"ii",  vidStart:60  },
+  { letter:"ಉ",  roman:"u",   vidStart:79  },
+  { letter:"ಊ",  roman:"uu",  vidStart:94  },
+  { letter:"ಋ",  roman:"ru",  vidStart:107 },
+  { letter:"ಎ",  roman:"e",   vidStart:122 },
+  { letter:"ಏ",  roman:"E",   vidStart:138 },
+  { letter:"ಐ",  roman:"ai",  vidStart:154 },
+  { letter:"ಒ",  roman:"o",   vidStart:170 },
+  { letter:"ಓ",  roman:"oo",  vidStart:186 },
+  { letter:"ಔ",  roman:"au",  vidStart:202 },
+  { letter:"ಅಂ", roman:"am",  vidStart:218 },
+  { letter:"ಅಃ", roman:"ah",  vidStart:234 },
+];
+
+const CONSONANTS = [
+  { letter:"ಕ",  roman:"ka",   vidStart:250 },
+  { letter:"ಖ",  roman:"kha",  vidStart:263 },
+  { letter:"ಗ",  roman:"ga",   vidStart:276 },
+  { letter:"ಘ",  roman:"gha",  vidStart:289 },
+  { letter:"ಙ",  roman:"nga",  vidStart:302 },
+  { letter:"ಚ",  roman:"cha",  vidStart:315 },
+  { letter:"ಛ",  roman:"chha", vidStart:328 },
+  { letter:"ಜ",  roman:"ja",   vidStart:341 },
+  { letter:"ಝ",  roman:"jha",  vidStart:355 },
+  { letter:"ಞ",  roman:"nya",  vidStart:362 },
+  { letter:"ಟ",  roman:"Ta",   vidStart:371 },
+  { letter:"ಠ",  roman:"Tha",  vidStart:380 },
+  { letter:"ಡ",  roman:"Da",   vidStart:391 },
+  { letter:"ಢ",  roman:"Dha",  vidStart:402 },
+  { letter:"ಣ",  roman:"Na",   vidStart:424 },
+  { letter:"ತ",  roman:"ta",   vidStart:441 },
+  { letter:"ಥ",  roman:"tha",  vidStart:457 },
+  { letter:"ದ",  roman:"da",   vidStart:474 },
+  { letter:"ಧ",  roman:"dha",  vidStart:490 },
+  { letter:"ನ",  roman:"na",   vidStart:507 },
+  { letter:"ಪ",  roman:"pa",   vidStart:527 },
+  { letter:"ಫ",  roman:"pha",  vidStart:542 },
+  { letter:"ಬ",  roman:"ba",   vidStart:558 },
+  { letter:"ಭ",  roman:"bha",  vidStart:574 },
+  { letter:"ಮ",  roman:"ma",   vidStart:590 },
+  { letter:"ಯ",  roman:"ya",   vidStart:605 },
+  { letter:"ರ",  roman:"ra",   vidStart:615 },
+  { letter:"ಲ",  roman:"la",   vidStart:636 },
+  { letter:"ವ",  roman:"va",   vidStart:631 },
+  { letter:"ಶ",  roman:"sha",  vidStart:667 },
+  { letter:"ಷ",  roman:"sha2", vidStart:681 },
+  { letter:"ಸ",  roman:"sa",   vidStart:699 },
+  { letter:"ಹ",  roman:"ha",   vidStart:714 },
+  { letter:"ಳ",  roman:"La",   vidStart:null },
+];
+
+function buildGrid(items, gridId) {
+  const grid = document.getElementById(gridId);
+  items.forEach(({ letter, roman, vidStart }) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const end = vidStart !== null ? vidStart + CLIP_DUR : null;
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="letter">${letter}</div>
+        <div class="meta"><strong>${roman}</strong>${vidStart !== null ? `${vidStart}s – ${end}s` : "no timestamp"}</div>
+      </div>
+      ${vidStart !== null
+        ? `<div class="embed-wrap">
+             <iframe src="https://www.youtube.com/embed/${VIDEO_ID}?start=${vidStart}&end=${end}&autoplay=0&rel=0&modestbranding=1"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               allowfullscreen></iframe>
+           </div>
+           <div class="ts-info">start: ${vidStart}s &nbsp;·&nbsp; end: ${end}s</div>`
+        : `<div class="null-note">no timestamp</div>`
+      }
+    `;
+    grid.appendChild(card);
+  });
+}
+
+buildGrid(VOWELS, "grid-vowels");
+buildGrid(CONSONANTS, "grid-consonants");
+</script>
+</body>
+</html>

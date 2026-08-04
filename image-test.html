@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LetterBrain — Image Tester</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #111; color: #e8e4d4; padding: 2rem 1rem; }
+  h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+       color: #D4940E; border-bottom: 2px solid #D4940E; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+  h2 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+       color: #807888; margin: 2rem 0 1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+  .card {
+    background: #1c1a26; border-radius: 10px; overflow: hidden;
+    border: 1px solid #2e2b3a; display: flex; flex-direction: column; align-items: center;
+    padding: 0.75rem 0.5rem;
+  }
+  .card.warn { border-color: #b53a2a; }
+  .card.proposed { border-color: #3DB870; border-style: dashed; }
+  .letter { font-size: 2.2rem; line-height: 1; margin-bottom: 0.2rem; }
+  .roman  { font-size: 0.72rem; color: #807888; margin-bottom: 0.5rem; font-family: monospace; }
+  .img-wrap { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;
+              background: #fff; border-radius: 6px; overflow: hidden; }
+  .img-wrap img { width: 100%; height: 100%; object-fit: contain; }
+  .img-null { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;
+              background: #2e2b3a; border-radius: 6px; font-size: 0.72rem; color: #E0604A;
+              text-align: center; padding: 0.5rem; }
+  .note { font-size: 0.62rem; color: #E0604A; margin-top: 0.4rem; text-align: center; }
+  .note.green { color: #3DB870; }
+  .filename { font-size: 0.65rem; color: #504a60; margin-top: 0.3rem; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<h1>LetterBrain — Image Tester</h1>
+
+<h2>Kannada Vowels</h2>
+<div class="grid" id="kannada-grid"></div>
+
+<h2>Proposed new Kannada vowels (not yet in app.js)</h2>
+<div class="grid" id="kannada-proposed"></div>
+
+<h2>Hindi Consonants</h2>
+<div class="grid" id="hindi-grid"></div>
+
+<script>
+const KANNADA = [
+  { letter:"ಅ",  roman:"a",   image:"images/prince.png"   },
+  { letter:"ಆ",  roman:"aa",  image:"images/elephant.png" },
+  { letter:"ಇ",  roman:"i",   image:"images/rat.png"      },
+  { letter:"ಈ",  roman:"ii",  image:"images/fly.png"      },
+  { letter:"ಉ",  roman:"u",   image:"images/ring.png"     },
+  { letter:"ಊ",  roman:"uu",  image:"images/sadhya.png"   },
+  { letter:"ಋ",  roman:"ru",  image:"images/saint.jpg"    },
+  { letter:"ಎ",  roman:"e",   image:"images/leaf.png"     },
+  { letter:"ಏ",  roman:"E",   image:"images/crab.png"     },
+  { letter:"ಐ",  roman:"ai",  image:"images/five.png"     },
+  { letter:"ಒ",  roman:"o",   image:"images/camel.png"    },
+  { letter:"ಓ",  roman:"oo",  image:"images/run.png"      },
+  { letter:"ಔ",  roman:"au",  image:"images/medicine.png" },
+];
+
+const KANNADA_PROPOSED = [
+  { letter:"ಅಂ", roman:"am",  image:"images/shop.png",  note:"proposed · shop (ಅಂಗಡಿ)" },
+  { letter:"ಅಃ", roman:"ah",  image:"images/star.png",  note:"proposed · star (placeholder)" },
+];
+
+const HINDI = [
+  { letter:"क",  roman:"ka",   image:"images/lotus.png"    },
+  { letter:"ख",  roman:"kha",  image:"images/sword.png"    },
+  { letter:"ग",  roman:"ga",   image:"images/watch.png"    },
+  { letter:"घ",  roman:"gha",  image:"images/bell.png"     },
+  { letter:"ङ",  roman:"nga",  image:"images/color.png",   warn:"duplicate: also used by ब" },
+  { letter:"च",  roman:"cha",  image:"images/spoon.png"    },
+  { letter:"छ",  roman:"chha", image:"images/umbrella.png" },
+  { letter:"ज",  roman:"ja",   image:"images/ship.png"     },
+  { letter:"झ",  roman:"jha",  image:"images/waterfall.png"},
+  { letter:"ञ",  roman:"nya",  image:null                  },
+  { letter:"ट",  roman:"ṭa",   image:"images/ram.png"      },
+  { letter:"ठ",  roman:"ṭha",  image:"images/stamp.png"    },
+  { letter:"ड",  roman:"ḍa",   image:"images/drum.png"     },
+  { letter:"ढ",  roman:"ḍha",  image:"images/damaru.png",  warn:"app.js still says drum.png — needs fix" },
+  { letter:"ण",  roman:"ṇa",   image:"images/fly.png"      },
+  { letter:"त",  roman:"ta",   image:"images/scale.png"    },
+  { letter:"थ",  roman:"tha",  image:"images/thermos.png"  },
+  { letter:"द",  roman:"da",   image:"images/cow.png"      },
+  { letter:"ध",  roman:"dha",  image:"images/arrow.png"    },
+  { letter:"न",  roman:"na",   image:"images/tap.png",     warn:"you listed peacock too — confirm which" },
+  { letter:"प",  roman:"pa",   image:"images/kite.png"     },
+  { letter:"फ",  roman:"pha",  image:"images/fruit.png"    },
+  { letter:"ब",  roman:"ba",   image:"images/color.png",   warn:"duplicate: also used by ङ" },
+  { letter:"भ",  roman:"bha",  image:"images/dance.png"    },
+  { letter:"म",  roman:"ma",   image:"images/tree.png"     },
+  { letter:"य",  roman:"ya",   image:"images/mask.png"     },
+  { letter:"र",  roman:"ra",   image:"images/sun.png"      },
+  { letter:"ल",  roman:"la",   image:"images/laddoo.png"   },
+  { letter:"व",  roman:"va",   image:"images/diamond.png"  },
+  { letter:"श",  roman:"sha",  image:"images/conch.png"    },
+  { letter:"ष",  roman:"ṣha",  image:"images/hexagon.png"  },
+  { letter:"स",  roman:"sa",   image:"images/snake.png"    },
+  { letter:"ह",  roman:"ha",   image:"images/swan.png"     },
+];
+
+function buildGrid(items, gridId, proposed = false) {
+  const grid = document.getElementById(gridId);
+  items.forEach(({ letter, roman, image, warn, note }) => {
+    const card = document.createElement("div");
+    card.className = "card" + (warn ? " warn" : "") + (proposed ? " proposed" : "");
+    const filename = image ? image.replace("images/","") : null;
+    card.innerHTML = `
+      <div class="letter">${letter}</div>
+      <div class="roman">${roman}</div>
+      ${image
+        ? `<div class="img-wrap"><img src="${image}" alt="${roman}" onerror="this.parentNode.innerHTML='<span style=color:#E0604A;font-size:0.7rem>missing</span>'"></div>`
+        : `<div class="img-null">no image</div>`
+      }
+      ${warn ? `<div class="note">${warn}</div>` : ""}
+      ${note ? `<div class="note green">${note}</div>` : ""}
+      ${filename ? `<div class="filename">${filename}</div>` : ""}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+buildGrid(KANNADA, "kannada-grid");
+buildGrid(KANNADA_PROPOSED, "kannada-proposed", true);
+buildGrid(HINDI, "hindi-grid");
+</script>
+</body>
+</html>
