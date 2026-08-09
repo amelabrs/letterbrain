@@ -2,42 +2,42 @@
 
 const ALL_ITEMS = [
     // Level 1: A–F (6 new)
-    { letter: "A", word: "Apple",     image: "images/apple.png",    level: 1 },
-    { letter: "B", word: "Ball",      image: "images/ball.png",     level: 1 },
-    { letter: "C", word: "Cat",       image: "images/cat.png",      level: 1 },
-    { letter: "D", word: "Dog",       image: "images/dog.png",      level: 1 },
-    { letter: "E", word: "Elephant",  image: "images/elephant.png", level: 1 },
-    { letter: "F", word: "Fish",      image: "images/fish.png",     level: 1 },
+    { letter: "A", word: "Apple",     image: "images/apple.png",    level: 1,  vidStart: 5,   vidEnd: 12  },
+    { letter: "B", word: "Ball",      image: "images/ball.png",     level: 1,  vidStart: 12,  vidEnd: 19  },
+    { letter: "C", word: "Cat",       image: "images/cat.png",      level: 1,  vidStart: 24,  vidEnd: 30  },
+    { letter: "D", word: "Dog",       image: "images/dog.png",      level: 1,  vidStart: 30,  vidEnd: 36  },
+    { letter: "E", word: "Elephant",  image: "images/elephant.png", level: 1,  vidStart: 36,  vidEnd: 43  },
+    { letter: "F", word: "Fish",      image: "images/fish.png",     level: 1,  vidStart: 43,  vidEnd: 50  },
     // Level 2: G–H (2 new)
-    { letter: "G", word: "Guitar",    image: "images/guitar.png",   level: 2 },
-    { letter: "H", word: "House",     image: "images/house.png",    level: 2, boost: true },
+    { letter: "G", word: "Guitar",    image: "images/guitar.png",   level: 2,  vidStart: 56,  vidEnd: 62  },
+    { letter: "H", word: "House",     image: "images/house.png",    level: 2,  vidStart: 62,  vidEnd: 69, boost: true },
     // Level 3: I–J (2 new)
-    { letter: "I", word: "Ice Cream", image: "images/icecream.png", level: 3 },
-    { letter: "J", word: "Joker",     image: "images/joker.png",    level: 3 },
+    { letter: "I", word: "Ice Cream", image: "images/icecream.png", level: 3,  vidStart: 69,  vidEnd: 76  },
+    { letter: "J", word: "Joker",     image: "images/joker.png",    level: 3,  vidStart: 75,  vidEnd: 82  },
     // Level 4: K–L (2 new)
-    { letter: "K", word: "King",      image: "images/king.png",     level: 4 },
-    { letter: "L", word: "Lion",      image: "images/lion.png",     level: 4 },
+    { letter: "K", word: "King",      image: "images/king.png",     level: 4,  vidStart: 88,  vidEnd: 95  },
+    { letter: "L", word: "Lion",      image: "images/lion.png",     level: 4,  vidStart: 95,  vidEnd: 102 },
     // Level 5: M–N (2 new)
-    { letter: "M", word: "Monkey",    image: "images/monkey.png",   level: 5 },
-    { letter: "N", word: "Nose",      image: "images/nose.png",     level: 5 },
+    { letter: "M", word: "Monkey",    image: "images/monkey.png",   level: 5,  vidStart: 102, vidEnd: 109 },
+    { letter: "N", word: "Nose",      image: "images/nose.png",     level: 5,  vidStart: 109, vidEnd: 116 },
     // Level 6: O–P (2 new)
-    { letter: "O", word: "Orange",    image: "images/orange.png",   level: 6 },
-    { letter: "P", word: "Parrot",    image: "images/parrot.png",   level: 6 },
+    { letter: "O", word: "Orange",    image: "images/orange.png",   level: 6,  vidStart: 118, vidEnd: 125 },
+    { letter: "P", word: "Parrot",    image: "images/parrot.png",   level: 6,  vidStart: 125, vidEnd: 132 },
     // Level 7: Q–R (2 new)
-    { letter: "Q", word: "Queen",     image: "images/queen.png",    level: 7 },
-    { letter: "R", word: "Rabbit",    image: "images/rabbit.png",   level: 7 },
+    { letter: "Q", word: "Queen",     image: "images/queen.png",    level: 7,  vidStart: 132, vidEnd: 139 },
+    { letter: "R", word: "Rabbit",    image: "images/rabbit.png",   level: 7,  vidStart: 139, vidEnd: 146 },
     // Level 8: S–T (2 new)
-    { letter: "S", word: "Snake",     image: "images/snake.png",    level: 8 },
-    { letter: "T", word: "Tiger",     image: "images/tiger.png",    level: 8 },
+    { letter: "S", word: "Snake",     image: "images/snake.png",    level: 8,  vidStart: 150, vidEnd: 157 },
+    { letter: "T", word: "Tiger",     image: "images/tiger.png",    level: 8,  vidStart: 157, vidEnd: 164 },
     // Level 9: U–V (2 new)
-    { letter: "U", word: "Uncle",     image: "images/uncle.png",    level: 9 },
-    { letter: "V", word: "Van",       image: "images/van.png",      level: 9 },
+    { letter: "U", word: "Uncle",     image: "images/uncle.png",    level: 9,  vidStart: 164, vidEnd: 171 },
+    { letter: "V", word: "Van",       image: "images/van.png",      level: 9,  vidStart: 171, vidEnd: 178 },
     // Level 10: W–X (2 new)
-    { letter: "W", word: "Watch",     image: "images/watch.png",    level: 10 },
-    { letter: "X", word: "Xmas Tree", image: "images/xmastree.png", level: 10 },
+    { letter: "W", word: "Watch",     image: "images/watch.png",    level: 10, vidStart: 182, vidEnd: 189 },
+    { letter: "X", word: "Xmas Tree", image: "images/xmastree.png", level: 10, vidStart: 189, vidEnd: 196 },
     // Level 11: Y–Z (2 new)
-    { letter: "Y", word: "Yacht",     image: "images/yacht.png",    level: 11 },
-    { letter: "Z", word: "Zebra",     image: "images/zebra.png",    level: 11 },
+    { letter: "Y", word: "Yacht",     image: "images/yacht.png",    level: 11, vidStart: 196, vidEnd: 203 },
+    { letter: "Z", word: "Zebra",     image: "images/zebra.png",    level: 11, vidStart: 203, vidEnd: 210 },
 ];
 
 let currentLevel = 1;
@@ -171,11 +171,11 @@ const KANNADA_ITEMS = [
     { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 122, image: "images/leaf.png" },
     { letter: "ಏ", roman: "E",  audio: "audio/kannada/E.mp3",  vidStart: 138, image: "images/crab.png" },
     { letter: "ಐ", roman: "ai", audio: "audio/kannada/ai.mp3", vidStart: 154, image: "images/five.png" },
-    { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 170, image: "images/camel.png" },
-    { letter: "ಓ", roman: "oo", audio: "audio/kannada/oo.mp3", vidStart: 186, image: "images/run.png" },
-    { letter: "ಔ", roman: "au", audio: "audio/kannada/au.mp3", vidStart: 202, image: "images/medicine.png" },
+    { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 169, image: "images/camel.png" },
+    { letter: "ಓ", roman: "oo", audio: "audio/kannada/oo.mp3", vidStart: 185, image: "images/run.png" },
+    { letter: "ಔ", roman: "au", audio: "audio/kannada/au.mp3", vidStart: 201, image: "images/medicine.png" },
     { letter: "ಅಂ", roman: "am", audio: "audio/kannada/am.mp3", vidStart: 218, image: "images/shop.png"     },
-    { letter: "ಅಃ", roman: "ah", audio: "audio/kannada/ah.mp3", vidStart: 234, image: "images/tea.png"      },
+    { letter: "ಅಃ", roman: "ah", audio: "audio/kannada/ah.mp3", vidStart: 232, image: "images/tea.png"      },
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
@@ -220,45 +220,45 @@ const KANNADA_LEVELS = [
 // ── Kannada Consonants ────────────────────────────────────────────────
 const KANNADA_CONSONANT_ITEMS = [
     // ka-varga
-    { letter: "ಕ",  roman: "ka",   audio: "audio/kannada/ka.mp3",   vidStart: 250, image: "images/lotus.png"    },
-    { letter: "ಖ",  roman: "kha",  audio: "audio/kannada/kha.mp3",  vidStart: 263, image: "images/sword.png"    },
-    { letter: "ಗ",  roman: "ga",   audio: "audio/kannada/ga.mp3",   vidStart: 276, image: "images/watch.png"    },
-    { letter: "ಘ",  roman: "gha",  audio: "audio/kannada/gha.mp3",  vidStart: 289, image: "images/bell.png"     },
-    { letter: "ಙ",  roman: "nga",  audio: "audio/kannada/nga.mp3",  vidStart: 302, image: "images/color.png"    },
+    { letter: "ಕ",  roman: "ka",   audio: "audio/kannada/ka.mp3",   vidStart: 236, image: "images/lotus.png"    },
+    { letter: "ಖ",  roman: "kha",  audio: "audio/kannada/kha.mp3",  vidStart: 252, image: "images/sword.png"    },
+    { letter: "ಗ",  roman: "ga",   audio: "audio/kannada/ga.mp3",   vidStart: 268, image: "images/watch.png"    },
+    { letter: "ಘ",  roman: "gha",  audio: "audio/kannada/gha.mp3",  vidStart: 283, image: "images/bell.png"     },
+    { letter: "ಙ",  roman: "nga",  audio: "audio/kannada/nga.mp3",  vidStart: 299, image: "images/color.png"    },
     // cha-varga
-    { letter: "ಚ",  roman: "cha",  audio: "audio/kannada/cha.mp3",  vidStart: 315, image: "images/spoon.png"    },
-    { letter: "ಛ",  roman: "chha", audio: "audio/kannada/chha.mp3", vidStart: 328, image: "images/umbrella.png" },
-    { letter: "ಜ",  roman: "ja",   audio: "audio/kannada/ja.mp3",   vidStart: 341, image: "images/ship.png"     },
-    { letter: "ಝ",  roman: "jha",  audio: "audio/kannada/jha.mp3",  vidStart: 355, image: "images/waterfall.png"},
-    { letter: "ಞ",  roman: "nya",  audio: "audio/kannada/nya.mp3",  vidStart: 362, image: null                  },
+    { letter: "ಚ",  roman: "cha",  audio: "audio/kannada/cha.mp3",  vidStart: 304, image: "images/spoon.png"    },
+    { letter: "ಛ",  roman: "chha", audio: "audio/kannada/chha.mp3", vidStart: 320, image: "images/umbrella.png" },
+    { letter: "ಜ",  roman: "ja",   audio: "audio/kannada/ja.mp3",   vidStart: 336, image: "images/ship.png"     },
+    { letter: "ಝ",  roman: "jha",  audio: "audio/kannada/jha.mp3",  vidStart: 351, image: "images/waterfall.png"},
+    { letter: "ಞ",  roman: "nya",  audio: "audio/kannada/nya.mp3",  vidStart: 366, image: null                  },
     // ta-varga (retroflex)
     { letter: "ಟ",  roman: "Ta",   audio: "audio/kannada/Ta.mp3",   vidStart: 371, image: "images/ram.png"      },
-    { letter: "ಠ",  roman: "Tha",  audio: "audio/kannada/Tha.mp3",  vidStart: 380, image: "images/stamp.png"    },
-    { letter: "ಡ",  roman: "Da",   audio: "audio/kannada/Da.mp3",   vidStart: 391, image: "images/drum.png"     },
-    { letter: "ಢ",  roman: "Dha",  audio: "audio/kannada/Dha.mp3",  vidStart: 402, image: "images/damaru.png"   },
-    { letter: "ಣ",  roman: "Na",   audio: "audio/kannada/Na.mp3",   vidStart: 424, image: "images/fly.png"      },
+    { letter: "ಠ",  roman: "Tha",  audio: "audio/kannada/Tha.mp3",  vidStart: 387, image: "images/stamp.png"    },
+    { letter: "ಡ",  roman: "Da",   audio: "audio/kannada/Da.mp3",   vidStart: 403, image: "images/drum.png"     },
+    { letter: "ಢ",  roman: "Dha",  audio: "audio/kannada/Dha.mp3",  vidStart: 403, image: "images/damaru.png"   },
+    { letter: "ಣ",  roman: "Na",   audio: "audio/kannada/Na.mp3",   vidStart: 434, image: "images/fly.png"      },
     // ta-varga (dental)
-    { letter: "ತ",  roman: "ta",   audio: "audio/kannada/ta.mp3",   vidStart: 441, image: "images/scale.png"    },
-    { letter: "ಥ",  roman: "tha",  audio: "audio/kannada/tha.mp3",  vidStart: 457, image: "images/thermos.png"  },
-    { letter: "ದ",  roman: "da",   audio: "audio/kannada/da.mp3",   vidStart: 474, image: "images/cow.png"      },
-    { letter: "ಧ",  roman: "dha",  audio: "audio/kannada/dha.mp3",  vidStart: 490, image: "images/arrow.png"    },
-    { letter: "ನ",  roman: "na",   audio: "audio/kannada/na.mp3",   vidStart: 507, image: "images/peacock.png"  },
+    { letter: "ತ",  roman: "ta",   audio: "audio/kannada/ta.mp3",   vidStart: 449, image: "images/scale.png"    },
+    { letter: "ಥ",  roman: "tha",  audio: "audio/kannada/tha.mp3",  vidStart: 465, image: "images/thermos.png"  },
+    { letter: "ದ",  roman: "da",   audio: "audio/kannada/da.mp3",   vidStart: 480, image: "images/cow.png"      },
+    { letter: "ಧ",  roman: "dha",  audio: "audio/kannada/dha.mp3",  vidStart: 496, image: "images/arrow.png"    },
+    { letter: "ನ",  roman: "na",   audio: "audio/kannada/na.mp3",   vidStart: 512, image: "images/peacock.png"  },
     // pa-varga
-    { letter: "ಪ",  roman: "pa",   audio: "audio/kannada/pa.mp3",   vidStart: 527, image: "images/kite.png"     },
-    { letter: "ಫ",  roman: "pha",  audio: "audio/kannada/pha.mp3",  vidStart: 542, image: "images/fruit.png"    },
+    { letter: "ಪ",  roman: "pa",   audio: "audio/kannada/pa.mp3",   vidStart: 528, image: "images/kite.png"     },
+    { letter: "ಫ",  roman: "pha",  audio: "audio/kannada/pha.mp3",  vidStart: 543, image: "images/fruit.png"    },
     { letter: "ಬ",  roman: "ba",   audio: "audio/kannada/ba.mp3",   vidStart: 558, image: "images/color.png"    },
     { letter: "ಭ",  roman: "bha",  audio: "audio/kannada/bha.mp3",  vidStart: 574, image: "images/dance.png"    },
     { letter: "ಮ",  roman: "ma",   audio: "audio/kannada/ma.mp3",   vidStart: 590, image: "images/tree.png"     },
     // antastha
     { letter: "ಯ",  roman: "ya",   audio: "audio/kannada/ya.mp3",   vidStart: 605, image: "images/mask.png"     },
-    { letter: "ರ",  roman: "ra",   audio: "audio/kannada/ra.mp3",   vidStart: 615, image: "images/sun.png"      },
-    { letter: "ಲ",  roman: "la",   audio: "audio/kannada/la.mp3",   vidStart: 636, image: "images/laddoo.png"   },
-    { letter: "ವ",  roman: "va",   audio: "audio/kannada/va.mp3",   vidStart: 631, image: "images/diamond.png"  },
+    { letter: "ರ",  roman: "ra",   audio: "audio/kannada/ra.mp3",   vidStart: 621, image: "images/sun.png"      },
+    { letter: "ಲ",  roman: "la",   audio: "audio/kannada/la.mp3",   vidStart: 637, image: "images/laddoo.png"   },
+    { letter: "ವ",  roman: "va",   audio: "audio/kannada/va.mp3",   vidStart: 652, image: "images/diamond.png"  },
     // ushma + ha
-    { letter: "ಶ",  roman: "sha",  audio: "audio/kannada/sha.mp3",  vidStart: 667, image: "images/conch.png"    },
-    { letter: "ಷ",  roman: "sha2", audio: "audio/kannada/sha2.mp3", vidStart: 681, image: "images/hexagon.png"  },
+    { letter: "ಶ",  roman: "sha",  audio: "audio/kannada/sha.mp3",  vidStart: 668, image: "images/conch.png"    },
+    { letter: "ಷ",  roman: "sha2", audio: "audio/kannada/sha2.mp3", vidStart: 683, image: "images/hexagon.png"  },
     { letter: "ಸ",  roman: "sa",   audio: "audio/kannada/sa.mp3",   vidStart: 699, image: "images/snake.png"    },
-    { letter: "ಹ",  roman: "ha",   audio: "audio/kannada/ha.mp3",   vidStart: 714, image: "images/swan.png"     },
+    { letter: "ಹ",  roman: "ha",   audio: "audio/kannada/ha.mp3",   vidStart: 715, image: "images/swan.png"     },
     // special
     { letter: "ಳ",  roman: "La",   audio: "audio/kannada/La.mp3",   vidStart: null, image: "images/tap.png"     },
 ];
@@ -305,42 +305,42 @@ const HINDI_ITEMS = [
     { letter: "क", roman: "ka",   audio: "audio/hindi/ka.mp3",   vidStart: 58,  image: "images/lotus.png"    },
     { letter: "ख", roman: "kha",  audio: "audio/hindi/kha.mp3",  vidStart: 63,  image: "images/sword.png"    },
     { letter: "ग", roman: "ga",   audio: "audio/hindi/ga.mp3",   vidStart: 67,  image: "images/watch.png"    },
-    { letter: "घ", roman: "gha",  audio: "audio/hindi/gha.mp3",  vidStart: 71,  image: "images/bell.png"     },
-    { letter: "ङ", roman: "nga",  audio: "audio/hindi/nga.mp3",  vidStart: 76,  image: "images/color.png"    },
+    { letter: "घ", roman: "gha",  audio: "audio/hindi/gha.mp3",  vidStart: 72,  image: "images/bell.png"     },
+    { letter: "ङ", roman: "nga",  audio: "audio/hindi/nga.mp3",  vidStart: 77,  image: "images/color.png"    },
     // cha-varga
     { letter: "च", roman: "cha",  audio: "audio/hindi/cha.mp3",  vidStart: 81,  image: "images/spoon.png"    },
-    { letter: "छ", roman: "chha", audio: "audio/hindi/chha.mp3", vidStart: 85,  image: "images/umbrella.png" },
-    { letter: "ज", roman: "ja",   audio: "audio/hindi/ja.mp3",   vidStart: 94,  image: "images/ship.png"     },
-    { letter: "झ", roman: "jha",  audio: "audio/hindi/jha.mp3",  vidStart: 99,  image: "images/waterfall.png"},
-    { letter: "ञ", roman: "nya",  audio: "audio/hindi/nya.mp3",  vidStart: 103, image: null                  },
+    { letter: "छ", roman: "chha", audio: "audio/hindi/chha.mp3", vidStart: 86,  image: "images/umbrella.png" },
+    { letter: "ज", roman: "ja",   audio: "audio/hindi/ja.mp3",   vidStart: 90,  image: "images/ship.png"     },
+    { letter: "झ", roman: "jha",  audio: "audio/hindi/jha.mp3",  vidStart: 95,  image: "images/waterfall.png"},
+    { letter: "ञ", roman: "nya",  audio: "audio/hindi/nya.mp3",  vidStart: 99,  image: null                  },
     // ta-varga (retroflex)
-    { letter: "ट", roman: "ta",   audio: "audio/hindi/ta2.mp3",  vidStart: 108, image: "images/ram.png"      },
-    { letter: "ठ", roman: "tha",  audio: "audio/hindi/tha2.mp3", vidStart: 113, image: "images/stamp.png"    },
-    { letter: "ड", roman: "da",   audio: "audio/hindi/da2.mp3",  vidStart: 118, image: "images/drum.png"     },
-    { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 122, image: "images/damaru.png"  },
-    { letter: "ण", roman: "na",   audio: "audio/hindi/na2.mp3",  vidStart: 127, image: "images/fly.png"      },
+    { letter: "ट", roman: "ta",   audio: "audio/hindi/ta2.mp3",  vidStart: 104, image: "images/ram.png"      },
+    { letter: "ठ", roman: "tha",  audio: "audio/hindi/tha2.mp3", vidStart: 109, image: "images/stamp.png"    },
+    { letter: "ड", roman: "da",   audio: "audio/hindi/da2.mp3",  vidStart: 113, image: "images/drum.png"     },
+    { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 118, image: "images/damaru.png"  },
+    { letter: "ण", roman: "na",   audio: "audio/hindi/na2.mp3",  vidStart: 123, image: "images/fly.png"      },
     // ta-varga (dental)
-    { letter: "त", roman: "ta",   audio: "audio/hindi/ta.mp3",   vidStart: 131, image: "images/scale.png"    },
-    { letter: "थ", roman: "tha",  audio: "audio/hindi/tha.mp3",  vidStart: 136, image: "images/thermos.png"  },
-    { letter: "द", roman: "da",   audio: "audio/hindi/da.mp3",   vidStart: 141, image: "images/cow.png"      },
-    { letter: "ध", roman: "dha",  audio: "audio/hindi/dha.mp3",  vidStart: 145, image: "images/arrow.png"    },
-    { letter: "न", roman: "na",   audio: "audio/hindi/na.mp3",   vidStart: 151, image: "images/tap.png"      },
+    { letter: "त", roman: "ta",   audio: "audio/hindi/ta.mp3",   vidStart: 127, image: "images/scale.png"    },
+    { letter: "थ", roman: "tha",  audio: "audio/hindi/tha.mp3",  vidStart: 132, image: "images/thermos.png"  },
+    { letter: "द", roman: "da",   audio: "audio/hindi/da.mp3",   vidStart: 137, image: "images/cow.png"      },
+    { letter: "ध", roman: "dha",  audio: "audio/hindi/dha.mp3",  vidStart: 141, image: "images/arrow.png"    },
+    { letter: "न", roman: "na",   audio: "audio/hindi/na.mp3",   vidStart: 146, image: "images/tap.png"      },
     // pa-varga
-    { letter: "प", roman: "pa",   audio: "audio/hindi/pa.mp3",   vidStart: 154, image: "images/kite.png"     },
-    { letter: "फ", roman: "pha",  audio: "audio/hindi/pha.mp3",  vidStart: 159, image: "images/fruit.png"    },
-    { letter: "ब", roman: "ba",   audio: "audio/hindi/ba.mp3",   vidStart: 164, image: "images/color.png"    },
-    { letter: "भ", roman: "bha",  audio: "audio/hindi/bha.mp3",  vidStart: 168, image: "images/dance.png"    },
-    { letter: "म", roman: "ma",   audio: "audio/hindi/ma.mp3",   vidStart: 173, image: "images/tree.png"     },
+    { letter: "प", roman: "pa",   audio: "audio/hindi/pa.mp3",   vidStart: 150, image: "images/kite.png"     },
+    { letter: "फ", roman: "pha",  audio: "audio/hindi/pha.mp3",  vidStart: 155, image: "images/fruit.png"    },
+    { letter: "ब", roman: "ba",   audio: "audio/hindi/ba.mp3",   vidStart: 159, image: "images/bus.png"      },
+    { letter: "भ", roman: "bha",  audio: "audio/hindi/bha.mp3",  vidStart: 164, image: "images/dance.png"    },
+    { letter: "म", roman: "ma",   audio: "audio/hindi/ma.mp3",   vidStart: 168, image: "images/tree.png"     },
     // antastha
-    { letter: "य", roman: "ya",   audio: "audio/hindi/ya.mp3",   vidStart: 177, image: "images/mask.png"     },
-    { letter: "र", roman: "ra",   audio: "audio/hindi/ra.mp3",   vidStart: 182, image: "images/sun.png"      },
-    { letter: "ल", roman: "la",   audio: "audio/hindi/la.mp3",   vidStart: 187, image: "images/laddoo.png"   },
-    { letter: "व", roman: "va",   audio: "audio/hindi/va.mp3",   vidStart: 191, image: "images/diamond.png"  },
+    { letter: "य", roman: "ya",   audio: "audio/hindi/ya.mp3",   vidStart: 173, image: "images/yagna.png"    },
+    { letter: "र", roman: "ra",   audio: "audio/hindi/ra.mp3",   vidStart: 178, image: "images/sun.png"      },
+    { letter: "ल", roman: "la",   audio: "audio/hindi/la.mp3",   vidStart: 182, image: "images/laddoo.png"   },
+    { letter: "व", roman: "va",   audio: "audio/hindi/va.mp3",   vidStart: 187, image: "images/diamond.png"  },
     // ushma + ha
-    { letter: "श", roman: "sha",  audio: "audio/hindi/sha.mp3",  vidStart: 195, image: "images/conch.png"    },
-    { letter: "ष", roman: "sha2", audio: "audio/hindi/sha2.mp3", vidStart: 200, image: "images/hexagon.png"  },
-    { letter: "स", roman: "sa",   audio: "audio/hindi/sa.mp3",   vidStart: 205, image: "images/snake.png"    },
-    { letter: "ह", roman: "ha",   audio: "audio/hindi/ha.mp3",   vidStart: 210, image: "images/swan.png"     },
+    { letter: "श", roman: "sha",  audio: "audio/hindi/sha.mp3",  vidStart: 191, image: "images/conch.png"    },
+    { letter: "ष", roman: "sha2", audio: "audio/hindi/sha2.mp3", vidStart: 196, image: "images/hexagon.png"  },
+    { letter: "स", roman: "sa",   audio: "audio/hindi/sa.mp3",   vidStart: 200, image: "images/snake.png"    },
+    { letter: "ह", roman: "ha",   audio: "audio/hindi/ha.mp3",   vidStart: 205, image: "images/swan.png"     },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 const HINDI_LEVELS = [
@@ -431,7 +431,7 @@ const NUMBER_LEVELS = [
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "kannada", "hindi", "saynumbers", "words"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "kannada", "hindi", "saynumbers", "words"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -903,6 +903,30 @@ function buildLevelGrid() {
         return;
     }
 
+    if (currentAppMode === "lowercase") {
+        LOWERCASE_LEVELS.forEach(({ letters, mode, isTest }, idx) => {
+            const color = qTypeColor(mode, isTest);
+            const letterStr = isTest
+                ? `${letters[0]}–${letters[letters.length - 1]}`
+                : letters.join('');
+            const fs = isTest ? "18px" : "30px";
+            const sublabel = qTypeIcon(mode, isTest);
+            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                <span style="font-family:'Baloo 2',sans-serif;font-size:${fs};font-weight:800;color:inherit;line-height:1.15">${letterStr}</span>
+                <span style="font-size:11px;line-height:1">${sublabel}</span>
+            </div>`;
+            grid.appendChild(makeNode({
+                color,
+                content,
+                isLocked: homeworkLocked("lowercase", idx),
+                isCurrent: false,
+                isExam: isTest,
+                onclick: () => startLowercaseGame(letters, mode, isTest),
+            }));
+        });
+        return;
+    }
+
     if (currentAppMode === "blends") {
         const audioColor = qTypeColor("hear");
         BLENDS_LEVELS.forEach(({ label, activeBlends }) => {
@@ -1014,6 +1038,10 @@ async function initWordVideos() {
 initWordVideos();
 
 // ── Phonetics toggle ─────────────────────────────────────────────────
+const songModeToggle = document.getElementById("song-mode-toggle");
+songModeToggle.checked = getSongMode();
+songModeToggle.addEventListener("change", () => setSongMode(songModeToggle.checked));
+
 const phoneticsRealToggle = document.getElementById("phonetics-real-toggle");
 phoneticsRealToggle.checked = getPhoneticMode();
 phoneticsRealToggle.addEventListener("change", () => setPhoneticMode(phoneticsRealToggle.checked));
@@ -1072,7 +1100,7 @@ function updateHomeworkBanner() {
 }
 
 function tabIconLabel(tab) {
-    return { quiz: "🔤", matchcaps: "🔡", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "cat" }[tab];
+    return { quiz: "🔤", matchcaps: "🔡", lowercase: "abc", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "cat" }[tab];
 }
 
 function tabLevelLabel(tab, level) {
@@ -1243,7 +1271,7 @@ function loadRound() {
                 btn.className = "choice-btn choice-letter-btn";
                 styleTile(btn, i);
                 btn.dataset.letter = opt.letter;
-                btn.textContent = opt.letter;
+                btn.textContent = opt.letter.toLowerCase();
                 btn.onclick = () => handleChoice(btn, opt);
                 choicesEl.appendChild(btn);
             });
@@ -1253,7 +1281,7 @@ function loadRound() {
                 <div id="big-letter">A</div>
             `;
             const bigLetter = document.getElementById("big-letter");
-            bigLetter.textContent = currentItem.letter;
+            bigLetter.textContent = currentItem.letter.toLowerCase();
             bigLetter.style.animation = "none";
             void bigLetter.offsetWidth;
             bigLetter.style.animation = "popIn 0.4s ease-out";
@@ -1372,6 +1400,16 @@ const PHONETICS_TIMESTAMPS = {
     "Q":113,"R":122,"S":130,"T":138,"U":145,"V":152,"W":158,"X":166,
     "Y":172,"Z":179
 };
+
+const ABC_SONG_VIDEO_ID = "a_DRSc0oZV0";
+
+function getSongMode() {
+    const val = localStorage.getItem("lb_song");
+    return val === null ? true : val === "1";
+}
+function setSongMode(val) {
+    localStorage.setItem("lb_song", val ? "1" : "0");
+}
 
 // Phonetics toggle — ON: plays phonetic-sound video (MbO6vGBkx48), OFF: plays letter video (svmmuYQPrI4)
 function getPhoneticMode() {
@@ -1508,8 +1546,34 @@ function playPhoneticClip() {
     }, 5000);
 }
 
+function playSongClip() {
+    if (!ytReady) { advanceRound(); return; }
+    const start = currentItem.vidStart;
+    const end   = currentItem.vidEnd;
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId: ABC_SONG_VIDEO_ID, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, (end - start + 3) * 1000);
+}
+
 function playVideoReward() {
     if (getVideosDisabled()) { advanceRound(); return; }
+    if (getSongMode() && currentItem.vidStart != null) { playSongClip(); return; }
     if (getPhoneticMode()) { playPhoneticClip(); return; }
     playPhonicsClip();
 }
@@ -1594,7 +1658,6 @@ function hideVideoOverlay() {
     const overlay = document.getElementById("video-overlay");
     const localPlayer = document.getElementById("local-player");
     overlay.className = "video-overlay hidden";
-    document.getElementById("skip-cartoon").style.display = "none";
     if (localPlayer) {
         localPlayer.pause();
         localPlayer.currentTime = 0;
@@ -1641,6 +1704,8 @@ function showFeedback(correct) {
         text.textContent = `It's ${currentItem.roman}!`;
     } else if (currentAppMode === "hindi") {
         text.textContent = `It's ${currentItem.roman}!`;
+    } else if (currentAppMode === "lowercase") {
+        text.textContent = `It's ${currentItem.letter} for ${currentItem.word}!`;
     } else if (currentAppMode === "blends") {
         text.textContent = `It's ${currentItem.blend}!`;
     } else if (currentAppMode === "words") {
@@ -2319,6 +2384,223 @@ function playHindiVideo() {
     }, 10000);
 }
 
+// ── Lowercase English ─────────────────────────────────────────────────
+
+const LOWERCASE_VIDEO_ID = "Moa5JIeBAiY";
+
+const LOWERCASE_ITEMS = [
+    { letter: "a", word: "Apple",    audio: "audio/lowercase/a.mp3", vidStart: 7,   image: "images/apple.png"    },
+    { letter: "b", word: "Ball",     audio: "audio/lowercase/b.mp3", vidStart: 40,  image: "images/ball.png"     },
+    { letter: "c", word: "Cat",      audio: "audio/lowercase/c.mp3", vidStart: 76,  image: "images/cat.png"      },
+    { letter: "d", word: "Dog",      audio: "audio/lowercase/d.mp3", vidStart: 114, image: "images/dog.png"      },
+    { letter: "e", word: "Elephant", audio: "audio/lowercase/e.mp3", vidStart: 140, image: "images/elephant.png" },
+    { letter: "f", word: "Fish",     audio: "audio/lowercase/f.mp3", vidStart: 173, image: "images/fish.png"     },
+    { letter: "g", word: "Goat",     audio: "audio/lowercase/g.mp3", vidStart: 203, image: "images/goat.png"     },
+    { letter: "h", word: "House",    audio: "audio/lowercase/h.mp3", vidStart: 251, image: "images/house.png"   },
+    { letter: "i", word: "Ice Cream", audio: "audio/lowercase/i.mp3", vidStart: 297, image: "images/icecream.png"  },
+    { letter: "j", word: "Jungle",   audio: "audio/lowercase/j.mp3", vidStart: 324, image: "images/jungle.png"   },
+    { letter: "k", word: "King",     audio: "audio/lowercase/k.mp3", vidStart: 342, image: "images/king.png"     },
+    { letter: "l", word: "Lion",     audio: "audio/lowercase/l.mp3", vidStart: 380, image: "images/lion.png"     },
+    { letter: "m", word: "Monkey",   audio: "audio/lowercase/m.mp3", vidStart: 409, image: "images/monkey.png"   },
+    { letter: "n", word: "Nose",     audio: "audio/lowercase/n.mp3", vidStart: 456, image: "images/nose.png"     },
+    { letter: "o", word: "Orange",   audio: "audio/lowercase/o.mp3", vidStart: 474, image: "images/orange.png"   },
+    { letter: "p", word: "Parrot",   audio: "audio/lowercase/p.mp3", vidStart: 505, image: "images/parrot.png"   },
+    { letter: "q", word: "Queen",    audio: "audio/lowercase/q.mp3", vidStart: 541, image: "images/queen.png"    },
+    { letter: "r", word: "Rabbit",   audio: "audio/lowercase/r.mp3", vidStart: 574, image: "images/rabbit.png"   },
+    { letter: "s", word: "School",   audio: "audio/lowercase/s.mp3", vidStart: 612, image: "images/school.png"  },
+    { letter: "t", word: "Tiger",    audio: "audio/lowercase/t.mp3", vidStart: 642, image: "images/tiger.png"    },
+    { letter: "u", word: "Umbrella", audio: "audio/lowercase/u.mp3", vidStart: 677, image: "images/umbrella.png" },
+    { letter: "v", word: "Van",      audio: "audio/lowercase/v.mp3", vidStart: 721, image: "images/van.png"      },
+    { letter: "w", word: "Watch",    audio: "audio/lowercase/w.mp3", vidStart: 747, image: "images/watch.png"    },
+    { letter: "x", word: "Xmas Tree",audio: "audio/lowercase/x.mp3", vidStart: 788, image: "images/xmastree.png" },
+    { letter: "y", word: "Yacht",    audio: "audio/lowercase/y.mp3", vidStart: 821, image: "images/yacht.png"    },
+    { letter: "z", word: "Zebra",    audio: "audio/lowercase/z.mp3", vidStart: 847, image: "images/zebra.png"    },
+];
+
+// 2 letters → 3 modes → test after every 2 pairs (4 letters)
+const LOWERCASE_LEVELS = (() => {
+    const pairs = [
+        ["a","b"], ["c","d"], ["e","f"], ["g","h"], ["i","j"], ["k","l"],
+        ["m","n"], ["o","p"], ["q","r"], ["s","t"], ["u","v"], ["w","x"], ["y","z"]
+    ];
+    const levels = [];
+    let cumulative = [];
+    pairs.forEach((pair, i) => {
+        ["hear","video-letter","picture"].forEach(mode => {
+            levels.push({ letters: pair, mode, isTest: false });
+        });
+        cumulative = [...cumulative, ...pair];
+        // test after every 2 pairs
+        if ((i + 1) % 2 === 0 || i === pairs.length - 1) {
+            ["hear","video-letter","picture"].forEach(mode => {
+                levels.push({ letters: [...cumulative], mode, isTest: true });
+            });
+        }
+    });
+    return levels;
+})();
+
+let lowercaseMode = "hear";
+let lowercaseActiveItems = LOWERCASE_ITEMS;
+
+const _lowercaseAudios = {};
+LOWERCASE_ITEMS.forEach(item => {
+    const a = new Audio(item.audio);
+    a.preload = "auto";
+    _lowercaseAudios[item.letter] = a;
+});
+let _lowercaseClipTimer = null;
+
+function playLowercaseClip(letter) {
+    const audio = _lowercaseAudios[letter];
+    if (!audio) return;
+    clearTimeout(_lowercaseClipTimer);
+    Object.values(_lowercaseAudios).forEach(a => a.pause());
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+    _lowercaseClipTimer = setTimeout(() => audio.pause(), 1800);
+}
+
+function playLowercaseVideo() {
+    if (getVideosDisabled()) { proceedFromVideo(); return; }
+    if (!ytReady || currentItem.vidStart == null) { proceedFromVideo(); return; }
+    const start = currentItem.vidStart;
+    const end = start + 6;
+    const overlay = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl = document.getElementById("yt-player");
+    localPlayer.style.display = "none";
+    ytEl.style.display = "block";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+    ytPlayer.loadVideoById({ videoId: LOWERCASE_VIDEO_ID, startSeconds: start });
+    clearInterval(videoTimer);
+    videoTimer = setInterval(() => {
+        if (ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() >= end) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, 10000);
+}
+
+function startLowercaseGame(letters, mode, isTest) {
+    lowercaseMode = mode;
+    lowercaseActiveItems = LOWERCASE_ITEMS.filter(it => letters.includes(it.letter));
+    isExamMode = false;
+    gameMode = "lowercase";
+    queue = shuffleNoRepeat([...lowercaseActiveItems, ...lowercaseActiveItems, ...lowercaseActiveItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("lowercase");
+    showScreen("quiz-screen");
+    loadLowercaseRound();
+}
+
+function loadLowercaseRound() {
+    if (currentIndex >= queue.length) { showDone(); return; }
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+
+    const buildChoices = () => {
+        const wrong = shuffle(LOWERCASE_ITEMS.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
+        shuffle([currentItem, ...wrong]).forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            styleTile(btn, i);
+            btn.style.fontFamily = "'Baloo 2', sans-serif";
+            btn.style.fontSize = "2rem";
+            btn.textContent = opt.letter;
+            btn.onclick = () => handleLowercaseChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    };
+
+    const buildPictureChoices = () => {
+        const wrong = shuffle(LOWERCASE_ITEMS.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
+        shuffle([currentItem, ...wrong]).forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            styleTile(btn, i);
+            btn.innerHTML = `<img src="${opt.image}" style="width:70px;height:70px;object-fit:contain">`;
+            btn.onclick = () => handleLowercaseChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    };
+
+    if (lowercaseMode === "hear") {
+        letterDisplay.innerHTML = `
+            <div id="lc-hear-btn" class="kannada-listen-btn">🔊</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>`;
+        setLetterDisplayColor("lowercase");
+        buildChoices();
+        setTimeout(() => playLowercaseClip(currentItem.letter), 400);
+        const hearBtn = document.getElementById("lc-hear-btn");
+        if (hearBtn) hearBtn.onclick = () => playLowercaseClip(currentItem.letter);
+    } else if (lowercaseMode === "video-letter") {
+        letterDisplay.innerHTML = "";
+        setLetterDisplayColor("lowercase");
+        buildChoices();
+        if (!getVideosDisabled()) {
+            afterVideoHide = null;
+            playLowercaseVideo();
+        } else {
+            playLowercaseClip(currentItem.letter);
+        }
+    } else if (lowercaseMode === "picture") {
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out">`;
+        setLetterDisplayColor("lowercase");
+        buildChoices();
+        playLowercaseClip(currentItem.letter);
+    }
+
+    updateProgress();
+}
+
+function handleLowercaseChoice(btn, chosen) {
+    if (answered) return;
+    const isCorrect = chosen.letter === currentItem.letter;
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        const videoAlreadyPlayed = lowercaseMode === "video-letter" || (getVideoBeforeQuestion() && !getVideosDisabled());
+        if (videoAlreadyPlayed) {
+            playLowercaseClip(currentItem.letter);
+            setTimeout(() => advanceRound(), 1200);
+        } else if (lowercaseMode === "picture") {
+            playLowercaseClip(currentItem.letter);
+            setTimeout(() => playLowercaseVideo(), 1800);
+        } else {
+            setTimeout(() => playLowercaseVideo(), 1600);
+        }
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        answered = false;
+    }
+}
+
 // ── Blends Game ──────────────────────────────────────────────────────
 
 const _blendAudios = {};
@@ -2577,6 +2859,8 @@ function advanceRound() {
         loadKannadaRound();
     } else if (currentAppMode === "hindi") {
         loadHindiRound();
+    } else if (currentAppMode === "lowercase") {
+        loadLowercaseRound();
     } else if (currentAppMode === "blends") {
         loadBlendsRound();
     } else if (currentAppMode === "words") {
@@ -2590,13 +2874,15 @@ function advanceRound() {
 // "matchcaps" has no nav button of its own — it lives inside the Quiz tab
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
-    return mode === "matchcaps" ? "quiz" : mode;
+    if (mode === "matchcaps" || mode === "lowercase") return "quiz";
+    return mode;
 }
 function updateQuizCaseToggle() {
     const wrap = document.getElementById("quiz-case-toggle");
-    const isQuizFamily = currentAppMode === "quiz" || currentAppMode === "matchcaps";
+    const isQuizFamily = ["quiz", "matchcaps", "lowercase"].includes(currentAppMode);
     wrap.style.display = isQuizFamily ? "flex" : "none";
     document.getElementById("toggle-quiz").classList.toggle("active", currentAppMode === "quiz");
+    document.getElementById("toggle-lowercase").classList.toggle("active", currentAppMode === "lowercase");
     document.getElementById("toggle-case").classList.toggle("active", currentAppMode === "matchcaps");
 }
 function setActiveTab(mode) {
@@ -2616,9 +2902,10 @@ document.getElementById("tab-hindi").addEventListener("click", () => setActiveTa
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
+document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));
 document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
 // Reset any stored mode from removed/retired tabs
-if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode)) {
+if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
     localStorage.setItem("lb_mode", "quiz");
 }
