@@ -288,13 +288,10 @@ WORD_ZONE_GROUPS.forEach(group => {
 
 // ── AM word family ─────────────────────────────────────────────────────
 const AM_WORD_ITEMS = [
-    { word: "ham",  image: "images/ham.png"  },
-    { word: "jam",  image: "images/jam.png"  },
     { word: "yam",  image: "images/yam.png"  },
     { word: "ram",  image: "images/ram.png"  },
 ];
 const AM_WORD_ALL_PAIRS = [
-    ["ham","jam"],
     ["yam","ram"],
 ];
 const AM_WORD_ZONE_GROUPS = AM_WORD_ALL_PAIRS.map((pair, i) => ({
