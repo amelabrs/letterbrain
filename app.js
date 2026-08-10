@@ -282,6 +282,30 @@ WORD_ZONE_GROUPS.forEach(group => {
     });
     WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
 });
+
+// ── AM word family ─────────────────────────────────────────────────────
+const AM_WORD_ITEMS = [
+    { word: "ham",  image: "images/ham.png"  },
+    { word: "jam",  image: "images/jam.png"  },
+    { word: "yam",  image: "images/yam.png"  },
+    { word: "ram",  image: "images/ram.png"  },
+];
+const AM_WORD_ALL_PAIRS = [
+    ["ham","jam"],
+    ["yam","ram"],
+];
+const AM_WORD_ZONE_GROUPS = AM_WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(AM_WORD_ALL_PAIRS.slice(0, i + 1).flat())],
+}));
+const AM_WORD_LEVELS = [];
+AM_WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        AM_WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        AM_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    AM_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
 const PHONEME_MAP = {
     a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
     g:"guh", h:"huh", i:"ih", j:"juh", k:"kuh", l:"luh",
@@ -429,7 +453,7 @@ let nhQueue = [], nhIdx = 0, nhItem = null;
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "kannada", "hindi", "saynumbers", "words"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "kannada", "hindi", "saynumbers", "words", "words-am"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -455,6 +479,7 @@ function getLevelsForTab(tab) {
         case "hindi": return HINDI_LEVELS;
         case "saynumbers": return NH_ZONES;
         case "words": return WORD_LEVELS;
+        case "words-am": return AM_WORD_LEVELS;
     }
 }
 
@@ -654,7 +679,7 @@ function setModeChip(mode) {
             hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:${c}">अ</span>`,
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${c}">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
-            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">cat</span>`,
+            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">word</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     } else {
@@ -669,7 +694,7 @@ function setModeChip(mode) {
             hindi:      `<span style="font-family:'Noto Sans Kannada',serif;font-size:20px;font-weight:600;color:#fff">अ</span>`,
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
-            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">cat</span>`,
+            words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">word</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     }
@@ -859,6 +884,60 @@ function buildLevelGrid() {
             const tw = group.test;
             testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${tw[0]}–${tw[tw.length-1]}</span>`;
             testBtn.onclick = () => startWordsGame(tw, "normal");
+            card.appendChild(testBtn);
+
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    if (currentAppMode === "words-am") {
+        grid.classList.add("nh-mode");
+        let gIdx = 0;
+
+        AM_WORD_ZONE_GROUPS.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            group.learns.forEach(words => {
+                const normIdx = gIdx++;
+                const revIdx  = gIdx++;
+                const wStr = words.join("·");
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+
+                // Normal (teal) — hear/see word, pick image
+                const normLocked = homeworkLocked("words-am", normIdx);
+                const normBtn = document.createElement("button");
+                normBtn.className = "hindi-pair-btn" + (normLocked ? " nh-node-locked" : "");
+                normBtn.disabled = normLocked;
+                normBtn.style.background = "#2E5E6E";
+                normBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1rem;letter-spacing:0.02em">${wStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+                normBtn.onclick = () => startWordsAmGame(words, "normal");
+                row.appendChild(normBtn);
+
+                // Reverse (red) — see image, pick word
+                const revLocked = homeworkLocked("words-am", revIdx);
+                const revBtn = document.createElement("button");
+                revBtn.className = "hindi-pair-btn" + (revLocked ? " nh-node-locked" : "");
+                revBtn.disabled = revLocked;
+                revBtn.style.background = "#C04A4A";
+                revBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1rem;letter-spacing:0.02em">${wStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.letter}</span>`;
+                revBtn.onclick = () => startWordsAmGame(words, "reverse");
+                row.appendChild(revBtn);
+
+                card.appendChild(row);
+            });
+
+            // Cumulative test pill
+            const testIdx = gIdx++;
+            const testLocked = homeworkLocked("words-am", testIdx);
+            const testBtn = document.createElement("button");
+            testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+            testBtn.disabled = testLocked;
+            const tw = group.test;
+            testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${tw[0]}–${tw[tw.length-1]}</span>`;
+            testBtn.onclick = () => startWordsAmGame(tw, "normal");
             card.appendChild(testBtn);
 
             grid.appendChild(card);
@@ -1268,7 +1347,7 @@ function updateHomeworkBanner() {
 }
 
 function tabIconLabel(tab) {
-    return { quiz: "🔤", matchcaps: "🔡", lowercase: "abc", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "cat" }[tab];
+    return { quiz: "🔤", matchcaps: "🔡", lowercase: "abc", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "AT", "words-am": "AM" }[tab];
 }
 
 function tabLevelLabel(tab, level) {
@@ -1892,7 +1971,7 @@ function showFeedback(correct) {
         text.textContent = `It's ${currentItem.letter} for ${currentItem.word}!`;
     } else if (currentAppMode === "blends") {
         text.textContent = `It's ${currentItem.blend}!`;
-    } else if (currentAppMode === "words") {
+    } else if (currentAppMode === "words" || currentAppMode === "words-am") {
         text.textContent = `It's "${currentItem.word}"!`;
     } else if (currentAppMode === "saynumbers" && nhItem) {
         text.textContent = `It's ${nhItem.num} — ${nhItem.word} rhymes with ${nhItem.rhyme}!`;
@@ -2914,6 +2993,21 @@ function startWordsGame(words, mode) {
     loadWordsRound();
 }
 
+function startWordsAmGame(words, mode) {
+    wordsMode = mode;
+    wordsFamilyItems = AM_WORD_ITEMS.filter(it => words.includes(it.word));
+    gameMode = "words-" + mode;
+    currentAppMode = "words-am";
+    queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadWordsRound();
+}
+
 function playWordInitialPhonic(word, onDone) {
     const letter = word[0].toUpperCase();
     const start = PHONETICS_TIMESTAMPS[letter] ?? 0;
@@ -3047,7 +3141,7 @@ function advanceRound() {
         loadLowercaseRound();
     } else if (currentAppMode === "blends") {
         loadBlendsRound();
-    } else if (currentAppMode === "words") {
+    } else if (currentAppMode === "words" || currentAppMode === "words-am") {
         loadWordsRound();
     } else {
         loadRound();
@@ -3059,6 +3153,7 @@ function advanceRound() {
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
     if (mode === "matchcaps" || mode === "lowercase") return "quiz";
+    if (mode === "words-am") return "words";
     return mode;
 }
 function updateQuizCaseToggle() {
@@ -3069,6 +3164,13 @@ function updateQuizCaseToggle() {
     document.getElementById("toggle-lowercase").classList.toggle("active", currentAppMode === "lowercase");
     document.getElementById("toggle-case").classList.toggle("active", currentAppMode === "matchcaps");
 }
+function updateWordFamilyToggle() {
+    const wrap = document.getElementById("word-family-toggle");
+    const isWordsFamily = ["words", "words-am"].includes(currentAppMode);
+    wrap.style.display = isWordsFamily ? "flex" : "none";
+    document.getElementById("toggle-words-at").classList.toggle("active", currentAppMode === "words");
+    document.getElementById("toggle-words-am").classList.toggle("active", currentAppMode === "words-am");
+}
 function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
@@ -3078,6 +3180,7 @@ function setActiveTab(mode) {
         if (el) el.classList.toggle("active", m === activeNavTab);
     });
     updateQuizCaseToggle();
+    updateWordFamilyToggle();
     buildLevelGrid();
 }
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
@@ -3088,6 +3191,8 @@ document.getElementById("tab-words").addEventListener("click", () => setActiveTa
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));
 document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
+document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
+document.getElementById("toggle-words-am").addEventListener("click", () => setActiveTab("words-am"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
@@ -3100,6 +3205,7 @@ const initialNavTab = navTabFor(currentAppMode);
     if (el) el.classList.toggle("active", m === initialNavTab);
 });
 updateQuizCaseToggle();
+updateWordFamilyToggle();
 
 // Apply saved theme on load
 document.body.classList.toggle("theme-rainbow", currentTheme === "rainbow");

@@ -1,6 +1,6 @@
 # LetterBrain — Implementation Reference
 
-> Last updated: 2026-07-17. Reflects app.js v38.
+> Last updated: 2026-08-10. Reflects app.js v77.
 
 ---
 
@@ -9,12 +9,13 @@
 ```
 letterbrain/
 ├── index.html              — Single HTML shell; all screens live here as hidden divs
-├── app.js                  — All game logic (~2200 lines)
+├── app.js                  — All game logic (~3700 lines)
 ├── style.css               — Chalkboard Pop theme (dark bg, neon borders) + Rainbow Trail toggle
 ├── manifest.json           — PWA metadata
 │
 ├── images/                 — PNG/JPG assets (A–Z letters, Kannada, Hindi, word family images)
-├── videos/                 — Local mp4 overrides (only ee.mp4 for ಈ special case)
+├── videos/
+│   └── number song.mp4     — Local number-rhyme video (used by Numbers tab, zones 3–4 and 5–6)
 ├── audio/
 │   ├── kannada.mp3         — Full Kannada vowel recording (source for splicing)
 │   ├── kannada/            — Pre-spliced individual vowel clips: a.mp3, aa.mp3, i.mp3, …
@@ -60,17 +61,111 @@ Two visual themes toggled at runtime. Stored in `localStorage` key `lb_theme`.
 
 ---
 
+## Color Vocabulary (Zone UI)
+
+A consistent three-color system applies to all zone-based tabs:
+
+| Color | Hex | Meaning |
+|-------|-----|---------|
+| **Red** | `#C04A4A` | Audio/hearing activity — tap to hear, pick the letter |
+| **Teal** | `#2E5E6E` | Visual/image activity — see the letter or image, make a visual match |
+| **Gold** | `#DEA431` | Cumulative test pill — never used for learn buttons |
+
+This means: if a button plays a sound, it's red. If a button shows an image quiz, it's teal. The big gold pill is always the test.
+
+---
+
 ## Tabs
 
 | Tab | ID | `currentAppMode` | Description |
 |-----|----|-----------------|-------------|
 | Quiz | `tab-quiz` | `"quiz"` | A–Z alphabet: letter ↔ image |
-| Case | `tab-matchcaps` | `"matchcaps"` | Upper ↔ lowercase matching |
+| Case | *(sub-tab of Quiz)* | `"matchcaps"` | Upper ↔ lowercase matching |
+| Lowercase | *(sub-tab of Quiz)* | `"lowercase"` | abc recognition |
 | ಕನ್ನಡ | `tab-kannada` | `"kannada"` | Kannada vowels |
 | हिंदी | `tab-hindi` | `"hindi"` | Hindi consonants |
-| Blends | `tab-blends` | `"blends"` | Phonics rimes/blends (audio) |
-| Numbers | `tab-saynumbers` | `"saynumbers"` | Number recognition 1–6 |
-| Words | `tab-words` | `"words"` | CVC word families |
+| Numbers | `tab-saynumbers` | `"saynumbers"` | Number recognition 1–10 |
+| Word / AT | `tab-words` | `"words"` | CVC word families — -at rime |
+| Word / AM | *(sub-tab of Word)* | `"words-am"` | CVC word families — -am rime |
+
+### Sub-tab pattern
+
+Tabs with multiple modes use a segmented toggle below the nav tabs:
+
+- **Quiz tab** → `#quiz-case-toggle` (ABC / abc / Case)
+- **Word tab** → `#word-family-toggle` (AT / AM)
+
+`navTabFor(mode)` maps sub-modes to their parent nav tab so the correct tab button stays highlighted:
+```js
+function navTabFor(mode) {
+    if (mode === "matchcaps" || mode === "lowercase") return "quiz";
+    if (mode === "words-am") return "words";
+    return mode;
+}
+```
+
+`updateWordFamilyToggle()` shows/hides `#word-family-toggle` and marks the active button, mirroring `updateQuizCaseToggle()`. Both are called from `setActiveTab()` and on initial load.
+
+---
+
+## Zone Card UI Pattern
+
+All non-English tabs now use a vertical zone card layout instead of the 3-column letter grid.
+
+### CSS override
+
+When rendering a zone tab, the grid gets class `nh-mode`:
+```js
+grid.classList.add("nh-mode");
+```
+
+In style.css:
+```css
+#level-grid.nh-mode {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: unset;
+    padding: 12px 16px 24px;
+}
+```
+
+`buildLevelGrid()` calls `grid.classList.remove("nh-mode")` at the top so switching tabs resets the layout.
+
+### Zone group card structure
+
+Each group card (`.nh-group-card`) contains:
+1. A **learn row** (`.nh-learn-row`) — flex row of learn pill buttons
+2. A **test pill** (`.nh-test-node`) — full-width gold pill for the cumulative test
+
+Learn buttons use `.hindi-pair-btn` (shared across all zone tabs).
+
+---
+
+## Zone Data Pattern
+
+All pair-based tabs derive their zone groups from a flat `ALL_PAIRS` array:
+
+```js
+const *_ZONE_GROUPS = *_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: *_ALL_PAIRS.slice(0, i + 1).flat(), // cumulative — all taught so far
+}));
+```
+
+### Flat LEVELS arrays (for homework index tracking)
+
+Each tab derives a flat array in the same top-to-bottom order as the UI buttons, so `homeworkLocked(tab, idx)` works with sequential indices:
+
+```js
+const *_LEVELS = [];
+*_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(pair => {
+        *_LEVELS.push({ ..., mode: "learn1" });
+        *_LEVELS.push({ ..., mode: "learn2" });
+    });
+    *_LEVELS.push({ ..., isTest: true });
+});
+```
 
 ---
 
@@ -78,223 +173,43 @@ Two visual themes toggled at runtime. Stored in `localStorage` key `lb_theme`.
 
 ### Overview
 
-Teaches Kannada vowels (ಸ್ವರಗಳು) in pairs. Each pair gets two levels:
-1. **letter-image** — see the letter, pick the matching image
-2. **video-letter** — watch the teaching video clip, then see image, pick the letter
+Teaches Kannada vowels (ಸ್ವರಗಳು) in pairs. Two learn modes per pair, then a cumulative test.
 
-After every two pairs, a block of three cumulative test levels runs.
+### KANNADA_ALL_PAIRS (7 groups)
 
----
-
-### KANNADA_ITEMS (app.js ~line 115)
-
-All eight current vowels:
-
-| Letter | Roman | Audio file | `vidStart` (sec) | Image |
-|--------|-------|------------|-----------------|-------|
-| ಅ | a  | `audio/kannada/a.mp3`  | 14 (override → 18s in code) | `images/prince.png` |
-| ಆ | aa | `audio/kannada/aa.mp3` | 31 (override → 32s in code) | `images/elephant.png` |
-| ಇ | i  | `audio/kannada/i.mp3`  | 96 (override → 47s in code) | `images/rat.png` |
-| ಈ | ii | `audio/kannada/ii.mp3` | null (local mp4 used) | `images/fly.png` |
-| ಉ | u  | `audio/kannada/u.mp3`  | 79  | `images/ring.png` |
-| ಊ | uu | `audio/kannada/uu.mp3` | 94  | `images/sadhya.png` |
-| ಋ | ru | `audio/kannada/ru.mp3` | 79  | `images/saint.jpg` |
-| ಎ | e  | `audio/kannada/e.mp3`  | 121 | `images/leaf.png` |
-
-> **Note on ಅ/ಆ/ಇ overrides**: `playKannadaVideo()` contains hardcoded start-second overrides for ಅ (18), ಆ (32), ಇ (47) that supersede the `vidStart` field. This is because the field values were set to an earlier version of the video.
-
-> **Note on ಈ**: Uses a local mp4 (`videos/only ee.mp4`) instead of the YouTube video — `playKannadaVideo()` special-cases this letter.
-
----
-
-### Audio — splicing from kannada.mp3
-
-Each vowel's pronunciation is stored as a pre-spliced individual MP3 under `audio/kannada/`. The source file is `audio/kannada.mp3` (50.9 seconds total).
-
-Splicing is done **offline with ffmpeg** before committing:
-
-```bash
-# General pattern:
-ffmpeg -y -i audio/kannada.mp3 -ss <START_SECONDS> -t 3 -q:a 2 audio/kannada/<roman>.mp3
-
-# All current clips (source timestamps in kannada.mp3):
-# a.mp3   → spliced from kannada.mp3 (original session, exact start unknown)
-# aa.mp3  → spliced from kannada.mp3 (original session)
-# i.mp3   → spliced from kannada.mp3 (original session)
-# ii.mp3  → spliced from kannada.mp3 (original session)
-# u.mp3   → spliced from kannada.mp3 (original session)
-# uu.mp3  → spliced from kannada.mp3 (original session)
-# ru.mp3  → ffmpeg -ss 20 -t 3   (spliced 2026-07-17)
-# e.mp3   → ffmpeg -ss 25 -t 3   (spliced 2026-07-17)
+```
+["ಅ","ಆ"], ["ಇ","ಈ"], ["ಉ","ಊ"], ["ಋ","ಎ"], ["ಏ","ಐ"],
+["ಒ","ಓ","ಔ"],  ← triplet group
+["ಅಂ","ಅಃ"]
 ```
 
-At runtime, `playKannadaClip(letter)` plays the file from position 0 and pauses after **2500ms** via a `setTimeout` (the audio file may be longer; the timer caps playback):
+### Zone structure per pair
+
+| Button | Color | Mode | Game: child sees → picks |
+|--------|-------|------|--------------------------|
+| Letter·Image (teal) | `#2E5E6E` | `letter-image` | Kannada letter → image |
+| 🔊 Hear (red) | `#C04A4A` | `hear` | Audio clip → Kannada letter |
+| ★ Test (gold) | `#DEA431` | cumulative test | All pairs seen so far |
+
+### KANNADA_LEVELS derivation
 
 ```js
-function playKannadaClip(letter) {
-    // Stops all other clips, plays the target clip for 2500ms
-    audio.currentTime = 0;
-    audio.play();
-    _kannadaClipTimer = setTimeout(() => audio.pause(), 2500);
-}
+KANNADA_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(letters => {
+        KANNADA_LEVELS.push({ letters, mode: "letter-image" });
+        KANNADA_LEVELS.push({ letters, mode: "hear" });
+    });
+    KANNADA_LEVELS.push({ letters: group.test, mode: "letter-image", isTest: true });
+});
 ```
 
-All clips are preloaded at startup via `new Audio(item.audio)` with `preload = "auto"`.
+### Audio / Video
 
----
-
-### Video — KANNADA_VIDEO_ID
-
-YouTube video: `KMNRrw5fPCY`  
-URL: `https://www.youtube.com/watch?v=KMNRrw5fPCY`
-
-`playKannadaVideo()` plays a **5-second clip** from `vidStart`:
-```js
-const end = start + 5;
-ytPlayer.loadVideoById({ videoId, startSeconds: start });
-// polls getCurrentTime() every 200ms; hides overlay when >= end
-// safetyTimer at 10s cancels if polling stalls
-```
-
-After the overlay hides, `hideVideoOverlay()` fires `afterVideoHide` callback if set, otherwise calls `advanceRound()`.
-
----
-
-### KANNADA_LEVELS (app.js ~line 127)
-
-18 levels total as of v38:
-
-| Level | Letters | Mode | Child sees | Child picks |
-|-------|---------|------|-----------|-------------|
-| 1  | ಅ, ಆ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
-| 2  | ಅ, ಆ | `video-letter` | Teaching video → then image | Kannada letter (4 choices) |
-| 3  | ಇ, ಈ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
-| 4  | ಇ, ಈ | `video-letter` | Teaching video → then image | Kannada letter (4 choices) |
-| 5  | ಅ ಆ ಇ ಈ | `video-letter` ⭐ | Teaching video → image | Kannada letter (4 choices) |
-| 6  | ಅ ಆ ಇ ಈ | `letter-image` ⭐ | Big letter | Image (4 choices) |
-| 7  | ಅ ಆ ಇ ಈ | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
-| 8  | ಉ, ಊ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
-| 9  | ಉ, ಊ | `video-letter` | Teaching video → image | Kannada letter (4 choices) |
-| 10 | ಅ ಆ ಇ ಈ ಉ ಊ | `video-letter` ⭐ | Teaching video → image | Kannada letter (4 choices) |
-| 11 | ಅ ಆ ಇ ಈ ಉ ಊ | `letter-image` ⭐ | Big letter | Image (4 choices) |
-| 12 | ಅ ಆ ಇ ಈ ಉ ಊ | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
-| 13 | ಅ ಆ ಇ ಈ ಉ ಊ | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
-| 14 | ಋ, ಎ | `letter-image` | Big Kannada letter | Matching image (4 choices) |
-| 15 | ಋ, ಎ | `video-letter` | Teaching video → image | Kannada letter (4 choices) |
-| 16 | all 8 | `video-letter` ⭐ | Teaching video → image | Kannada letter (4 choices) |
-| 17 | all 8 | `letter-image` ⭐ | Big letter | Image (4 choices) |
-| 18 | all 8 | `hear` ⭐ | 🔊 button | Kannada letter (4 choices) |
-
-⭐ = cumulative test (`isTest: true`)
-
----
-
-### Game Modes (Kannada)
-
-**`letter-image`** — Letter shown silently, child picks image:
-- Display: large Kannada letter (5rem, Noto Sans Kannada)
-- Choices: 4 image buttons (from KANNADA_ITEMS)
-- On correct: `playKannadaClip()` → 1800ms → `playKannadaVideo()`
-
-**`video-letter`** — Teaching video plays first, then image question:
-- On load: `afterVideoHide` callback is set, then `playKannadaVideo()` fires immediately
-- After video hides: image appears + `playKannadaClip()` fires + 4 letter buttons appear
-- On correct: `advanceRound()` after 1200ms (video was the teaching moment; no repeat)
-
-**`picture`** — Image shown, child picks letter (used sparingly in test levels):
-- Display: image (130×130px)
-- `playKannadaClip()` fires 400ms after display
-- On correct: `playKannadaClip()` → 1800ms → `playKannadaVideo()`
-
-**`hear`** — Audio-only question:
-- Display: 🔊 button (tappable to replay), "tap to hear again" label
-- `playKannadaClip()` fires 400ms after display
-- On correct: `playKannadaVideo()` after 1600ms
-
----
-
-### Choice Options — getKannadaOptions()
-
-Always shows **4 choices**. Logic:
-1. Start with the pair of the current letter (e.g. ಅ→ [ಅ, ಆ], ಋ→ [ಋ, ಎ])
-2. Fill remaining slots from `levelLetterSet` (letters active this level), then from the full `KANNADA_ITEMS` pool
-3. ಅ is suppressed from distractors unless `isTest=true` or `levelIndex === 0`
-
-Pair map (kept in sync with `getKannadaOptions`):
-
-```js
-{ "ಅ": ["ಅ","ಆ"], "ಆ": ["ಅ","ಆ"],
-  "ಇ": ["ಇ","ಈ"], "ಈ": ["ಇ","ಈ"],
-  "ಋ": ["ಋ","ಎ"], "ಎ": ["ಋ","ಎ"] }
-```
-
-ಉ and ಊ are not in the pairMap; they appear together because both are in `levelLetterSet`.
-
----
-
-### How to Add a New Kannada Vowel
-
-Follow this checklist exactly:
-
-#### 1. Record / identify audio
-- Source file: `audio/kannada.mp3` (the full recorded pronunciation track)
-- Note the timestamp (in seconds) where the new vowel is spoken
-- Splice with ffmpeg:
-  ```bash
-  ffmpeg -y -i audio/kannada.mp3 -ss <START_SEC> -t 3 -q:a 2 audio/kannada/<roman>.mp3
-  ```
-  Use `-t 3` (3 seconds) for a clean clip. Adjust if the natural pause is shorter.
-
-#### 2. Find the video timestamp
-- Video: `https://www.youtube.com/watch?v=KMNRrw5fPCY`
-- Play the video, find where the new vowel is introduced
-- Note the timestamp in seconds (e.g. 2:01 = 121 seconds)
-- This becomes `vidStart` in KANNADA_ITEMS
-
-#### 3. Choose or create the image
-- Fluent Emoji 3D style preferred (256×256 PNG from Microsoft's emoji CDN)
-- Or any clear photo/illustration the child recognises
-- Store in `images/<name>.png` (or `.jpg`)
-- The image should unambiguously represent the word/concept used in the video
-
-#### 4. Add to KANNADA_ITEMS
-```js
-{ letter: "ಏ", roman: "ee", audio: "audio/kannada/ee.mp3", vidStart: <sec>, image: "images/<name>.png" },
-```
-Keep the array in canonical Kannada vowel order: ಅ ಆ ಇ ಈ ಉ ಊ ಋ ಎ ಏ ಐ ಒ ಓ ಔ …
-
-#### 5. Update getKannadaOptions pairMap
-Add both directions so choices always include the pair:
-```js
-"ಏ": ["ಏ", "ಐ"],
-"ಐ": ["ಏ", "ಐ"],
-```
-If adding a lone vowel without a pair yet, omit from pairMap — it will fall through to the general pool.
-
-#### 6. Update shouldPlayKannadaDoubleCue (if needed)
-If the vowel should get the double-cue audio behaviour, add it to the array in `shouldPlayKannadaDoubleCue()`.
-
-#### 7. Add KANNADA_LEVELS entries
-Follow the pattern: two intro levels (letter-image + video-letter), then three cumulative test levels covering all vowels seen so far:
-```js
-{ label: "19", letters: ["ಏ", "ಐ"], mode: "letter-image" },
-{ label: "20", letters: ["ಏ", "ಐ"], mode: "video-letter" },
-{ label: "21", letters: ["ಅ","ಆ","ಇ","ಈ","ಉ","ಊ","ಋ","ಎ","ಏ","ಐ"], mode: "video-letter", isTest: true },
-{ label: "22", letters: ["ಅ","ಆ","ಇ","ಈ","ಉ","ಊ","ಋ","ಎ","ಏ","ಐ"], mode: "letter-image", isTest: true },
-{ label: "23", letters: ["ಅ","ಆ","ಇ","ಈ","ಉ","ಊ","ಋ","ಎ","ಏ","ಐ"], mode: "hear",         isTest: true },
-```
-
-#### 8. Bump the version in index.html
-```html
-<script src="app.js?v=39"></script>
-```
-
-#### 9. Commit and push
-```bash
-git add audio/kannada/<roman>.mp3 app.js index.html
-git commit -m "Kannada: add ಏ/ಐ (levels 19–23)"
-git push
-```
+| Resource | Details |
+|----------|---------|
+| Audio clips | `audio/kannada/*.mp3`, each capped at 2500ms playback |
+| YouTube video | `KMNRrw5fPCY`, 5-second clip from `vidStart` |
+| Special case | ಈ uses local `videos/only ee.mp4` instead of YouTube |
 
 ---
 
@@ -302,117 +217,246 @@ git push
 
 ### Overview
 
-Teaches Hindi **consonants** (व्यंजन), not vowels. Currently covers the first four: क, ख, ग, घ (ka, kha, ga, gha). Structure mirrors Kannada but simpler — 5 levels only.
+Teaches Hindi consonants (व्यंजन). 16 pairs covering the full Devanagari consonant set.
 
----
+### HINDI_ALL_PAIRS (16 pairs)
 
-### HINDI_ITEMS (app.js ~line 190)
+```
+["क","ख"], ["ग","घ"], ["ङ","च"], ["छ","ज"], ["झ","ट"],
+["ठ","ड"], ["ढ","ण"], ["त","थ"], ["द","ध"], ["न","प"],
+["फ","ब"], ["भ","म"], ["य","र"], ["ल","व"], ["श","ष"], ["स","ह"]
+```
 
-| Letter | Roman | Audio file | `vidStart` (sec) | Image |
-|--------|-------|------------|-----------------|-------|
-| क | ka  | `audio/hindi/ka.mp3`  | 58 | `images/lotus.png` |
-| ख | kha | `audio/hindi/kha.mp3` | 63 | `images/rabbit.png` |
-| ग | ga  | `audio/hindi/ga.mp3`  | 67 | `images/cow.png` |
-| घ | gha | `audio/hindi/gha.mp3` | 71 | `images/clock.png` |
+### Zone structure per pair
 
----
+| Button | Color | Mode | Game: child sees → picks |
+|--------|-------|------|--------------------------|
+| 🔊 Hear (red) | `#C04A4A` | `hear` | Audio clip → Hindi letter |
+| Picture (teal) | `#2E5E6E` | `picture` | Image → Hindi letter |
+| ★ Test (gold) | `#DEA431` | cumulative test | All pairs seen so far |
 
-### Audio — hindi/ clips
-
-Individual MP3 files in `audio/hindi/`. Each was pre-spliced offline from a Hindi consonant audio recording. At runtime, `playHindiClip(letter)` plays the file from position 0 and stops after **1000ms**:
+### HINDI_LEVELS derivation
 
 ```js
-function playHindiClip(letter) {
-    audio.currentTime = 0;
-    audio.play();
-    _hindiClipTimer = setTimeout(() => audio.pause(), 1000);
+HINDI_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(letters => {
+        HINDI_LEVELS.push({ letters, mode: "hear" });
+        HINDI_LEVELS.push({ letters, mode: "picture" });
+    });
+    HINDI_LEVELS.push({ letters: group.test, mode: "picture", isTest: true });
+});
+```
+
+### Audio / Video
+
+| Resource | Details |
+|----------|---------|
+| Audio clips | `audio/hindi/*.mp3`, each capped at 1000ms playback |
+| YouTube video | `0EfSycgslF0`, 4-second clip from `vidStart` |
+
+---
+
+## English Quiz Tab
+
+### Overview
+
+A–Z alphabet. Two play modes per content level (learn pair), cumulative test after each.
+
+### Sub-tabs
+
+The Quiz tab has a segmented toggle: **ABC** (normal/reverse quiz) | **abc** (lowercase) | **Case** (uppercase ↔ lowercase matching).
+
+### CONTENT_LEVELS and GAME_LEVELS
+
+`CONTENT_LEVELS` is `[1..11]` — level 1 = A–F, levels 2–11 = two letters each.
+
+`GAME_LEVELS` is derived: for each content level, one `mode:"normal"` entry + one `mode:"reverse"` entry.
+
+### Zone structure per content level
+
+| Button | Color | Mode | Game |
+|--------|-------|------|------|
+| Normal (teal) | `#2E5E6E` | `normal` | See letter → pick image |
+| Reverse (red) | `#C04A4A` | `reverse` | See image → pick letter |
+| ★ Test (gold) | `#DEA431` | cumulative test | `startQuizTest(contentLevel)` |
+
+### startQuizTest(maxContentLevel)
+
+Runs reverse mode on all letters up to that content level:
+```js
+function startQuizTest(maxContentLevel) {
+    isExamMode = true;
+    currentGameLevelIdx = -1;
+    gameMode = "reverse";
+    levelItems = ALL_ITEMS.filter(it => it.level <= maxContentLevel);
+    queue = shuffle([...levelItems]);
+    // ...
 }
 ```
 
-Note: Hindi clips are capped at 1000ms (vs 2500ms for Kannada) because consonant clips are shorter.
+### Case sub-tab
+
+- Uses `CAPS_GROUPS` (pairs of uppercase letters)
+- **Lower-case labels**: `"a·b"`, not `"A·B"`
+- One learn button per pair (teal, only one mode: match uppercase to lowercase)
+- Gold cumulative test pill covering all pairs seen so far
+- `CAPS_LEVELS` flat array: `normalIdx = i*2`, `testIdx = i*2+1`
 
 ---
 
-### Video — HINDI_VIDEO_ID
+## Word Tab
 
-YouTube video: `0EfSycgslF0`  
-URL: `https://www.youtube.com/watch?v=0EfSycgslF0`
+The **Word** tab (nav button: "word") covers CVC word families. It has two sub-tabs:
 
-`playHindiVideo()` plays a **4-second clip** from `vidStart` (end = `start + 4`). Optional `vidEnd` field on an item overrides the default +4 duration.
+| Sub-tab | `currentAppMode` | Content |
+|---------|-----------------|---------|
+| AT | `"words"` | -at word family: cat, bat, mat, hat, rat |
+| AM | `"words-am"` | -am word family: ham, jam, yam, ram |
 
----
+The `#word-family-toggle` (AT / AM) shows only when in the words family, exactly mirroring the `#quiz-case-toggle` for English.
 
-### HINDI_LEVELS (app.js ~line 197)
+### AT Word Family
 
-5 levels:
+**WORD_ITEMS**: cat, bat, mat, hat, rat
 
-| Level | Letters | Mode | Child sees | Child picks |
-|-------|---------|------|-----------|-------------|
-| 1 | क, ख | `hear` | 🔊 button | Hindi letter (4 choices) |
-| 2 | क, ख | `video-letter` | Teaching video → image | Hindi letter (4 choices) |
-| 3 | ग, घ | `hear` | 🔊 button | Hindi letter (4 choices) |
-| 4 | ग, घ | `video-letter` | Teaching video → image | Hindi letter (4 choices) |
-| 5 | all 4 | `hear` ⭐ | 🔊 button | Hindi letter (4 choices) |
-
-⭐ = cumulative test (`isTest: true`)
-
----
-
-### Game Modes (Hindi)
-
-**`hear`** — Audio clip plays automatically:
-- Display: 🔊 button + "tap to hear again"
-- `playHindiClip()` fires 400ms after display
-- 4 choice buttons = all HINDI_ITEMS (always all 4, no distractor logic)
-- On correct: `playHindiVideo()` after 1600ms
-
-**`video-letter`** — Teaching video plays first:
-- `afterVideoHide` callback is set, then `playHindiVideo()` fires 300ms after display
-- After video hides: image (or letter fallback) appears + `playHindiClip()` + 4 letter buttons
-- On correct: `advanceRound()` after 1200ms
-
-**`picture`** — Image shown silently, child picks letter:
-- On correct: `playHindiClip()` → 1800ms → `playHindiVideo()`
-
----
-
-### Choices (Hindi)
-
-Unlike Kannada, Hindi does **not** use `getKannadaOptions`. It simply shuffles all `HINDI_ITEMS` and shows all 4 as buttons — no distractor pool logic. This means if more letters are added, the choice count increases automatically.
-
----
-
-### How to Add a New Hindi Consonant
-
-#### 1. Audio
-- Splice from source file at the known timestamp:
-  ```bash
-  ffmpeg -y -i audio/<source>.mp3 -ss <START_SEC> -t 2 -q:a 2 audio/hindi/<roman>.mp3
-  ```
-  Use `-t 2` (2 seconds) — consonant clips are shorter than vowel clips.
-
-#### 2. Video timestamp
-- Video: `https://www.youtube.com/watch?v=0EfSycgslF0`
-- Note timestamp in seconds for the letter's clip → becomes `vidStart`
-
-#### 3. Image
-- Choose a clear illustration the child recognises for this consonant's word
-- Store in `images/<name>.png`
-
-#### 4. Add to HINDI_ITEMS
+**WORD_ALL_PAIRS**:
 ```js
-{ letter: "ङ", roman: "nga", audio: "audio/hindi/nga.mp3", vidStart: <sec>, image: "images/<name>.png" },
+["cat","bat"], ["mat","hat"], ["rat","mat"]
 ```
 
-#### 5. Add HINDI_LEVELS entries
-The first two new letters get 2 intro levels + the test expands to all known letters:
+### AM Word Family
+
+**AM_WORD_ITEMS**: ham, jam, yam, ram
+
+**AM_WORD_ALL_PAIRS**:
 ```js
-{ label: "6", letters: ["ङ", "च"], mode: "hear" },
-{ label: "7", letters: ["ङ", "च"], mode: "video-letter" },
-{ label: "8", letters: ["क","ख","ग","घ","ङ","च"], mode: "hear", isTest: true },
+["ham","jam"], ["yam","ram"]
 ```
 
-#### 6. Bump version, commit, push.
+> **Note**: Images for ham, jam, yam need to be added to `images/`. `ram.png` already exists.
+
+### Zone structure (both word families)
+
+| Button | Color | Mode | Game: child sees → picks |
+|--------|-------|------|--------------------------|
+| Word pair (teal) | `#2E5E6E` | `normal` | Hear/see word → pick image |
+| Word pair (red) | `#C04A4A` | `reverse` | See image → pick word |
+| ★ Test (gold) | `#DEA431` | cumulative test | All words seen so far |
+
+### startWordsGame / startWordsAmGame
+
+AT uses `WORD_ITEMS` and sets `currentAppMode = "words"`.
+AM uses `AM_WORD_ITEMS` and sets `currentAppMode = "words-am"`.
+Both delegate gameplay to the shared `loadWordsRound()` which uses `wordsFamilyItems`.
+
+### Adding a new word family sub-tab
+
+1. Add `*_WORD_ITEMS`, `*_WORD_ALL_PAIRS`, `*_WORD_ZONE_GROUPS`, `*_WORD_LEVELS`
+2. Add the mode to `HOMEWORK_TABS` and `getLevelsForTab()`
+3. Add toggle button to `#word-family-toggle` in HTML
+4. Add `navTabFor` mapping → `"words"`
+5. Add `updateWordFamilyToggle()` logic
+6. Add `buildLevelGrid` branch for the new mode
+7. Add `start*WordsGame()` function
+
+---
+
+## Numbers Tab (saynumbers)
+
+### Overview
+
+Teaches number recognition 1–10 using a **rhyme-peg** system (each number rhymes with a memorable word).
+
+### Rhyme Peg System
+
+| Number | Peg word | Emoji |
+|--------|----------|-------|
+| 1 | sun | ☀️ |
+| 2 | shoe | 👟 |
+| 3 | tree | 🌳 |
+| 4 | door | 🚪 |
+| 5 | hive | 🐝 |
+| 6 | sticks | 🪵 |
+| 7 | heaven | ✨ |
+| 8 | plate | 🍽️ |
+| 9 | vine | 🍇 |
+| 10 | pen | ✏️ |
+
+### Game Flow (per zone)
+
+1. **Word flash**: large rhyme word + emoji shown briefly
+2. **Count display**: N emoji images fill the `#letter-display` box (`renderNHCountGrid`)
+3. **Numeral choice**: 4 tiles showing numerals — child picks the right number
+4. Feedback → next item
+
+### NH_ZONES
+
+```js
+const NH_ZONES = [
+    { id:"nhz1-2",   label:"1 & 2",     nums:[1,2],           isTest:false, repeats:3 },
+    { id:"nhz3-4",   label:"3 & 4",     nums:[3,4],           isTest:false, repeats:3 },
+    { id:"nhzt1-4",  label:"Test 1–4",  nums:[1,2,3,4],       isTest:true,  repeats:2 },
+    { id:"nhz5-6",   label:"5 & 6",     nums:[5,6],           isTest:false, repeats:3 },
+    { id:"nhzt1-6",  label:"Test 1–6",  nums:[1,2,3,4,5,6],   isTest:true,  repeats:1 },
+    { id:"nhz7-8",   label:"7 & 8",     nums:[7,8],           isTest:false, repeats:3 },
+    { id:"nhzt1-8",  label:"Test 1–8",  nums:[1,2,3,4,5,6,7,8], isTest:true, repeats:1 },
+    { id:"nhz9-10",  label:"9 & 10",    nums:[9,10],          isTest:false, repeats:3 },
+    { id:"nhzt1-10", label:"Test 1–10", nums:[1,2,3,4,5,6,7,8,9,10], isTest:true, repeats:1 },
+];
+```
+
+Zones are grouped by `buildLevelGrid` into cards: consecutive learn zones + their following test pill.
+
+### renderNHCountGrid — emoji sizes for 150px display box
+
+The `#letter-display` element is 150×150px. Emoji counts and sizes are calibrated to fit:
+
+| n | Grid cols | Emoji size | Gap |
+|---|-----------|-----------|-----|
+| 1 | 1 | 82px | 5px |
+| 2 | 2 | 58px | 5px |
+| 3 | 3 | 36px | 5px |
+| 4 | 2 | 56px | 5px |
+| 5–6 | 3 | 34px | 3px |
+| 7–8 | 4 | 26px | 3px |
+| 9 | 3 | 32px | 3px |
+| 10 | 5 | 20px | 3px |
+
+### Video Clip Strategy (NH_CLIPS)
+
+For zones 3-4 and 5-6, a local video (`videos/number song.mp4`) plays clips during the learn flow:
+
+```
+intro clip  → word flash for first number
+after-N clip → shown after counting N emojis
+outro clip  → closes the zone
+```
+
+**NH_CLIPS** (current):
+```js
+const NH_CLIPS = {
+    'nhz3-4': {
+        intro:  { start: 90,  dur: 5 },
+        after3: { start: 95,  dur: 7 },
+        after4: { start: 102, dur: 7 },
+        outro:  { start: 110, dur: 8 },
+    },
+    'nhz5-6': {
+        intro:  { start: 121, dur: 5 },
+        after5: { start: 126, dur: 7 },
+        after6: { start: 134, dur: 7 },
+        outro:  { start: 143, dur: 8 },
+    },
+};
+```
+
+**Zones without clips** (nhz1-2, nhz7-8, nhz9-10):
+- Zones 1–2 play without any video (word flash → count → choose).
+- **Zones 7–8 and 9–10 have no NH_CLIPS entries yet.** The number song video does contain footage for these numbers, but the timestamps have not been identified. To add them:
+  1. Open `videos/number song.mp4` and find where 7, 8, 9, 10 are introduced.
+  2. Note the seconds for intro, after-7, after-8 (and after-9, after-10).
+  3. Add `'nhz7-8': { intro, after7, after8, outro }` and `'nhz9-10': { ... }` to `NH_CLIPS`.
+  4. The `playNHClip(key, cb)` function already supports any clip key in the zone's object — no other code changes needed.
 
 ---
 
@@ -426,10 +470,12 @@ The first two new letters get 2 intro levels + the test expands to all known let
 | Quiz (phonics on) | `playPhoneticClip()` | `MbO6vGBkx48` | 5 sec |
 | Kannada | `playKannadaVideo()` | `KMNRrw5fPCY` | 5 sec (ಈ = local mp4) |
 | Hindi | `playHindiVideo()` | `0EfSycgslF0` | 4 sec |
+| Numbers 3-4, 5-6 | `playNHClip()` | local mp4 | variable |
 
-All use the YouTube IFrame API via the single `#yt-player` element. The `hideVideoOverlay()` function fires `afterVideoHide` if set, else calls `advanceRound()`.
+All YouTube clips use the single `#yt-player` element (IFrame API). `hideVideoOverlay()` fires `afterVideoHide` callback if set, else calls `advanceRound()`.
 
 ### Shorts reward (after perfect/near-perfect score)
+
 - 50 sequential YouTube Shorts IDs in `SHORTS_IDS`
 - Resumes from `lb_cartoon` localStorage (`{ index, position }`)
 - Plays up to 5 minutes; child skips with "Done ✖"
@@ -448,13 +494,13 @@ All use the YouTube IFrame API via the single `#yt-player` element. The `hideVid
 
 ## Queue Building
 
-All tabs build `queue` as N copies of the active items, then call `shuffleNoRepeat()` to guarantee no consecutive duplicates:
+All tabs build `queue` as N copies of the active items, then call `shuffleNoRepeat()`:
 
 ```js
 queue = shuffleNoRepeat([...activeItems, ...activeItems, ...activeItems]); // 3× repeat
 ```
 
-`shuffleNoRepeat()` runs Fisher-Yates then walks the array, swapping any adjacent duplicate further ahead.
+`shuffleNoRepeat()` runs Fisher-Yates then walks the array, swapping any adjacent duplicate.
 
 ---
 
@@ -473,6 +519,21 @@ Settings: `rate: 0.85`, `pitch: 0.85`.
 
 ---
 
+## Homework Locking
+
+`homeworkLocked(tab, idx)` returns true if homework mode is on and the index is at or above the ceiling.
+
+```js
+const HOMEWORK_TABS = [
+    "quiz", "matchcaps", "lowercase", "kannada", "hindi",
+    "saynumbers", "words", "words-am"
+];
+```
+
+Each tab's ceiling is stored as `lb_hw_ceiling_<tab>` in localStorage. `getLevelsForTab(tab)` returns the corresponding flat levels array for displaying the homework setup screen.
+
+---
+
 ## Settings Toggles
 
 | Toggle | `localStorage` key | Effect |
@@ -480,3 +541,77 @@ Settings: `rate: 0.85`, `pitch: 0.85`.
 | 🔬 Phonetics | `lb_phonetic` | ON: phonetic-sound video; OFF: phonics-name video (Quiz tab only) |
 | 🚫 No Videos | `lb_novideo` | Skips all video overlays; `proceedFromVideo()` fires immediately |
 | 🌙 Chalkboard / 🌿 Rainbow | `lb_theme` | Visual theme |
+
+---
+
+## How to Add a New Word Family Sub-tab
+
+1. **Images** — Add one image per word to `images/`. e.g. `ham.png`, `jam.png`, `yam.png`.
+
+2. **Data** — Add word items, pairs, zone groups, levels:
+```js
+const OG_WORD_ITEMS = [
+    { word: "dog", image: "images/dog.png" },
+    { word: "log", image: "images/log.png" },
+    // ...
+];
+const OG_WORD_ALL_PAIRS = [["dog","log"], ["fog","hog"]];
+const OG_WORD_ZONE_GROUPS = OG_WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(OG_WORD_ALL_PAIRS.slice(0, i+1).flat())],
+}));
+const OG_WORD_LEVELS = [];
+OG_WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        OG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        OG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    OG_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
+```
+
+3. **HTML** — Add a toggle button inside `#word-family-toggle`:
+```html
+<button id="toggle-words-og" class="segmented-btn" data-mode="words-og">OG</button>
+```
+
+4. **app.js wiring**:
+   - `HOMEWORK_TABS` → add `"words-og"`
+   - `getLevelsForTab` → add `case "words-og": return OG_WORD_LEVELS;`
+   - `navTabFor` → add `if (mode === "words-og") return "words";`
+   - `updateWordFamilyToggle` → add the new toggle button highlight
+   - `buildLevelGrid` → add `if (currentAppMode === "words-og") { ... }`
+   - Add `startWordsOgGame(words, mode)` that uses `OG_WORD_ITEMS`
+   - Add event listener: `document.getElementById("toggle-words-og").addEventListener("click", () => setActiveTab("words-og"))`
+
+5. **Bump version** in index.html and push.
+
+---
+
+## How to Add a New Kannada Vowel
+
+1. **Audio**: splice from `audio/kannada.mp3`:
+   ```bash
+   ffmpeg -y -i audio/kannada.mp3 -ss <START_SEC> -t 3 -q:a 2 audio/kannada/<roman>.mp3
+   ```
+
+2. **Video timestamp**: `https://www.youtube.com/watch?v=KMNRrw5fPCY` → note seconds → `vidStart`
+
+3. **Image**: store in `images/<name>.png`
+
+4. **Add to KANNADA_ITEMS** in canonical vowel order.
+
+5. **Add pair to KANNADA_ALL_PAIRS** — KANNADA_ZONE_GROUPS and KANNADA_LEVELS auto-derive.
+
+6. **Bump version, commit, push**.
+
+---
+
+## How to Add a New Hindi Consonant
+
+1. **Audio**: `ffmpeg -y -i audio/<source>.mp3 -ss <START_SEC> -t 2 -q:a 2 audio/hindi/<roman>.mp3`
+2. **Video timestamp**: `https://www.youtube.com/watch?v=0EfSycgslF0`
+3. **Image**: `images/<name>.png`
+4. **Add to HINDI_ITEMS** in Devanagari consonant order.
+5. **Add pair to HINDI_ALL_PAIRS** — zones and levels auto-derive.
+6. **Bump version, commit, push**.
