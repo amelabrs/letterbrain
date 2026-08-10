@@ -846,6 +846,7 @@ function makeNode({ color, content, isLocked, isCurrent, isExam, onclick }) {
 function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
+    grid.classList.remove("nh-mode"); // reset from any previous saynumbers visit
     updateHomeworkBanner();
 
     if (currentAppMode === "words") {
@@ -874,30 +875,45 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "saynumbers") {
+        // Switch level-grid to single-column flex (overrides the 3-column letter layout)
+        grid.classList.add("nh-mode");
+
         NH_ZONES.forEach((zone, idx) => {
             const isLocked = homeworkLocked("saynumbers", idx);
             const card = document.createElement("div");
             card.className = zone.isTest ? "nh-zone-card nh-zone-test-card" : "nh-zone-card";
+
             const header = document.createElement("div");
             header.className = zone.isTest ? "nh-zone-header nh-zone-test-header" : "nh-zone-header";
-            header.textContent = zone.isTest ? "★ " + zone.label : zone.label;
+            header.textContent = zone.label;
             card.appendChild(header);
+
             const row = document.createElement("div");
             row.className = "nh-zone-row";
-            // one node per distinct number in the zone (up to 2 for learn, all for test)
-            const displayNums = zone.isTest ? zone.nums : zone.nums;
-            displayNums.forEach(n => {
-                const item = NH_ITEMS[n - 1];
+
+            if (zone.isTest) {
+                // Single wide gold button for test zones
                 const btn = document.createElement("button");
-                btn.className = "nh-level-node" + (isLocked ? " nh-node-locked" : "");
+                btn.className = "nh-test-node" + (isLocked ? " nh-node-locked" : "");
                 btn.disabled = isLocked;
-                // background color from rainbow palette
-                const col = RAINBOW_TILE_COLORS[(n - 1) % RAINBOW_TILE_COLORS.length];
-                btn.style.background = col;
-                btn.innerHTML = `<span class="nh-node-emoji">${item.emoji}</span><span class="nh-node-num">${n}</span>`;
+                btn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">Tap to test</span>`;
                 btn.onclick = () => startNumberZone(zone);
                 row.appendChild(btn);
-            });
+            } else {
+                // 2 emoji nodes side-by-side for learn zones
+                zone.nums.forEach(n => {
+                    const item = NH_ITEMS[n - 1];
+                    const btn = document.createElement("button");
+                    btn.className = "nh-level-node" + (isLocked ? " nh-node-locked" : "");
+                    btn.disabled = isLocked;
+                    const col = RAINBOW_TILE_COLORS[(n - 1) % RAINBOW_TILE_COLORS.length];
+                    btn.style.background = col;
+                    btn.innerHTML = `<span class="nh-node-emoji">${item.emoji}</span><span class="nh-node-num">${n}</span>`;
+                    btn.onclick = () => startNumberZone(zone);
+                    row.appendChild(btn);
+                });
+            }
+
             card.appendChild(row);
             grid.appendChild(card);
         });

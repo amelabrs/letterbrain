@@ -1106,37 +1106,54 @@ body.theme-rainbow .theme-btn.active {
 
 /* ── NumberHead mechanic (NH) ──────────────────────────────────────── */
 
-/* Zone cards in level grid */
+/* Override the 3-column letter grid to a single scrollable column */
+#level-grid.nh-mode {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: unset;
+  gap: 0;
+  padding: 12px 16px 24px;
+  overflow-y: auto;
+}
+
+/* Zone cards */
 .nh-zone-card {
-  background: var(--bg-raised);
+  background: var(--bg-raised, #f5f2eb);
   border-radius: 14px;
-  padding: 10px 14px 12px;
+  padding: 10px 14px 14px;
   margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .nh-zone-test-card {
   border: 1.5px solid #DEA431;
-  background: color-mix(in srgb, #DEA431 6%, var(--bg-raised));
+  background: rgba(222, 164, 49, 0.07);
 }
+
 .nh-zone-header {
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--fg-faint, #9C9E8C);
+  color: #9C9E8C;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .nh-zone-test-header { color: #DEA431; }
+
 .nh-zone-row {
   display: flex;
   flex-direction: row;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
+
+/* Learn zone: circular emoji nodes */
 .nh-level-node {
   width: 72px;
   height: 72px;
   border-radius: 50%;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1148,22 +1165,47 @@ body.theme-rainbow .theme-btn.active {
   box-shadow: 0 4px 12px rgba(0,0,0,0.18);
 }
 .nh-level-node:active { transform: scale(0.91); }
-.nh-node-locked { opacity: 0.4; cursor: not-allowed; }
-.nh-node-emoji { font-size: 1.5rem; line-height: 1; }
+.nh-node-locked { opacity: 0.35; cursor: not-allowed; }
+.nh-node-emoji { font-size: 1.6rem; line-height: 1; }
 .nh-node-num {
   font-family: var(--font-display);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255,255,255,0.92);
   margin-top: 2px;
 }
 
-/* Quiz: display box — override LB defaults for NH */
-#quiz-screen.nh-active #letter-display {
-  border-radius: 44px !important;
-  overflow: hidden;
+/* Test zone: wide gold pill button */
+.nh-test-node {
+  flex: 1;
+  height: 52px;
+  border-radius: 26px;
+  background: #DEA431;
+  border: none;
+  box-shadow: 0 3px 10px rgba(222,164,49,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.13s, opacity 0.15s;
+}
+.nh-test-node:active { transform: scale(0.97); }
+.nh-test-node.nh-node-locked { opacity: 0.35; cursor: not-allowed; }
+.nh-test-icon {
+  font-size: 1.2rem;
+  color: #fff;
+  line-height: 1;
+}
+.nh-test-sublabel {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.02em;
 }
 
+/* ── Quiz: display box ─────────────────────────────────────────────── */
 /* Word flash */
 .nh-rhyme-word {
   font-family: var(--font-display);
