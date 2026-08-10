@@ -1082,29 +1082,48 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "matchcaps") {
+        grid.classList.add("nh-mode");
         const unlockedPair = getCapsUnlockedLevel();
         const capsLockedAt = i => CAPS_LEVELS[i].pair > unlockedPair || homeworkLocked("matchcaps", i);
-        CAPS_LEVELS.forEach((gl, idx) => {
-            const isLocked = capsLockedAt(idx);
-            const isTest = gl.mode === "caps-test";
-            const color = qTypeColor(gl.mode);
-            const isCurrent = !isLocked && idx + 1 < CAPS_LEVELS.length && capsLockedAt(idx + 1);
-            const rangeStr = isTest
-                ? `${gl.cumulative[0]}–${gl.cumulative[gl.cumulative.length - 1]}`
-                : `${gl.letters[0]}–${gl.letters[gl.letters.length - 1]}`;
-            const sublabel = isTest ? "★" : QTYPE_ICONS.letter;
-            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Baloo 2',sans-serif;font-size:28px;font-weight:700;color:inherit;line-height:1.15">${rangeStr}</span>
-                <span style="font-size:11px;line-height:1">${sublabel}</span>
-            </div>`;
-            grid.appendChild(makeNode({
-                color,
-                content,
-                isLocked,
-                isCurrent,
-                isExam: isTest,
-                onclick: () => startCapsGame(idx),
-            }));
+
+        CAPS_GROUPS.forEach((group, i) => {
+            const normalIdx = i * 2;      // caps-normal entry
+            const testIdx   = i * 2 + 1; // caps-test entry
+            const normLocked = capsLockedAt(normalIdx);
+            const testLocked = capsLockedAt(testIdx);
+            const cumulative = CAPS_LEVELS[testIdx].cumulative;
+
+            // Lowercase display labels
+            const lStr  = group.map(l => l.toLowerCase()).join("·");
+            const cumLo = cumulative[0].toLowerCase();
+            const cumHi = cumulative[cumulative.length - 1].toLowerCase();
+
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            // Single learn button per pair (only one mode: case-match)
+            const row = document.createElement("div");
+            row.className = "nh-learn-row";
+
+            const learnBtn = document.createElement("button");
+            learnBtn.className = "hindi-pair-btn" + (normLocked ? " nh-node-locked" : "");
+            learnBtn.disabled = normLocked;
+            learnBtn.style.background = "#2E5E6E";
+            learnBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1.3rem">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.letter}</span>`;
+            learnBtn.onclick = () => startCapsGame(normalIdx);
+            row.appendChild(learnBtn);
+
+            card.appendChild(row);
+
+            // Cumulative test pill
+            const testBtn = document.createElement("button");
+            testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+            testBtn.disabled = testLocked;
+            testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${cumLo}–${cumHi}</span>`;
+            testBtn.onclick = () => startCapsGame(testIdx);
+            card.appendChild(testBtn);
+
+            grid.appendChild(card);
         });
         return;
     }
