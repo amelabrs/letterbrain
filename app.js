@@ -344,25 +344,18 @@ const HINDI_ITEMS = [
     { letter: "ह", roman: "ha",   audio: "audio/hindi/ha.mp3",   vidStart: 205, image: "images/swan.png"     },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
-// ── Hindi zones (grouped: learn pairs → test) ─────────────────────────
-const HINDI_ZONE_GROUPS = [
-    {
-        learns: [["क","ख"], ["ग","घ"]],
-        test: ["क","ख","ग","घ"],
-    },
-    {
-        learns: [["ङ","च"], ["छ","ज"], ["झ","ट"], ["ठ","ड"], ["ढ","ण"]],
-        test: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"],
-    },
-    {
-        learns: [["त","थ"], ["द","ध"], ["न","प"], ["फ","ब"], ["भ","म"]],
-        test: ["त","थ","द","ध","न","प","फ","ब","भ","म"],
-    },
-    {
-        learns: [["य","र"], ["ल","व"], ["श","ष"], ["स","ह"]],
-        test: null,
-    },
+// ── Hindi zones: one pair per group, cumulative test after each ────────
+const HINDI_ALL_PAIRS = [
+    ["क","ख"], ["ग","घ"], ["ङ","च"], ["छ","ज"], ["झ","ट"],
+    ["ठ","ड"], ["ढ","ण"], ["त","थ"], ["द","ध"], ["न","प"],
+    ["फ","ब"], ["भ","म"], ["य","र"], ["ल","व"], ["श","ष"], ["स","ह"],
 ];
+
+// Each group: learn the new pair, then test all letters covered so far
+const HINDI_ZONE_GROUPS = HINDI_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: HINDI_ALL_PAIRS.slice(0, i + 1).flat(),
+}));
 
 // Flat HINDI_LEVELS derived from groups — used only for homework index tracking
 // Order: hear, picture per pair; then picture-test for each group test
