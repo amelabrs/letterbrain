@@ -1103,3 +1103,114 @@ body.theme-rainbow .theme-btn.active {
   border-color: #347046;
   color: #347046;
 }
+
+/* ── NumberHead mechanic (NH) ──────────────────────────────────────── */
+
+/* Zone cards in level grid */
+.nh-zone-card {
+  background: var(--bg-raised);
+  border-radius: 14px;
+  padding: 10px 14px 12px;
+  margin-bottom: 10px;
+}
+.nh-zone-test-card {
+  border: 1.5px solid #DEA431;
+  background: color-mix(in srgb, #DEA431 6%, var(--bg-raised));
+}
+.nh-zone-header {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--fg-faint, #9C9E8C);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.nh-zone-test-header { color: #DEA431; }
+.nh-zone-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nh-level-node {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1.2;
+  transition: transform 0.15s;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+.nh-level-node:active { transform: scale(0.91); }
+.nh-node-locked { opacity: 0.4; cursor: not-allowed; }
+.nh-node-emoji { font-size: 1.5rem; line-height: 1; }
+.nh-node-num {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  margin-top: 2px;
+}
+
+/* Quiz: display box — override LB defaults for NH */
+#quiz-screen.nh-active #letter-display {
+  border-radius: 44px !important;
+  overflow: hidden;
+}
+
+/* Word flash */
+.nh-rhyme-word {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  letter-spacing: 0.01em;
+}
+
+/* Count grid */
+.nh-count-grid {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+}
+.nh-count-emoji {
+  line-height: 1;
+  user-select: none;
+}
+
+/* Choice tiles — 4 in one row */
+.nh-num-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  border-radius: 16px !important;
+  aspect-ratio: 1 !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18) !important;
+}
+.nh-choice-numeral {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 6vw, 32px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.nh-choice-subword {
+  font-family: var(--font-sans);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  text-transform: lowercase;
+}

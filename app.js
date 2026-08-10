@@ -418,16 +418,50 @@ const BLENDS_LEVELS = [
     { label: "★",     activeBlends: ["th", "at", "og", "un"] },
 ];
 
-// ── Numbers ──────────────────────────────────────────────────────────
-const NUMBER_LEVELS = [
-    { label: "1–2", range: [1, 2],  mode: "hear" },
-    { label: "3–4", range: [3, 4],  mode: "hear" },
-    { label: "1–4", range: [1, 4],  mode: "hear", isTest: true },
-    { label: "5–6", range: [5, 6],  mode: "hear" },
-    { label: "1–6", range: [1, 6],  mode: "hear" },
-    { label: "7–8", range: [7, 8],  mode: "hear" },
-    { label: "1–8", range: [1, 8],  mode: "hear", isTest: true },
+// ── Numbers (NumberHead mechanic) ─────────────────────────────────────
+const NH_ITEMS = [
+    { num:1,  word:"one",   rhyme:"sun",    emoji:"☀️"  },
+    { num:2,  word:"two",   rhyme:"shoes",  emoji:"👟"  },
+    { num:3,  word:"three", rhyme:"trees",  emoji:"🌲"  },
+    { num:4,  word:"four",  rhyme:"doors",  emoji:"🚪"  },
+    { num:5,  word:"five",  rhyme:"dive",   emoji:"🤿"  },
+    { num:6,  word:"six",   rhyme:"sticks", emoji:"🪄"  },
+    { num:7,  word:"seven", rhyme:"heaven", emoji:"⭐"  },
+    { num:8,  word:"eight", rhyme:"gate",   emoji:"⛩️" },
+    { num:9,  word:"nine",  rhyme:"line",   emoji:"📏"  },
+    { num:10, word:"ten",   rhyme:"pen",    emoji:"✏️"  },
 ];
+
+const NH_ZONES = [
+    { id:"nhz1-2",   label:"1 & 2",     nums:[1,2],                   isTest:false, repeats:3 },
+    { id:"nhz3-4",   label:"3 & 4",     nums:[3,4],                   isTest:false, repeats:3 },
+    { id:"nhzt1-4",  label:"Test 1–4",  nums:[1,2,3,4],               isTest:true,  repeats:2 },
+    { id:"nhz5-6",   label:"5 & 6",     nums:[5,6],                   isTest:false, repeats:3 },
+    { id:"nhzt1-6",  label:"Test 1–6",  nums:[1,2,3,4,5,6],           isTest:true,  repeats:1 },
+    { id:"nhz7-8",   label:"7 & 8",     nums:[7,8],                   isTest:false, repeats:3 },
+    { id:"nhzt1-8",  label:"Test 1–8",  nums:[1,2,3,4,5,6,7,8],      isTest:true,  repeats:1 },
+    { id:"nhz9-10",  label:"9 & 10",    nums:[9,10],                  isTest:false, repeats:3 },
+    { id:"nhzt1-10", label:"Test 1–10", nums:[1,2,3,4,5,6,7,8,9,10], isTest:true,  repeats:1 },
+];
+
+const NH_CLIPS = {
+    'nhz3-4': {
+        intro:  { start: 90,  dur: 5 },
+        after3: { start: 95,  dur: 7 },
+        after4: { start: 102, dur: 7 },
+        outro:  { start: 110, dur: 8 },
+    },
+    'nhz5-6': {
+        intro:  { start: 121, dur: 5 },
+        after5: { start: 126, dur: 7 },
+        after6: { start: 134, dur: 7 },
+        outro:  { start: 143, dur: 8 },
+    },
+};
+
+// NH game state
+let currentNHZone = null;
+let nhQueue = [], nhIdx = 0, nhItem = null;
 
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
@@ -456,7 +490,7 @@ function getLevelsForTab(tab) {
         case "matchcaps": return CAPS_LEVELS;
         case "kannada": return KANNADA_LEVELS;
         case "hindi": return HINDI_LEVELS;
-        case "saynumbers": return NUMBER_LEVELS;
+        case "saynumbers": return NH_ZONES;
         case "words": return WORD_LEVELS;
     }
 }
@@ -840,18 +874,32 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "saynumbers") {
-        NUMBER_LEVELS.forEach(({ label, range, mode, isTest }, idx) => {
-            const color = qTypeColor(mode, isTest);
-            const icon = isTest ? "★" : qTypeIcon(mode, false);
-            const content = `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.1">${label}<br><span style="font-size:13px">${icon}</span></span>`;
-            grid.appendChild(makeNode({
-                color,
-                content,
-                isLocked: homeworkLocked("saynumbers", idx),
-                isCurrent: false,
-                isExam: isTest,
-                onclick: () => startNumbers(mode, range),
-            }));
+        NH_ZONES.forEach((zone, idx) => {
+            const isLocked = homeworkLocked("saynumbers", idx);
+            const card = document.createElement("div");
+            card.className = zone.isTest ? "nh-zone-card nh-zone-test-card" : "nh-zone-card";
+            const header = document.createElement("div");
+            header.className = zone.isTest ? "nh-zone-header nh-zone-test-header" : "nh-zone-header";
+            header.textContent = zone.isTest ? "★ " + zone.label : zone.label;
+            card.appendChild(header);
+            const row = document.createElement("div");
+            row.className = "nh-zone-row";
+            // one node per distinct number in the zone (up to 2 for learn, all for test)
+            const displayNums = zone.isTest ? zone.nums : zone.nums;
+            displayNums.forEach(n => {
+                const item = NH_ITEMS[n - 1];
+                const btn = document.createElement("button");
+                btn.className = "nh-level-node" + (isLocked ? " nh-node-locked" : "");
+                btn.disabled = isLocked;
+                // background color from rainbow palette
+                const col = RAINBOW_TILE_COLORS[(n - 1) % RAINBOW_TILE_COLORS.length];
+                btn.style.background = col;
+                btn.innerHTML = `<span class="nh-node-emoji">${item.emoji}</span><span class="nh-node-num">${n}</span>`;
+                btn.onclick = () => startNumberZone(zone);
+                row.appendChild(btn);
+            });
+            card.appendChild(row);
+            grid.appendChild(card);
         });
         return;
     }
@@ -1711,6 +1759,8 @@ function showFeedback(correct) {
         text.textContent = `It's ${currentItem.blend}!`;
     } else if (currentAppMode === "words") {
         text.textContent = `It's "${currentItem.word}"!`;
+    } else if (currentAppMode === "saynumbers" && nhItem) {
+        text.textContent = `It's ${nhItem.num} — ${nhItem.word} rhymes with ${nhItem.rhyme}!`;
     } else {
         text.textContent = `It's ${currentItem.word}!`;
     }
@@ -2851,9 +2901,7 @@ function handleWordsChoice(btn, chosen) {
 function advanceRound() {
     currentIndex++;
     if (currentAppMode === "saynumbers") {
-        if (gameMode === "reverse") loadNumberRoundReverse();
-        else if (gameMode === "hear") loadNumberRoundHear();
-        else loadNumberRound();
+        loadNHRound(); // NH game manages its own queue
     } else if (currentAppMode === "matchcaps") {
         loadCapsRound();
     } else if (currentAppMode === "kannada") {
@@ -2900,7 +2948,7 @@ function setActiveTab(mode) {
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
-// tab-saynumbers is now an <a> link to NumberHead — no JS needed
+document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
 document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));
@@ -3258,104 +3306,122 @@ function handleSayItResult(success, recognized) {
     }
 }
 
-// ── Numbers Game ──────────────────────────────────────────────────────
+// ── Numbers Game (NumberHead mechanic) ────────────────────────────────
 
-function startNumbers(mode = "normal", range = [1, 4]) {
-    gameMode = mode;
-    numberRange = range;
-    queue = Array.from({ length: 10 }, () => range[0] + Math.floor(Math.random() * (range[1] - range[0] + 1)));
-    currentIndex = 0;
+function startNumberZone(zone) {
+    currentNHZone = zone;
+    nhQueue = buildNHQueue(zone.nums, zone.repeats);
+    nhIdx = 0;
+    nhItem = null;
     stars = 0;
     answered = false;
     document.getElementById("stars").textContent = stars;
+    // reset choices grid style
+    const choicesEl = document.getElementById("choices");
+    choicesEl.style.gridTemplateColumns = "1fr 1fr 1fr 1fr";
+    choicesEl.style.gap = "10px";
+    choicesEl.className = "";
     setModeChip("saynumbers");
     showScreen("quiz-screen");
-    if (gameMode === "reverse") loadNumberRoundReverse();
-    else if (gameMode === "hear") loadNumberRoundHear();
-    else loadNumberRound();
+
+    if (NH_CLIPS[zone.id]) {
+        playNHClip("intro", () => loadNHRound());
+    } else {
+        loadNHRound();
+    }
 }
 
-function loadNumberRound() {
-    if (currentIndex >= queue.length) {
-        showNumbersDone();
-        return;
+function buildNHQueue(nums, repeats) {
+    const pool = [];
+    for (let r = 0; r < repeats; r++) pool.push(...shuffle([...nums]));
+    // break adjacent repeats
+    for (let i = 1; i < pool.length; i++) {
+        if (pool[i] === pool[i - 1]) {
+            for (let j = i + 1; j < pool.length; j++) {
+                if (pool[j] !== pool[i - 1]) { [pool[i], pool[j]] = [pool[j], pool[i]]; break; }
+            }
+        }
     }
+    return pool;
+}
 
+function loadNHRound() {
+    if (nhIdx >= nhQueue.length) { showNHDone(); return; }
+    nhItem = NH_ITEMS[nhQueue[nhIdx++] - 1];
     answered = false;
     roundClean = true;
     roundWrongs = 0;
-    const count = queue[currentIndex];
 
-    const balls = Array(count).fill('<div class="number-ball"></div>').join('');
-    document.getElementById("letter-display").innerHTML = `<div class="number-balls">${balls}</div>`;
+    document.getElementById("round-info").textContent = `${nhIdx} / ${nhQueue.length}`;
+    document.getElementById("progress-fill").style.width = `${((nhIdx - 1) / nhQueue.length) * 100}%`;
 
+    const display = document.getElementById("letter-display");
+    const col = RAINBOW_TILE_COLORS[(nhItem.num - 1) % RAINBOW_TILE_COLORS.length];
+    display.style.background = col;
+    display.style.borderRadius = "44px";
+    display.style.overflow = "hidden";
+    display.style.animation = "none";
+    void display.offsetWidth;
+    display.style.animation = "popIn 0.35s ease-out";
+
+    // Phase 1: flash word
+    display.innerHTML = `<span class="nh-rhyme-word">${nhItem.word}</span>`;
     const choicesEl = document.getElementById("choices");
-    choicesEl.className = "";
+    choicesEl.style.gridTemplateColumns = "1fr 1fr 1fr 1fr";
+    choicesEl.style.gap = "10px";
     choicesEl.innerHTML = "";
+    choicesEl.style.visibility = "hidden";
+    speak(nhItem.word);
 
-    // Build 3 distractors from nearby numbers, then shuffle with the correct answer
-    const pool = [];
-    for (let n = Math.max(1, count - 3); n <= count + 3; n++) {
-        if (n !== count) pool.push(n);
-    }
-    const choices = shuffle([count, ...shuffle(pool).slice(0, 3)]);
-    choices.forEach((n, i) => {
-        const btn = document.createElement("button");
-        btn.className = "choice-btn choice-number-btn";
-        styleTile(btn, i);
-        btn.textContent = n;
-        btn.onclick = () => handleNumberChoice(btn, n, count);
-        choicesEl.appendChild(btn);
-    });
-
-    setLetterDisplayColor("saynumbers");
-    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
-    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+    // Phase 2: count grid + choices
+    setTimeout(() => {
+        renderNHCountGrid(display);
+        renderNHChoices();
+        choicesEl.style.visibility = "visible";
+    }, 800);
 }
 
-function loadNumberRoundHear() {
-    if (currentIndex >= queue.length) { showNumbersDone(); return; }
-
-    answered = false;
-    roundClean = true;
-    roundWrongs = 0;
-    const count = queue[currentIndex];
-
-    const letterDisplay = document.getElementById("letter-display");
-    letterDisplay.innerHTML = `
-        <div id="number-hear-btn" class="kannada-listen-btn" style="font-size:2.5rem">🔊</div>
-        <div style="font-size:0.85rem;color:#aaa;margin-top:6px">tap to hear again</div>
-    `;
-    document.getElementById("number-hear-btn").addEventListener("click", () => speak(String(count)));
-    setTimeout(() => speak(String(count)), 400);
-
-    const choicesEl = document.getElementById("choices");
-    choicesEl.className = "";
-    choicesEl.innerHTML = "";
-
-    const pool = [];
-    for (let n = Math.max(1, count - 3); n <= count + 3; n++) {
-        if (n !== count) pool.push(n);
-    }
-    const choices = shuffle([count, ...shuffle(pool).slice(0, 3)]);
-    choices.forEach((n, i) => {
-        const btn = document.createElement("button");
-        btn.className = "choice-btn choice-number-btn";
-        styleTile(btn, i);
-        btn.textContent = n;
-        btn.onclick = () => handleNumberChoice(btn, n, count);
-        choicesEl.appendChild(btn);
-    });
-
-    setLetterDisplayColor("saynumbers");
-    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
-    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+function renderNHCountGrid(display) {
+    const n = nhItem.num;
+    const cols = n <= 3 ? n : n === 4 ? 2 : n <= 6 ? 3 : n <= 8 ? 4 : n === 9 ? 3 : 5;
+    const size = n === 1 ? 96 : n === 2 ? 76 : n === 3 ? 52 : n === 4 ? 70 : n <= 6 ? 46 : n <= 8 ? 36 : n === 9 ? 44 : 30;
+    const gap  = n <= 4 ? 6 : n <= 8 ? 4 : 3;
+    let html = `<div class="nh-count-grid" style="grid-template-columns:repeat(${cols},1fr);gap:${gap}px">`;
+    for (let i = 0; i < n; i++) html += `<span class="nh-count-emoji" style="font-size:${size}px">${nhItem.emoji}</span>`;
+    html += "</div>";
+    display.innerHTML = html;
 }
 
-function handleNumberChoice(btn, chosen, count) {
+function renderNHChoices() {
+    const opts = getNHOptions(nhItem.num);
+    const el = document.getElementById("choices");
+    el.innerHTML = "";
+    opts.forEach((num, i) => {
+        const item = NH_ITEMS[num - 1];
+        const btn = document.createElement("button");
+        btn.className = "choice-btn nh-num-btn";
+        const col = RAINBOW_TILE_COLORS[(num - 1) % RAINBOW_TILE_COLORS.length];
+        btn.style.background = col;
+        btn.innerHTML = `<span class="nh-choice-numeral">${num}</span><span class="nh-choice-subword">${item.word}</span>`;
+        btn.onclick = () => handleNHChoice(btn, num);
+        el.appendChild(btn);
+    });
+}
+
+function getNHOptions(correct) {
+    const others = [1,2,3,4,5,6,7,8,9,10].filter(n => n !== correct);
+    others.sort((a, b) => {
+        const da = Math.abs(a - correct) + Math.random() * 2.5;
+        const db = Math.abs(b - correct) + Math.random() * 2.5;
+        return da - db;
+    });
+    return shuffle([correct, ...others.slice(0, 3)]);
+}
+
+function handleNHChoice(btn, chosen) {
     if (answered) return;
 
-    if (chosen === count) {
+    if (chosen === nhItem.num) {
         answered = true;
         document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
         btn.classList.remove("dimmed");
@@ -3367,81 +3433,87 @@ function handleNumberChoice(btn, chosen, count) {
         }
         playCorrectSound();
         spawnConfetti();
-        speak(String(count));
-        setTimeout(() => speak(String(count)), 1200);
         showFeedback(true);
 
-        setTimeout(advanceRound, 2200);
+        const afterKey = "after" + nhItem.num;
+        const zoneClips = NH_CLIPS[currentNHZone.id];
+        if (zoneClips && zoneClips[afterKey]) {
+            setTimeout(() => playNHClip(afterKey, () => loadNHRound()), 1200);
+        } else {
+            setTimeout(() => loadNHRound(), 1200);
+        }
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
         roundClean = false;
         roundWrongs++;
         playWrongSound();
+        showFeedback(false);
     }
 }
 
-function loadNumberRoundReverse() {
-    if (currentIndex >= queue.length) {
+function showNHDone() {
+    document.getElementById("progress-fill").style.width = "100%";
+    const zoneClips = NH_CLIPS[currentNHZone ? currentNHZone.id : ""];
+    if (zoneClips && zoneClips.outro) {
+        playNHClip("outro", () => showNumbersDone());
+    } else {
         showNumbersDone();
-        return;
     }
-
-    answered = false;
-    const count = queue[currentIndex];
-    let tapped = 0;
-
-    const letterDisplay = document.getElementById("letter-display");
-    letterDisplay.innerHTML = `<div id="big-letter">${count}</div>`;
-    setLetterDisplayColor("saynumbers");
-    const bigLetter = document.getElementById("big-letter");
-    bigLetter.style.animation = "none";
-    void bigLetter.offsetWidth;
-    bigLetter.style.animation = "popIn 0.4s ease-out";
-
-    speak(String(count));
-
-    const choicesEl = document.getElementById("choices");
-    choicesEl.className = "number-tap-grid";
-    choicesEl.innerHTML = "";
-
-    for (let i = 0; i < 4; i++) {
-        const ball = document.createElement("div");
-        ball.className = "number-tap-ball";
-        ball.onclick = () => {
-            if (answered || ball.classList.contains("tapped")) return;
-            ball.classList.add("tapped");
-            tapped++;
-            if (tapped === count) {
-                answered = true;
-                stars++;
-                document.getElementById("stars").textContent = stars;
-                playCorrectSound();
-                spawnConfetti();
-                speak(String(count));
-                setTimeout(() => speak(String(count)), 1200);
-
-                showFeedback(true);
-                setTimeout(advanceRound, 2200);
-            }
-        };
-        choicesEl.appendChild(ball);
-    }
-
-    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
-    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
 }
+
+function playNHClip(key, callback) {
+    const zoneClips = NH_CLIPS[currentNHZone ? currentNHZone.id : ""];
+    const clip = zoneClips && zoneClips[key];
+    if (!clip) { if (callback) callback(); return; }
+
+    const { start, dur } = clip;
+    const overlay    = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl       = document.getElementById("yt-player");
+
+    afterVideoHide = callback;
+
+    if (localPlayer.src.indexOf("number song") === -1) {
+        localPlayer.src = "videos/number song.mp4";
+        localPlayer.load();
+    }
+    localPlayer.currentTime = start;
+    localPlayer.style.display = "block";
+    if (ytEl) ytEl.style.display = "none";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+
+    localPlayer.play().catch(() => { hideVideoOverlay(); });
+
+    clearInterval(videoTimer);
+    clearTimeout(safetyTimer);
+    const endAt = start + dur;
+    videoTimer = setInterval(() => {
+        if (localPlayer.currentTime >= endAt) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, (dur + 3) * 1000);
+}
+
+// loadNumberRoundReverse removed — replaced by NH mechanic
 
 function showNumbersDone() {
+    const total = nhQueue.length;
     document.getElementById("progress-fill").style.width = "100%";
     document.getElementById("final-score").textContent = stars;
-    document.getElementById("final-total").textContent = queue.length;
-    document.getElementById("final-stars").textContent = "⭐".repeat(stars) + "☆".repeat(queue.length - stars);
+    document.getElementById("final-total").textContent = total;
+    document.getElementById("final-stars").textContent = "⭐".repeat(stars) + "☆".repeat(Math.max(0, total - stars));
     document.getElementById("unlock-msg").style.display = "none";
     showScreen("done-screen");
-    const msg = stars >= 8 ? "Amazing! You got almost everything right!"
-        : stars >= 5 ? "Great job!"
-        : `Good try! You got ${stars} out of ${queue.length}. Keep practicing!`;
+    const msg = stars >= total ? "Perfect! You're a number star! ⭐"
+        : stars >= Math.floor(total * 0.7) ? "Great job!"
+        : `Good try! You got ${stars} out of ${total}. Keep practising!`;
     speak(msg);
     spawnConfetti();
 }
