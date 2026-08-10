@@ -102,7 +102,8 @@ function qTypeColor(mode, isTest = false) {
 }
 
 function qTypeIcon(mode, isTest) {
-    if (["picture", "reverse", "video-letter"].includes(mode)) return QTYPE_ICONS.image;
+    if (mode === "video-letter") return QTYPE_ICONS.video;
+    if (["picture", "reverse"].includes(mode)) return QTYPE_ICONS.image;
     if (mode === "hear") return QTYPE_ICONS.audio;
     return QTYPE_ICONS.letter;
 }
@@ -2899,7 +2900,7 @@ function setActiveTab(mode) {
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
-document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
+// tab-saynumbers is now an <a> link to NumberHead — no JS needed
 document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));

@@ -146,10 +146,9 @@ header {
 .mode-tab-kannada { border-color: var(--neon-orange); color: var(--neon-orange); }
 .mode-tab-hindi   { border-color: var(--neon-pink);   color: var(--neon-pink);   }
 .mode-tab-blends  { border-color: var(--neon-purple); color: var(--neon-purple); }
-.mode-tab-numbers    { border-color: var(--neon-yellow); color: var(--neon-yellow); font-size: 20px; }
-.mode-tab-words      { border-color: var(--neon-coral);  color: var(--neon-coral);  font-size: 16px; font-weight: 800; }
-.mode-tab-numberhead { border-color: #2E5E6E; color: #2E5E6E; font-size: 20px;
-                       text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.mode-tab-numbers { border-color: var(--neon-yellow); color: var(--neon-yellow); font-size: 20px;
+                    text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.mode-tab-words   { border-color: var(--neon-coral);  color: var(--neon-coral);  font-size: 16px; font-weight: 800; }
 
 .mode-tab.active { opacity: 1; border-width: 3px; }
 
@@ -1058,7 +1057,6 @@ body.theme-rainbow .mode-tab-blends.active  { background: #1A4226; color: #fff; 
 body.theme-rainbow .mode-tab-numbers.active { background: #DEA431; color: #fff; box-shadow: 0 2px 8px rgba(222,164,49,0.35); }
 body.theme-rainbow .mode-tab-words        { border-color: #C0392B; color: #C0392B; }
 body.theme-rainbow .mode-tab-words.active { background: #C0392B; color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,0.35); }
-body.theme-rainbow .mode-tab-numberhead   { border-color: #2E5E6E; color: #2E5E6E; }
 
 body.theme-rainbow .choice-btn.correct { outline-color: #347046; }
 body.theme-rainbow .feedback.wrong-fb #feedback-text  { color: #B85C38; }
