@@ -344,65 +344,36 @@ const HINDI_ITEMS = [
     { letter: "ह", roman: "ha",   audio: "audio/hindi/ha.mp3",   vidStart: 205, image: "images/swan.png"     },
 ];
 const HINDI_VIDEO_ID = "0EfSycgslF0";
-const HINDI_LEVELS = [
-    { label: "1",  letters: ["क", "ख"], mode: "hear" },
-    { label: "2",  letters: ["क", "ख"], mode: "video-letter" },
-    { label: "3",  letters: ["क", "ख"], mode: "picture" },
-    { label: "4",  letters: ["ग", "घ"], mode: "hear" },
-    { label: "5",  letters: ["ग", "घ"], mode: "video-letter" },
-    { label: "6",  letters: ["ग", "घ"], mode: "picture" },
-    { label: "7",  letters: ["क","ख","ग","घ"], mode: "hear",         isTest: true },
-    { label: "8",  letters: ["क","ख","ग","घ"], mode: "video-letter", isTest: true },
-    { label: "9",  letters: ["क","ख","ग","घ"], mode: "picture",      isTest: true },
-    { label: "10", letters: ["ङ", "च"], mode: "hear" },
-    { label: "11", letters: ["ङ", "च"], mode: "video-letter" },
-    { label: "12", letters: ["ङ", "च"], mode: "picture" },
-    { label: "13", letters: ["छ", "ज"], mode: "hear" },
-    { label: "14", letters: ["छ", "ज"], mode: "video-letter" },
-    { label: "15", letters: ["छ", "ज"], mode: "picture" },
-    { label: "16", letters: ["झ", "ट"], mode: "hear" },
-    { label: "17", letters: ["झ", "ट"], mode: "video-letter" },
-    { label: "18", letters: ["झ", "ट"], mode: "picture" },
-    { label: "19", letters: ["ठ", "ड"], mode: "hear" },
-    { label: "20", letters: ["ठ", "ड"], mode: "video-letter" },
-    { label: "21", letters: ["ठ", "ड"], mode: "picture" },
-    { label: "22", letters: ["ढ", "ण"], mode: "hear" },
-    { label: "23", letters: ["ढ", "ण"], mode: "video-letter" },
-    { label: "24", letters: ["ढ", "ण"], mode: "picture" },
-    { label: "25", letters: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"], mode: "hear",         isTest: true },
-    { label: "26", letters: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"], mode: "video-letter", isTest: true },
-    { label: "27", letters: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"], mode: "picture",      isTest: true },
-    { label: "28", letters: ["त", "थ"], mode: "hear" },
-    { label: "29", letters: ["त", "थ"], mode: "video-letter" },
-    { label: "30", letters: ["त", "थ"], mode: "picture" },
-    { label: "31", letters: ["द", "ध"], mode: "hear" },
-    { label: "32", letters: ["द", "ध"], mode: "video-letter" },
-    { label: "33", letters: ["द", "ध"], mode: "picture" },
-    { label: "34", letters: ["न", "प"], mode: "hear" },
-    { label: "35", letters: ["न", "प"], mode: "video-letter" },
-    { label: "36", letters: ["न", "प"], mode: "picture" },
-    { label: "37", letters: ["फ", "ब"], mode: "hear" },
-    { label: "38", letters: ["फ", "ब"], mode: "video-letter" },
-    { label: "39", letters: ["फ", "ब"], mode: "picture" },
-    { label: "40", letters: ["भ", "म"], mode: "hear" },
-    { label: "41", letters: ["भ", "म"], mode: "video-letter" },
-    { label: "42", letters: ["भ", "म"], mode: "picture" },
-    { label: "43", letters: ["त","थ","द","ध","न","प","फ","ब","भ","म"], mode: "hear",         isTest: true },
-    { label: "44", letters: ["त","थ","द","ध","न","प","फ","ब","भ","म"], mode: "video-letter", isTest: true },
-    { label: "45", letters: ["त","थ","द","ध","न","प","फ","ब","भ","म"], mode: "picture",      isTest: true },
-    { label: "46", letters: ["य", "र"], mode: "hear" },
-    { label: "47", letters: ["य", "र"], mode: "video-letter" },
-    { label: "48", letters: ["य", "र"], mode: "picture" },
-    { label: "49", letters: ["ल", "व"], mode: "hear" },
-    { label: "50", letters: ["ल", "व"], mode: "video-letter" },
-    { label: "51", letters: ["ल", "व"], mode: "picture" },
-    { label: "52", letters: ["श", "ष"], mode: "hear" },
-    { label: "53", letters: ["श", "ष"], mode: "video-letter" },
-    { label: "54", letters: ["श", "ष"], mode: "picture" },
-    { label: "55", letters: ["स", "ह"], mode: "hear" },
-    { label: "56", letters: ["स", "ह"], mode: "video-letter" },
-    { label: "57", letters: ["स", "ह"], mode: "picture" },
+// ── Hindi zones (grouped: learn pairs → test) ─────────────────────────
+const HINDI_ZONE_GROUPS = [
+    {
+        learns: [["क","ख"], ["ग","घ"]],
+        test: ["क","ख","ग","घ"],
+    },
+    {
+        learns: [["ङ","च"], ["छ","ज"], ["झ","ट"], ["ठ","ड"], ["ढ","ण"]],
+        test: ["क","ख","ग","घ","ङ","च","छ","ज","झ","ट","ठ","ड","ढ","ण"],
+    },
+    {
+        learns: [["त","थ"], ["द","ध"], ["न","प"], ["फ","ब"], ["भ","म"]],
+        test: ["त","थ","द","ध","न","प","फ","ब","भ","म"],
+    },
+    {
+        learns: [["य","र"], ["ल","व"], ["श","ष"], ["स","ह"]],
+        test: null,
+    },
 ];
+
+// Flat HINDI_LEVELS derived from groups — used only for homework index tracking
+// Order: hear, picture per pair; then picture-test for each group test
+const HINDI_LEVELS = [];
+HINDI_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(letters => {
+        HINDI_LEVELS.push({ letters, mode: "hear"    });
+        HINDI_LEVELS.push({ letters, mode: "picture" });
+    });
+    if (group.test) HINDI_LEVELS.push({ letters: group.test, mode: "picture", isTest: true });
+});
 
 // ── Blends ───────────────────────────────────────────────────────────
 const BLENDS_ITEMS = [
@@ -958,25 +929,57 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "hindi") {
-        HINDI_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const color = qTypeColor(mode, isTest);
-            const letterStr = isTest
-                ? `${letters[0]}–${letters[letters.length - 1]}`
-                : letters.slice(0, 2).join('');
-            const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
-            const sublabel = qTypeIcon(mode, isTest);
-            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:inherit;line-height:1.15">${letterStr}</span>
-                <span style="font-size:11px;line-height:1">${sublabel}</span>
-            </div>`;
-            grid.appendChild(makeNode({
-                color,
-                content,
-                isLocked: homeworkLocked("hindi", idx),
-                isCurrent: false,
-                isExam: isTest,
-                onclick: () => startHindiGame(letters, mode),
-            }));
+        grid.classList.add("nh-mode");
+        let gIdx = 0; // global index matching flat HINDI_LEVELS order
+
+        HINDI_ZONE_GROUPS.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            group.learns.forEach(letters => {
+                const hearIdx = gIdx++;
+                const picIdx  = gIdx++;
+                const lStr = letters.join("·");
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+
+                // Speaker button
+                const hearLocked = homeworkLocked("hindi", hearIdx);
+                const hearBtn = document.createElement("button");
+                hearBtn.className = "hindi-pair-btn" + (hearLocked ? " nh-node-locked" : "");
+                hearBtn.disabled = hearLocked;
+                hearBtn.style.background = qTypeColor("hear", false);
+                hearBtn.innerHTML = `<span class="hindi-pair-letters">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.audio}</span>`;
+                hearBtn.onclick = () => startHindiGame(letters, "hear");
+                row.appendChild(hearBtn);
+
+                // Image/picture button
+                const picLocked = homeworkLocked("hindi", picIdx);
+                const picBtn = document.createElement("button");
+                picBtn.className = "hindi-pair-btn" + (picLocked ? " nh-node-locked" : "");
+                picBtn.disabled = picLocked;
+                picBtn.style.background = qTypeColor("picture", false);
+                picBtn.innerHTML = `<span class="hindi-pair-letters">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+                picBtn.onclick = () => startHindiGame(letters, "picture");
+                row.appendChild(picBtn);
+
+                card.appendChild(row);
+            });
+
+            // Test pill — picture mode only
+            if (group.test) {
+                const testIdx = gIdx++;
+                const testLocked = homeworkLocked("hindi", testIdx);
+                const testBtn = document.createElement("button");
+                testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+                testBtn.disabled = testLocked;
+                const lo = group.test[0], hi = group.test[group.test.length - 1];
+                testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${lo} – ${hi}</span>`;
+                testBtn.onclick = () => startHindiGame(group.test, "picture", true);
+                card.appendChild(testBtn);
+            }
+
+            grid.appendChild(card);
         });
         return;
     }
