@@ -180,43 +180,32 @@ const KANNADA_ITEMS = [
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
-const KANNADA_LEVELS = [
-    { label: "1", letters: ["ಅ", "ಆ"], mode: "letter-image" },
-    { label: "2", letters: ["ಅ", "ಆ"], mode: "video-letter" },
-    { label: "3", letters: ["ಇ", "ಈ"], mode: "letter-image" },
-    { label: "4", letters: ["ಇ", "ಈ"], mode: "video-letter" },
-    { label: "5", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "video-letter", isTest: true },
-    { label: "6", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "letter-image", isTest: true },
-    { label: "7", letters: ["ಅ", "ಆ", "ಇ", "ಈ"], mode: "hear",         isTest: true },
-    { label: "8", letters: ["ಉ", "ಊ"], mode: "letter-image" },
-    { label: "9", letters: ["ಉ", "ಊ"], mode: "video-letter" },
-    { label: "10", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "video-letter", isTest: true },
-    { label: "11", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "letter-image", isTest: true },
-    { label: "12", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
-    { label: "13", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ"], mode: "hear",         isTest: true },
-    { label: "14", letters: ["ಋ", "ಎ"], mode: "letter-image" },
-    { label: "15", letters: ["ಋ", "ಎ"], mode: "video-letter" },
-    { label: "16", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "video-letter", isTest: true },
-    { label: "17", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "letter-image", isTest: true },
-    { label: "18", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ"], mode: "hear",         isTest: true },
-    { label: "19", letters: ["ಏ", "ಐ"], mode: "letter-image" },
-    { label: "20", letters: ["ಏ", "ಐ"], mode: "video-letter" },
-    { label: "21", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "video-letter", isTest: true },
-    { label: "22", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "letter-image", isTest: true },
-    { label: "23", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ"], mode: "hear",         isTest: true },
-    { label: "24", letters: ["ಒ", "ಓ"], mode: "letter-image" },
-    { label: "25", letters: ["ಒ", "ಓ"], mode: "video-letter" },
-    { label: "26", letters: ["ಔ"],      mode: "letter-image" },
-    { label: "27", letters: ["ಔ"],      mode: "video-letter" },
-    { label: "28", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "video-letter", isTest: true },
-    { label: "29", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "letter-image", isTest: true },
-    { label: "30", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ"], mode: "hear",         isTest: true },
-    { label: "31", letters: ["ಅಂ", "ಅಃ"], mode: "letter-image" },
-    { label: "32", letters: ["ಅಂ", "ಅಃ"], mode: "video-letter" },
-    { label: "33", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ", "ಅಂ", "ಅಃ"], mode: "video-letter", isTest: true },
-    { label: "34", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ", "ಅಂ", "ಅಃ"], mode: "letter-image", isTest: true },
-    { label: "35", letters: ["ಅ", "ಆ", "ಇ", "ಈ", "ಉ", "ಊ", "ಋ", "ಎ", "ಏ", "ಐ", "ಒ", "ಓ", "ಔ", "ಅಂ", "ಅಃ"], mode: "hear",         isTest: true },
+// ── Kannada vowel zones: one pair per group, cumulative test after each ─
+const KANNADA_ALL_PAIRS = [
+    ["ಅ","ಆ"],
+    ["ಇ","ಈ"],
+    ["ಉ","ಊ"],
+    ["ಋ","ಎ"],
+    ["ಏ","ಐ"],
+    ["ಒ","ಓ","ಔ"],
+    ["ಅಂ","ಅಃ"],
 ];
+
+const KANNADA_ZONE_GROUPS = KANNADA_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: KANNADA_ALL_PAIRS.slice(0, i + 1).flat(),
+}));
+
+// Flat KANNADA_LEVELS derived from groups — for homework index tracking
+// Order: letter-image, hear per pair; then letter-image test for each group
+const KANNADA_LEVELS = [];
+KANNADA_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(letters => {
+        KANNADA_LEVELS.push({ letters, mode: "letter-image" });
+        KANNADA_LEVELS.push({ letters, mode: "hear" });
+    });
+    KANNADA_LEVELS.push({ letters: group.test, mode: "letter-image", isTest: true });
+});
 
 // ── Kannada Consonants ────────────────────────────────────────────────
 const KANNADA_CONSONANT_ITEMS = [
@@ -898,25 +887,55 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "kannada") {
-        KANNADA_LEVELS.forEach(({ label, letters, mode, isTest }, idx) => {
-            const color = qTypeColor(mode, isTest);
-            const letterStr = isTest
-                ? `${letters[0]}–${letters[letters.length - 1]}`
-                : letters.slice(0, 2).join('');
-            const fs = isTest ? "22px" : letters.length > 2 ? "26px" : "34px";
-            const sublabel = qTypeIcon(mode, isTest);
-            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                <span style="font-family:'Noto Sans Kannada',serif;font-size:${fs};font-weight:700;color:inherit;line-height:1.15">${letterStr}</span>
-                <span style="font-size:11px;line-height:1">${sublabel}</span>
-            </div>`;
-            grid.appendChild(makeNode({
-                color,
-                content,
-                isLocked: homeworkLocked("kannada", idx),
-                isCurrent: false,
-                isExam: isTest,
-                onclick: () => startKannadaGame(letters, mode, isTest, idx),
-            }));
+        grid.classList.add("nh-mode");
+        let gIdx = 0;
+
+        KANNADA_ZONE_GROUPS.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            group.learns.forEach(letters => {
+                const litIdx  = gIdx++;
+                const hearIdx = gIdx++;
+                const lStr = letters.join("·");
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+
+                // Letter-image button — teal
+                const litLocked = homeworkLocked("kannada", litIdx);
+                const litBtn = document.createElement("button");
+                litBtn.className = "hindi-pair-btn" + (litLocked ? " nh-node-locked" : "");
+                litBtn.disabled = litLocked;
+                litBtn.style.background = "#2E5E6E";
+                litBtn.innerHTML = `<span class="hindi-pair-letters">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+                litBtn.onclick = () => startKannadaGame(letters, "letter-image");
+                row.appendChild(litBtn);
+
+                // Hear button — red
+                const hearLocked = homeworkLocked("kannada", hearIdx);
+                const hearBtn = document.createElement("button");
+                hearBtn.className = "hindi-pair-btn" + (hearLocked ? " nh-node-locked" : "");
+                hearBtn.disabled = hearLocked;
+                hearBtn.style.background = "#C04A4A";
+                hearBtn.innerHTML = `<span class="hindi-pair-letters">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.audio}</span>`;
+                hearBtn.onclick = () => startKannadaGame(letters, "hear");
+                row.appendChild(hearBtn);
+
+                card.appendChild(row);
+            });
+
+            // Cumulative test pill — gold
+            const testIdx = gIdx++;
+            const testLocked = homeworkLocked("kannada", testIdx);
+            const testBtn = document.createElement("button");
+            testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+            testBtn.disabled = testLocked;
+            const lo = group.test[0], hi = group.test[group.test.length - 1];
+            testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${lo} – ${hi}</span>`;
+            testBtn.onclick = () => startKannadaGame(group.test, "letter-image", true);
+            card.appendChild(testBtn);
+
+            grid.appendChild(card);
         });
         return;
     }
@@ -936,22 +955,22 @@ function buildLevelGrid() {
                 const row = document.createElement("div");
                 row.className = "nh-learn-row";
 
-                // Speaker button
+                // Speaker button — red
                 const hearLocked = homeworkLocked("hindi", hearIdx);
                 const hearBtn = document.createElement("button");
                 hearBtn.className = "hindi-pair-btn" + (hearLocked ? " nh-node-locked" : "");
                 hearBtn.disabled = hearLocked;
-                hearBtn.style.background = qTypeColor("hear", false);
+                hearBtn.style.background = "#C04A4A";
                 hearBtn.innerHTML = `<span class="hindi-pair-letters">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.audio}</span>`;
                 hearBtn.onclick = () => startHindiGame(letters, "hear");
                 row.appendChild(hearBtn);
 
-                // Image/picture button
+                // Image/picture button — teal
                 const picLocked = homeworkLocked("hindi", picIdx);
                 const picBtn = document.createElement("button");
                 picBtn.className = "hindi-pair-btn" + (picLocked ? " nh-node-locked" : "");
                 picBtn.disabled = picLocked;
-                picBtn.style.background = qTypeColor("picture", false);
+                picBtn.style.background = "#2E5E6E";
                 picBtn.innerHTML = `<span class="hindi-pair-letters">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
                 picBtn.onclick = () => startHindiGame(letters, "picture");
                 row.appendChild(picBtn);
