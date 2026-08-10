@@ -260,12 +260,15 @@ const WORD_ITEMS = [
     { word: "mat", image: "images/mat.png" },
     { word: "hat", image: "images/hat.png" },
     { word: "rat", image: "images/rat.png" },
+    { word: "fat", image: "images/fat.png" },
+    { word: "pat", image: "images/pat.png" },
 ];
 // ── Words zones: pair per group, cumulative test ──────────────────────
 const WORD_ALL_PAIRS = [
     ["cat","bat"],
     ["mat","hat"],
     ["rat","mat"],
+    ["fat","pat"],
 ];
 
 const WORD_ZONE_GROUPS = WORD_ALL_PAIRS.map((pair, i) => ({
