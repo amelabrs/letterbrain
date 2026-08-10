@@ -306,6 +306,75 @@ AM_WORD_ZONE_GROUPS.forEach(group => {
     });
     AM_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
 });
+// ── AN word family ─────────────────────────────────────────────────────
+const AN_WORD_ITEMS = [
+    { word: "man", image: "images/man.png" },
+    { word: "can", image: "images/can.png" },
+    { word: "fan", image: "images/fan.png" },
+];
+const AN_WORD_ALL_PAIRS = [
+    ["man","can"],
+    ["fan","can"],
+];
+const AN_WORD_ZONE_GROUPS = AN_WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(AN_WORD_ALL_PAIRS.slice(0, i + 1).flat())],
+}));
+const AN_WORD_LEVELS = [];
+AN_WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        AN_WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        AN_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    AN_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
+
+// ── AP word family ─────────────────────────────────────────────────────
+const AP_WORD_ITEMS = [
+    { word: "cap", image: "images/cap.png" },
+    { word: "map", image: "images/map.png" },
+    { word: "tap", image: "images/tap.png" },
+];
+const AP_WORD_ALL_PAIRS = [
+    ["cap","map"],
+    ["tap","cap"],
+];
+const AP_WORD_ZONE_GROUPS = AP_WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(AP_WORD_ALL_PAIRS.slice(0, i + 1).flat())],
+}));
+const AP_WORD_LEVELS = [];
+AP_WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        AP_WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        AP_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    AP_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
+
+// ── AG word family ─────────────────────────────────────────────────────
+const AG_WORD_ITEMS = [
+    { word: "bag", image: "images/bag.png" },
+    { word: "tag", image: "images/tag.png" },
+    { word: "rag", image: "images/rag.png" },
+];
+const AG_WORD_ALL_PAIRS = [
+    ["bag","tag"],
+    ["rag","bag"],
+];
+const AG_WORD_ZONE_GROUPS = AG_WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(AG_WORD_ALL_PAIRS.slice(0, i + 1).flat())],
+}));
+const AG_WORD_LEVELS = [];
+AG_WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        AG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        AG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    AG_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
+
 const PHONEME_MAP = {
     a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
     g:"guh", h:"huh", i:"ih", j:"juh", k:"kuh", l:"luh",
@@ -453,7 +522,7 @@ let nhQueue = [], nhIdx = 0, nhItem = null;
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "kannada", "hindi", "saynumbers", "words", "words-am"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "kannada", "hindi", "saynumbers", "words", "words-am", "words-an", "words-ap", "words-ag"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -480,6 +549,9 @@ function getLevelsForTab(tab) {
         case "saynumbers": return NH_ZONES;
         case "words": return WORD_LEVELS;
         case "words-am": return AM_WORD_LEVELS;
+        case "words-an": return AN_WORD_LEVELS;
+        case "words-ap": return AP_WORD_LEVELS;
+        case "words-ag": return AG_WORD_LEVELS;
     }
 }
 
@@ -945,6 +1017,63 @@ function buildLevelGrid() {
         return;
     }
 
+    // Generic word-family zone renderer — used by AN, AP, AG
+    function buildWordFamilyGrid(zoneGroups, items, tabKey, startFn) {
+        grid.classList.add("nh-mode");
+        let gIdx = 0;
+        zoneGroups.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+            group.learns.forEach(words => {
+                const normIdx = gIdx++;
+                const revIdx  = gIdx++;
+                const wStr = words.join("·");
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+                const normLocked = homeworkLocked(tabKey, normIdx);
+                const normBtn = document.createElement("button");
+                normBtn.className = "hindi-pair-btn" + (normLocked ? " nh-node-locked" : "");
+                normBtn.disabled = normLocked;
+                normBtn.style.background = "#2E5E6E";
+                normBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1rem;letter-spacing:0.02em">${wStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+                normBtn.onclick = () => startFn(words, "normal");
+                row.appendChild(normBtn);
+                const revLocked = homeworkLocked(tabKey, revIdx);
+                const revBtn = document.createElement("button");
+                revBtn.className = "hindi-pair-btn" + (revLocked ? " nh-node-locked" : "");
+                revBtn.disabled = revLocked;
+                revBtn.style.background = "#C04A4A";
+                revBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1rem;letter-spacing:0.02em">${wStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.letter}</span>`;
+                revBtn.onclick = () => startFn(words, "reverse");
+                row.appendChild(revBtn);
+                card.appendChild(row);
+            });
+            const testIdx = gIdx++;
+            const testLocked = homeworkLocked(tabKey, testIdx);
+            const testBtn = document.createElement("button");
+            testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+            testBtn.disabled = testLocked;
+            const tw = group.test;
+            testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${tw[0]}–${tw[tw.length-1]}</span>`;
+            testBtn.onclick = () => startFn(tw, "normal");
+            card.appendChild(testBtn);
+            grid.appendChild(card);
+        });
+    }
+
+    if (currentAppMode === "words-an") {
+        buildWordFamilyGrid(AN_WORD_ZONE_GROUPS, AN_WORD_ITEMS, "words-an", startWordsAnGame);
+        return;
+    }
+    if (currentAppMode === "words-ap") {
+        buildWordFamilyGrid(AP_WORD_ZONE_GROUPS, AP_WORD_ITEMS, "words-ap", startWordsApGame);
+        return;
+    }
+    if (currentAppMode === "words-ag") {
+        buildWordFamilyGrid(AG_WORD_ZONE_GROUPS, AG_WORD_ITEMS, "words-ag", startWordsAgGame);
+        return;
+    }
+
     if (currentAppMode === "saynumbers") {
         grid.classList.add("nh-mode");
 
@@ -1347,7 +1476,7 @@ function updateHomeworkBanner() {
 }
 
 function tabIconLabel(tab) {
-    return { quiz: "🔤", matchcaps: "🔡", lowercase: "abc", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "AT", "words-am": "AM" }[tab];
+    return { quiz: "🔤", matchcaps: "🔡", lowercase: "abc", kannada: "ಅ", hindi: "अ", saynumbers: "3", words: "AT", "words-am": "AM", "words-an": "AN", "words-ap": "AP", "words-ag": "AG" }[tab];
 }
 
 function tabLevelLabel(tab, level) {
@@ -1971,7 +2100,7 @@ function showFeedback(correct) {
         text.textContent = `It's ${currentItem.letter} for ${currentItem.word}!`;
     } else if (currentAppMode === "blends") {
         text.textContent = `It's ${currentItem.blend}!`;
-    } else if (currentAppMode === "words" || currentAppMode === "words-am") {
+    } else if (["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode)) {
         text.textContent = `It's "${currentItem.word}"!`;
     } else if (currentAppMode === "saynumbers" && nhItem) {
         text.textContent = `It's ${nhItem.num} — ${nhItem.word} rhymes with ${nhItem.rhyme}!`;
@@ -3008,6 +3137,51 @@ function startWordsAmGame(words, mode) {
     loadWordsRound();
 }
 
+function startWordsAnGame(words, mode) {
+    wordsMode = mode;
+    wordsFamilyItems = AN_WORD_ITEMS.filter(it => words.includes(it.word));
+    gameMode = "words-" + mode;
+    currentAppMode = "words-an";
+    queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadWordsRound();
+}
+
+function startWordsApGame(words, mode) {
+    wordsMode = mode;
+    wordsFamilyItems = AP_WORD_ITEMS.filter(it => words.includes(it.word));
+    gameMode = "words-" + mode;
+    currentAppMode = "words-ap";
+    queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadWordsRound();
+}
+
+function startWordsAgGame(words, mode) {
+    wordsMode = mode;
+    wordsFamilyItems = AG_WORD_ITEMS.filter(it => words.includes(it.word));
+    gameMode = "words-" + mode;
+    currentAppMode = "words-ag";
+    queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadWordsRound();
+}
+
 function playWordInitialPhonic(word, onDone) {
     const letter = word[0].toUpperCase();
     const start = PHONETICS_TIMESTAMPS[letter] ?? 0;
@@ -3141,7 +3315,7 @@ function advanceRound() {
         loadLowercaseRound();
     } else if (currentAppMode === "blends") {
         loadBlendsRound();
-    } else if (currentAppMode === "words" || currentAppMode === "words-am") {
+    } else if (["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode)) {
         loadWordsRound();
     } else {
         loadRound();
@@ -3153,7 +3327,7 @@ function advanceRound() {
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
     if (mode === "matchcaps" || mode === "lowercase") return "quiz";
-    if (mode === "words-am") return "words";
+    if (["words-am","words-an","words-ap","words-ag"].includes(mode)) return "words";
     return mode;
 }
 function updateQuizCaseToggle() {
@@ -3166,10 +3340,13 @@ function updateQuizCaseToggle() {
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
-    const isWordsFamily = ["words", "words-am"].includes(currentAppMode);
+    const isWordsFamily = ["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode);
     wrap.style.display = isWordsFamily ? "flex" : "none";
-    document.getElementById("toggle-words-at").classList.toggle("active", currentAppMode === "words");
-    document.getElementById("toggle-words-am").classList.toggle("active", currentAppMode === "words-am");
+    ["at","am","an","ap","ag"].forEach(fam => {
+        const mode = fam === "at" ? "words" : `words-${fam}`;
+        const el = document.getElementById(`toggle-words-${fam}`);
+        if (el) el.classList.toggle("active", currentAppMode === mode);
+    });
 }
 function setActiveTab(mode) {
     currentAppMode = mode;
@@ -3193,6 +3370,9 @@ document.getElementById("toggle-lowercase").addEventListener("click", () => setA
 document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-words-am").addEventListener("click", () => setActiveTab("words-am"));
+document.getElementById("toggle-words-an").addEventListener("click", () => setActiveTab("words-an"));
+document.getElementById("toggle-words-ap").addEventListener("click", () => setActiveTab("words-ap"));
+document.getElementById("toggle-words-ag").addEventListener("click", () => setActiveTab("words-ag"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
