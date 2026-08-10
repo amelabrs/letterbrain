@@ -3412,10 +3412,11 @@ function loadNHRound() {
 
 function renderNHCountGrid(display) {
     const n = nhItem.num;
+    // Display box is 150px; usable inner space ~138px after 6px padding each side
     const cols = n <= 3 ? n : n === 4 ? 2 : n <= 6 ? 3 : n <= 8 ? 4 : n === 9 ? 3 : 5;
-    const size = n === 1 ? 96 : n === 2 ? 76 : n === 3 ? 52 : n === 4 ? 70 : n <= 6 ? 46 : n <= 8 ? 36 : n === 9 ? 44 : 30;
-    const gap  = n <= 4 ? 6 : n <= 8 ? 4 : 3;
-    let html = `<div class="nh-count-grid" style="grid-template-columns:repeat(${cols},1fr);gap:${gap}px">`;
+    const size = n === 1 ? 82 : n === 2 ? 58 : n === 3 ? 36 : n === 4 ? 56 : n <= 6 ? 34 : n <= 8 ? 26 : n === 9 ? 32 : 20;
+    const gap  = n <= 4 ? 5 : 3;
+    let html = `<div class="nh-count-grid" style="grid-template-columns:repeat(${cols},1fr);gap:${gap}px;padding:6px">`;
     for (let i = 0; i < n; i++) html += `<span class="nh-count-emoji" style="font-size:${size}px">${nhItem.emoji}</span>`;
     html += "</div>";
     display.innerHTML = html;
