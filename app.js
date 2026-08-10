@@ -875,46 +875,59 @@ function buildLevelGrid() {
     }
 
     if (currentAppMode === "saynumbers") {
-        // Switch level-grid to single-column flex (overrides the 3-column letter layout)
         grid.classList.add("nh-mode");
 
-        NH_ZONES.forEach((zone, idx) => {
-            const isLocked = homeworkLocked("saynumbers", idx);
-            const card = document.createElement("div");
-            card.className = zone.isTest ? "nh-zone-card nh-zone-test-card" : "nh-zone-card";
+        // Build index map so homeworkLocked gets the right global position
+        const zoneIdx = {};
+        NH_ZONES.forEach((z, i) => { zoneIdx[z.id] = i; });
 
-            const header = document.createElement("div");
-            header.className = zone.isTest ? "nh-zone-header nh-zone-test-header" : "nh-zone-header";
-            header.textContent = zone.label;
-            card.appendChild(header);
-
-            const row = document.createElement("div");
-            row.className = "nh-zone-row";
-
-            if (zone.isTest) {
-                // Single wide gold button for test zones
-                const btn = document.createElement("button");
-                btn.className = "nh-test-node" + (isLocked ? " nh-node-locked" : "");
-                btn.disabled = isLocked;
-                btn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">Tap to test</span>`;
-                btn.onclick = () => startNumberZone(zone);
-                row.appendChild(btn);
+        // Group consecutive learn zones with their following test
+        const groups = [];
+        let learns = [];
+        NH_ZONES.forEach(zone => {
+            if (!zone.isTest) {
+                learns.push(zone);
             } else {
-                // 2 emoji nodes side-by-side for learn zones
-                zone.nums.forEach(n => {
-                    const item = NH_ITEMS[n - 1];
+                groups.push({ learns: [...learns], test: zone });
+                learns = [];
+            }
+        });
+        if (learns.length) groups.push({ learns, test: null });
+
+        groups.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            // Learn buttons row (e.g. [1–2] [3–4])
+            if (group.learns.length) {
+                const learnRow = document.createElement("div");
+                learnRow.className = "nh-learn-row";
+                group.learns.forEach(zone => {
+                    const locked = homeworkLocked("saynumbers", zoneIdx[zone.id]);
                     const btn = document.createElement("button");
-                    btn.className = "nh-level-node" + (isLocked ? " nh-node-locked" : "");
-                    btn.disabled = isLocked;
-                    const col = RAINBOW_TILE_COLORS[(n - 1) % RAINBOW_TILE_COLORS.length];
+                    btn.className = "nh-learn-btn" + (locked ? " nh-node-locked" : "");
+                    btn.disabled = locked;
+                    btn.textContent = `${zone.nums[0]}–${zone.nums[zone.nums.length - 1]}`;
+                    const col = RAINBOW_TILE_COLORS[(zone.nums[0] - 1) % RAINBOW_TILE_COLORS.length];
                     btn.style.background = col;
-                    btn.innerHTML = `<span class="nh-node-emoji">${item.emoji}</span><span class="nh-node-num">${n}</span>`;
                     btn.onclick = () => startNumberZone(zone);
-                    row.appendChild(btn);
+                    learnRow.appendChild(btn);
                 });
+                card.appendChild(learnRow);
             }
 
-            card.appendChild(row);
+            // Test pill
+            if (group.test) {
+                const locked = homeworkLocked("saynumbers", zoneIdx[group.test.id]);
+                const btn = document.createElement("button");
+                btn.className = "nh-test-node" + (locked ? " nh-node-locked" : "");
+                btn.disabled = locked;
+                const lo = group.test.nums[0], hi = group.test.nums[group.test.nums.length - 1];
+                btn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">Test ${lo}–${hi}</span>`;
+                btn.onclick = () => startNumberZone(group.test);
+                card.appendChild(btn);
+            }
+
             grid.appendChild(card);
         });
         return;

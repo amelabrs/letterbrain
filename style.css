@@ -1116,68 +1116,44 @@ body.theme-rainbow .theme-btn.active {
   overflow-y: auto;
 }
 
-/* Zone cards */
-.nh-zone-card {
+/* Group card: contains a learn row + test pill */
+.nh-group-card {
   background: var(--bg-raised, #f5f2eb);
   border-radius: 14px;
-  padding: 10px 14px 14px;
+  padding: 14px 14px 14px;
   margin-bottom: 10px;
   width: 100%;
   box-sizing: border-box;
-}
-.nh-zone-test-card {
-  border: 1.5px solid #DEA431;
-  background: rgba(222, 164, 49, 0.07);
-}
-
-.nh-zone-header {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #9C9E8C;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 10px;
-}
-.nh-zone-test-header { color: #DEA431; }
-
-.nh-zone-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Learn zone: circular emoji nodes */
-.nh-level-node {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  line-height: 1.2;
-  transition: transform 0.15s;
-  border: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-}
-.nh-level-node:active { transform: scale(0.91); }
-.nh-node-locked { opacity: 0.35; cursor: not-allowed; }
-.nh-node-emoji { font-size: 1.6rem; line-height: 1; }
-.nh-node-num {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.92);
-  margin-top: 2px;
+  gap: 10px;
 }
 
-/* Test zone: wide gold pill button */
-.nh-test-node {
+/* Learn buttons row */
+.nh-learn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.nh-learn-btn {
   flex: 1;
+  height: 52px;
+  border-radius: 26px;
+  border: none;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.13s, opacity 0.15s;
+  letter-spacing: 0.03em;
+}
+.nh-learn-btn:active { transform: scale(0.97); }
+
+/* Test zone: wide gold pill */
+.nh-test-node {
+  width: 100%;
   height: 52px;
   border-radius: 26px;
   background: #DEA431;
@@ -1191,15 +1167,15 @@ body.theme-rainbow .theme-btn.active {
   transition: transform 0.13s, opacity 0.15s;
 }
 .nh-test-node:active { transform: scale(0.97); }
-.nh-test-node.nh-node-locked { opacity: 0.35; cursor: not-allowed; }
+.nh-node-locked { opacity: 0.35; cursor: not-allowed; }
 .nh-test-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #fff;
   line-height: 1;
 }
 .nh-test-sublabel {
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: rgba(255,255,255,0.92);
   letter-spacing: 0.02em;
