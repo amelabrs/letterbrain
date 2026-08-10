@@ -1,0 +1,202 @@
+/* ── NumberHead — Rainbow / Earthy theme ─────────────────────────────── */
+
+:root {
+  --bg:        #F4EDDF;
+  --bg-raised: #FBF6EC;
+  --bg-deep:   #EDE5D4;
+  --fg:        #20251D;
+  --fg-soft:   #5C6151;
+  --fg-faint:  #9C9E8C;
+  --line:      #E6DCC8;
+  --r-green:   #347046;
+  --r-yellow:  #DEA431;
+  --accent:    #2E5E6E;
+  --font-display: 'Baloo 2', cursive;
+  --font-sans:    'Quicksand', -apple-system, sans-serif;
+  --radius-pill:  999px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:var(--font-sans); background:var(--bg-deep); color:var(--fg); min-height:100dvh; }
+
+#app {
+  max-width:500px; margin:0 auto; min-height:100dvh; height:100dvh;
+  display:flex; flex-direction:column; background:var(--bg); overflow:hidden;
+}
+
+.screen { display:none; flex-direction:column; flex:1; overflow:hidden; }
+.screen.active { display:flex; }
+#start-screen { overflow:hidden; }
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px 10px; background:var(--bg); border-bottom:1px solid var(--line); flex-shrink:0;
+}
+.header-title { font-family:var(--font-display); font-size:1.3rem; font-weight:800; color:var(--fg); }
+.score { font-size:0.95rem; font-weight:700; color:var(--fg-soft); }
+
+/* ── Level Grid ──────────────────────────────────────────────────────── */
+#level-grid { display:flex; flex-direction:column; gap:0; padding:10px 14px 20px; overflow-y:auto; flex:1; }
+
+.zone-card { background:var(--bg-raised); border-radius:14px; padding:10px 14px 12px; margin-bottom:10px; }
+.zone-test-card {
+  border:1px solid var(--r-yellow);
+  background:color-mix(in srgb, var(--r-yellow) 6%, var(--bg-raised));
+}
+
+.zone-header {
+  font-family:var(--font-display); font-size:0.72rem; font-weight:700;
+  color:var(--fg-faint); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:8px;
+}
+.zone-test-header { color:var(--r-yellow); }
+.zone-row { display:flex; flex-direction:row; gap:10px; flex-wrap:wrap; }
+
+.level-node {
+  width:72px; height:72px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; line-height:1.2; transition:transform 0.15s; position:relative;
+  border:none; box-shadow:0 4px 12px rgba(0,0,0,0.18);
+}
+.level-node:active { transform:scale(0.91); }
+.node-emoji { font-size:1.25rem; line-height:1; }
+.node-nums {
+  font-family:var(--font-display); font-size:0.68rem; font-weight:700;
+  color:rgba(255,255,255,0.9); margin-top:1px;
+}
+.node-stars { position:absolute; bottom:-2px; font-size:0.45rem; }
+
+/* ── Quiz Screen ─────────────────────────────────────────────────────── */
+#quiz-screen {
+  background:var(--bg); gap:16px; padding:0 20px 20px;
+  position:relative; align-items:center; justify-content:center;
+}
+
+.back-btn {
+  position:absolute; top:8px; left:8px; width:36px; height:36px; border-radius:50%;
+  border:1.5px solid var(--line); background:var(--bg-raised);
+  color:var(--fg-soft); font-size:1rem; cursor:pointer; z-index:10;
+  display:flex; align-items:center; justify-content:center;
+}
+.back-btn:active { background:var(--bg-deep); }
+
+.zone-label-chip {
+  font-family:var(--font-display); font-size:0.8rem; font-weight:700;
+  color:var(--fg-soft); letter-spacing:0.08em; margin-top:8px; text-transform:uppercase;
+}
+
+/* Prompt display box */
+#letter-display {
+  width:210px; height:210px; border-radius:44px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; animation:popIn 0.35s ease-out; flex-shrink:0;
+  box-shadow:0 4px 16px rgba(0,0,0,0.22);
+  overflow:hidden;
+}
+
+/* Word flash (phase 1) */
+.rhyme-word {
+  font-family:var(--font-display); font-size:2.6rem; font-weight:800;
+  color:#fff; text-shadow:0 2px 8px rgba(0,0,0,0.2); letter-spacing:0.01em;
+}
+
+/* Count grid (phase 2) */
+.count-grid { display:grid; align-items:center; justify-items:center; padding:8px; }
+.count-emoji { line-height:1; user-select:none; }
+
+/* ── Choices — 4 compact tiles in one row ────────────────────────────── */
+#choices { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; width:100%; }
+
+.choice-btn {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; border-radius:16px; aspect-ratio:1; cursor:pointer;
+  transition:transform 0.13s, opacity 0.2s; position:relative; overflow:visible;
+  border:none; box-shadow:0 4px 10px rgba(0,0,0,0.18);
+}
+.choice-btn:active { transform:scale(0.93); }
+
+.choice-numeral {
+  font-family:var(--font-display); font-size:clamp(22px, 6vw, 32px);
+  font-weight:800; color:#fff; line-height:1;
+}
+.choice-subword {
+  font-family:var(--font-sans); font-size:0.58rem; font-weight:700;
+  color:rgba(255,255,255,0.85); text-transform:lowercase;
+}
+
+.choice-btn.correct { outline:3px solid var(--r-green); outline-offset:3px; }
+.choice-btn.wrong   { opacity:0.18; pointer-events:none; }
+.choice-btn.dimmed  { opacity:0.18; pointer-events:none; }
+
+.check-badge {
+  position:absolute; top:-13px; right:-13px; width:30px; height:30px; border-radius:50%;
+  background:var(--r-green); display:flex; align-items:center; justify-content:center;
+  pointer-events:none; z-index:5;
+}
+
+/* ── Progress ─────────────────────────────────────────────────────────── */
+#progress { width:100%; padding:4px 0 0; }
+.progress-track { background:var(--line); border-radius:var(--radius-pill); height:8px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--r-green); border-radius:var(--radius-pill); transition:width 0.4s ease; width:0%; }
+
+/* ── Feedback ─────────────────────────────────────────────────────────── */
+.feedback {
+  position:fixed; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px;
+  pointer-events:none; z-index:200; transition:opacity 0.18s;
+}
+.feedback.hidden { opacity:0; }
+.feedback.show   { opacity:1; }
+#feedback-emoji { font-size:5rem; animation:popIn 0.28s ease-out; }
+#feedback-text  {
+  font-family:var(--font-display); font-size:1.4rem; font-weight:700;
+  color:#fff; text-align:center; padding:0 1rem;
+  text-shadow:0 2px 18px rgba(0,0,0,0.9);
+}
+
+/* ── Done Screen ──────────────────────────────────────────────────────── */
+#done-screen {
+  align-items:center; justify-content:center;
+  gap:14px; text-align:center; padding:2rem; background:var(--bg);
+}
+.big-emoji { font-size:4rem; animation:bounce 1.6s infinite; }
+#done-screen h2 { font-family:var(--font-display); font-size:2rem; font-weight:700; color:var(--r-green); }
+#done-screen p  { font-size:1.1rem; color:var(--fg-soft); }
+.home-btn {
+  font-family:var(--font-sans); font-size:1rem; font-weight:700;
+  padding:12px 32px; border:2px solid var(--accent); border-radius:var(--radius-pill);
+  background:transparent; color:var(--accent); cursor:pointer; margin-top:8px;
+  transition:background 0.15s, color 0.15s;
+}
+.home-btn:active { background:var(--accent); color:#fff; }
+
+/* ── Confetti canvas ──────────────────────────────────────────────────── */
+#confetti-canvas { position:fixed; inset:0; pointer-events:none; display:none; z-index:300; }
+
+/* ── Video overlay ────────────────────────────────────────────────────── */
+.video-overlay {
+  position:fixed; inset:0; z-index:400; background:#000;
+  display:flex; align-items:center; justify-content:center;
+}
+.video-overlay.hidden { display:none; }
+#vid { width:100%; max-height:100dvh; object-fit:contain; pointer-events:none; }
+.vid-skip-btn {
+  position:absolute; bottom:24px; right:20px;
+  background:rgba(255,255,255,0.2); color:#fff;
+  border:1.5px solid rgba(255,255,255,0.5); border-radius:20px;
+  padding:10px 22px; font-family:var(--font-sans);
+  font-size:0.9rem; font-weight:700; cursor:pointer;
+  transition:background 0.15s;
+}
+.vid-skip-btn:active { background:rgba(255,255,255,0.38); }
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+@keyframes popIn {
+  0%   { transform:scale(0.3); opacity:0; }
+  70%  { transform:scale(1.1); }
+  100% { transform:scale(1);   opacity:1; }
+}
+@keyframes bounce {
+  0%, 100% { transform:translateY(0); }
+  50%       { transform:translateY(-10px); }
+}
