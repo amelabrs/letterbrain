@@ -261,17 +261,27 @@ const WORD_ITEMS = [
     { word: "hat", image: "images/hat.png" },
     { word: "rat", image: "images/rat.png" },
 ];
-const WORD_LEVELS = [
-    { label: "cat\nbat", words: ["cat", "bat"],                      mode: "normal"  },
-    { label: "cat\nbat", words: ["cat", "bat"],                      mode: "reverse" },
-    { label: "mat\nhat", words: ["mat", "hat"],                      mode: "normal"  },
-    { label: "mat\nhat", words: ["mat", "hat"],                      mode: "reverse" },
-    { label: "all 4",   words: ["cat", "bat", "mat", "hat"],        mode: "normal",  isTest: true },
-    { label: "all 4",   words: ["cat", "bat", "mat", "hat"],        mode: "reverse", isTest: true },
-    { label: "rat\nmat", words: ["rat", "mat"],                      mode: "normal"  },
-    { label: "all 5",   words: ["cat", "bat", "mat", "hat", "rat"], mode: "normal",  isTest: true },
-    { label: "all 5",   words: ["cat", "bat", "mat", "hat", "rat"], mode: "reverse", isTest: true },
+// ── Words zones: pair per group, cumulative test ──────────────────────
+const WORD_ALL_PAIRS = [
+    ["cat","bat"],
+    ["mat","hat"],
+    ["rat","mat"],
 ];
+
+const WORD_ZONE_GROUPS = WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(WORD_ALL_PAIRS.slice(0, i + 1).flat())],
+}));
+
+// Flat WORD_LEVELS derived from groups — for homework index tracking
+const WORD_LEVELS = [];
+WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
 const PHONEME_MAP = {
     a:"ah", b:"buh", c:"kuh", d:"duh", e:"eh", f:"ff",
     g:"guh", h:"huh", i:"ih", j:"juh", k:"kuh", l:"luh",
@@ -803,26 +813,55 @@ function buildLevelGrid() {
     updateHomeworkBanner();
 
     if (currentAppMode === "words") {
-        WORD_LEVELS.forEach(({ label, words, mode, isTest }, idx) => {
-            const color = qTypeColor(mode, isTest);
-            const icon = qTypeIcon(mode, false);
-            const lines = label.split("\n");
-            const isMulti = lines.length > 1;
-            const labelHtml = isMulti
-                ? lines.map(w => `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:inherit;line-height:1.1;display:block">${w}</span>`).join("")
-                : `<span style="font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:800;color:inherit;line-height:1">${label}</span>`;
-            const content = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-                ${labelHtml}
-                <span style="font-size:11px;line-height:1">${icon}</span>
-            </div>`;
-            grid.appendChild(makeNode({
-                color,
-                content,
-                isLocked: homeworkLocked("words", idx),
-                isCurrent: false,
-                isExam: !!isTest,
-                onclick: () => startWordsGame(words, mode),
-            }));
+        grid.classList.add("nh-mode");
+        let gIdx = 0;
+
+        WORD_ZONE_GROUPS.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            group.learns.forEach(words => {
+                const normIdx = gIdx++;
+                const revIdx  = gIdx++;
+                const wStr = words.join("·");
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+
+                // Normal (teal) — hear/see word, pick image
+                const normLocked = homeworkLocked("words", normIdx);
+                const normBtn = document.createElement("button");
+                normBtn.className = "hindi-pair-btn" + (normLocked ? " nh-node-locked" : "");
+                normBtn.disabled = normLocked;
+                normBtn.style.background = "#2E5E6E";
+                normBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1rem;letter-spacing:0.02em">${wStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+                normBtn.onclick = () => startWordsGame(words, "normal");
+                row.appendChild(normBtn);
+
+                // Reverse (red) — see image, pick word
+                const revLocked = homeworkLocked("words", revIdx);
+                const revBtn = document.createElement("button");
+                revBtn.className = "hindi-pair-btn" + (revLocked ? " nh-node-locked" : "");
+                revBtn.disabled = revLocked;
+                revBtn.style.background = "#C04A4A";
+                revBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif;font-size:1rem;letter-spacing:0.02em">${wStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.letter}</span>`;
+                revBtn.onclick = () => startWordsGame(words, "reverse");
+                row.appendChild(revBtn);
+
+                card.appendChild(row);
+            });
+
+            // Cumulative test pill
+            const testIdx = gIdx++;
+            const testLocked = homeworkLocked("words", testIdx);
+            const testBtn = document.createElement("button");
+            testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+            testBtn.disabled = testLocked;
+            const tw = group.test;
+            testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${tw[0]}–${tw[tw.length-1]}</span>`;
+            testBtn.onclick = () => startWordsGame(tw, "normal");
+            card.appendChild(testBtn);
+
+            grid.appendChild(card);
         });
         return;
     }
@@ -1070,42 +1109,59 @@ function buildLevelGrid() {
         return;
     }
 
+    // ── English ABC zones ──────────────────────────────────────────────
+    grid.classList.add("nh-mode");
     const unlockedPair = getUnlockedLevel();
-    const quizLockedAt = i => GAME_LEVELS[i].pair > unlockedPair || homeworkLocked("quiz", i);
+    const quizLockedAt = i => !GAME_LEVELS[i] || GAME_LEVELS[i].pair > unlockedPair || homeworkLocked("quiz", i);
 
-    GAME_LEVELS.forEach((gl, idx) => {
-        const items = ALL_ITEMS.filter((it) => it.level === gl.contentLevel);
-        const isLocked = quizLockedAt(idx);
-        const isCurrent = !isLocked && idx + 1 < GAME_LEVELS.length && quizLockedAt(idx + 1);
-        const displayItem = gl.mode === "reverse" ? items[items.length - 1] : items[0];
-        const color = qTypeColor(gl.mode);
+    CONTENT_LEVELS.forEach(cl => {
+        const items = ALL_ITEMS.filter(it => it.level === cl);
+        const letters = items.map(it => it.letter);
+        const lStr = letters.length > 2
+            ? `${letters[0]}–${letters[letters.length - 1]}`
+            : letters.join("·");
 
-        const content = displayItem?.image
-            ? `<img src="${displayItem.image}" alt="${displayItem.word}">`
-            : `<span style="font-family:'Baloo 2',sans-serif;font-size:34px;font-weight:700;color:inherit">${displayItem?.letter || '?'}</span>`;
+        const normIdx = GAME_LEVELS.findIndex(gl => gl.contentLevel === cl && gl.mode === "normal");
+        const revIdx  = GAME_LEVELS.findIndex(gl => gl.contentLevel === cl && gl.mode === "reverse");
+        const normLocked = quizLockedAt(normIdx);
+        const revLocked  = quizLockedAt(revIdx);
 
-        grid.appendChild(makeNode({
-            color,
-            content,
-            isLocked,
-            isCurrent,
-            isExam: false,
-            onclick: () => startGame(idx),
-        }));
-    });
+        const card = document.createElement("div");
+        card.className = "nh-group-card";
 
-    // A–Z exam nodes
-    const examColor = modeColor("quiz");
-    ["normal", "reverse"].forEach(mode => {
-        const icon = mode === "normal" ? "🔤" : "🖼️";
-        grid.appendChild(makeNode({
-            color: examColor,
-            content: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:inherit;text-align:center;line-height:1.2">A–Z<br><span style="font-size:14px">${icon}</span></span>`,
-            isLocked: false,
-            isCurrent: false,
-            isExam: true,
-            onclick: () => startExam(mode),
-        }));
+        const row = document.createElement("div");
+        row.className = "nh-learn-row";
+
+        // Normal: see letter → pick image (teal)
+        const normBtn = document.createElement("button");
+        normBtn.className = "hindi-pair-btn" + (normLocked ? " nh-node-locked" : "");
+        normBtn.disabled = normLocked;
+        normBtn.style.background = "#2E5E6E";
+        normBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+        normBtn.onclick = () => startGame(normIdx);
+        row.appendChild(normBtn);
+
+        // Reverse: see image → pick letter (red)
+        const revBtn = document.createElement("button");
+        revBtn.className = "hindi-pair-btn" + (revLocked ? " nh-node-locked" : "");
+        revBtn.disabled = revLocked;
+        revBtn.style.background = "#C04A4A";
+        revBtn.innerHTML = `<span class="hindi-pair-letters" style="font-family:'Baloo 2',sans-serif">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.letter}</span>`;
+        revBtn.onclick = () => startGame(revIdx);
+        row.appendChild(revBtn);
+
+        card.appendChild(row);
+
+        // Cumulative test pill (unlocks when reverse unlocks)
+        const cumLetters = ALL_ITEMS.filter(it => it.level <= cl).map(it => it.letter);
+        const testBtn = document.createElement("button");
+        testBtn.className = "nh-test-node" + (revLocked ? " nh-node-locked" : "");
+        testBtn.disabled = revLocked;
+        testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${cumLetters[0]}–${cumLetters[cumLetters.length-1]}</span>`;
+        testBtn.onclick = () => startQuizTest(cl);
+        card.appendChild(testBtn);
+
+        grid.appendChild(card);
     });
     buildLegend();
 }
@@ -1291,6 +1347,22 @@ function startExam(mode) {
     const examItems = ALL_ITEMS.filter(it => EXAM_LETTERS.includes(it.letter));
     levelItems = [...examItems];
     queue = shuffle([...examItems]); // 1x each, no repeats
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("quiz");
+    showScreen("quiz-screen");
+    loadRound();
+}
+
+function startQuizTest(maxContentLevel) {
+    isExamMode = true;
+    currentGameLevelIdx = -1;
+    gameMode = "reverse"; // image → letter is the real test
+    currentLevel = 0;
+    levelItems = ALL_ITEMS.filter(it => it.level <= maxContentLevel);
+    queue = shuffle([...levelItems]);
     currentIndex = 0;
     stars = 0;
     sessionStats = [];
