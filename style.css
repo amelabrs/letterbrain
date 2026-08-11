@@ -616,6 +616,20 @@ body.theme-rainbow .segmented-btn[data-mode="matchcaps"].active { background: #2
   border-radius: 50%;
 }
 
+/* Word-family tabs: larger images in both choice buttons and display box */
+.image-choices.words-image-choices .choice-img-btn img {
+  width: 84%;
+  height: 84%;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+#letter-display.words-display {
+  width: 200px;
+  height: 200px;
+  border-radius: 40px;
+}
+
 .choice-letter-btn {
   font-size: clamp(32px, 9vw, 52px) !important;
   font-weight: 700 !important;

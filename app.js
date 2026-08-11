@@ -907,6 +907,7 @@ function buildLevelGrid() {
     const grid = document.getElementById("level-grid");
     grid.innerHTML = "";
     grid.classList.remove("nh-mode"); // reset from any previous saynumbers visit
+    document.getElementById("letter-display")?.classList.remove("words-display"); // reset word image sizing
     updateHomeworkBanner();
 
     if (currentAppMode === "words") {
@@ -3229,10 +3230,11 @@ function loadWordsRound() {
         const letterDisplay = document.getElementById("letter-display");
         const choicesEl = document.getElementById("choices");
         choicesEl.innerHTML = "";
+        letterDisplay.classList.add("words-display");
 
         if (wordsMode === "normal") {
             letterDisplay.innerHTML = `<div class="big-word">${currentItem.word.toUpperCase()}</div>`;
-            choicesEl.className = "image-choices";
+            choicesEl.className = "image-choices words-image-choices";
             options.forEach((opt, i) => {
                 const btn = document.createElement("button");
                 btn.className = "choice-btn choice-img-btn";
@@ -3243,7 +3245,7 @@ function loadWordsRound() {
                 choicesEl.appendChild(btn);
             });
         } else {
-            letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:130px;height:130px;object-fit:contain;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`;
+            letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:190px;height:190px;object-fit:cover;border-radius:20px;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`;
             options.forEach((opt, i) => {
                 const btn = document.createElement("button");
                 btn.className = "choice-btn choice-letter-btn";
