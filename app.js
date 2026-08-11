@@ -309,7 +309,7 @@ AM_WORD_ZONE_GROUPS.forEach(group => {
 // ── AN word family ─────────────────────────────────────────────────────
 const AN_WORD_ITEMS = [
     { word: "man", image: "images/man.png" },
-    { word: "can", image: "images/can.png" },
+    { word: "can", image: "images/can.jpg" },
     { word: "fan", image: "images/fan.png" },
 ];
 const AN_WORD_ALL_PAIRS = [
