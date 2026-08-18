@@ -55,6 +55,7 @@ const CHALK_MODE_COLORS = {
     saynumbers: "#FFEA00",
     blends:     "#B47CFF",
     words:      "#FF6060",
+    cursive:    "#A78BFA",
 };
 const RAINBOW_MODE_COLORS = {
     quiz:       "#347046",
@@ -64,6 +65,7 @@ const RAINBOW_MODE_COLORS = {
     saynumbers: "#DEA431",
     blends:     "#1A4226",
     words:      "#C0392B",
+    cursive:    "#6D28D9",
 };
 
 let currentTheme = localStorage.getItem("lb_theme") || "chalkboard";
@@ -150,6 +152,27 @@ CAPS_GROUPS.forEach((group, i) => {
     const cumulative = [..._capsRunning];
     CAPS_LEVELS.push({ letters: group, mode: "caps-normal", pair, cumulative });
     CAPS_LEVELS.push({ letters: group, mode: "caps-test",   pair, cumulative });
+});
+
+// ── Cursive Levels — 5 letters per zone, cumulative test after each ───
+const CURSIVE_ALL_GROUPS = [
+    ["A","B","C","D","E"],
+    ["F","G","H","I","J"],
+    ["K","L","M","N","O"],
+    ["P","Q","R","S","T"],
+    ["U","V","W","X","Y","Z"],
+];
+const CURSIVE_ZONE_GROUPS = CURSIVE_ALL_GROUPS.map((letters, i) => ({
+    learns: [letters],
+    test: CURSIVE_ALL_GROUPS.slice(0, i + 1).flat(),
+}));
+const CURSIVE_LEVELS = [];
+CURSIVE_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(letters => {
+        CURSIVE_LEVELS.push({ letters, mode: "normal" });
+        CURSIVE_LEVELS.push({ letters, mode: "reverse" });
+    });
+    CURSIVE_LEVELS.push({ letters: group.test, mode: "normal", isTest: true });
 });
 
 function getCapsUnlockedLevel() {
@@ -534,7 +557,7 @@ let nhQueue = [], nhIdx = 0, nhItem = null;
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "kannada", "hindi", "saynumbers", "words", "words-am", "words-an", "words-ap", "words-ag"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "words", "words-am", "words-an", "words-ap", "words-ag"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -559,6 +582,7 @@ function getLevelsForTab(tab) {
         case "kannada": return KANNADA_LEVELS;
         case "hindi": return HINDI_LEVELS;
         case "saynumbers": return NH_ZONES;
+        case "cursive": return CURSIVE_LEVELS;
         case "words": return WORD_LEVELS;
         case "words-am": return AM_WORD_LEVELS;
         case "words-an": return AN_WORD_LEVELS;
@@ -764,6 +788,7 @@ function setModeChip(mode) {
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${c}">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
             words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">word</span>`,
+            cursive:    `<span style="font-family:'Dancing Script',cursive;font-size:22px;font-weight:700;color:${c}">Aa</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     } else {
@@ -779,6 +804,7 @@ function setModeChip(mode) {
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
             words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">word</span>`,
+            cursive:    `<span style="font-family:'Dancing Script',cursive;font-size:22px;font-weight:700;color:#fff">Aa</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     }
@@ -1342,6 +1368,60 @@ function buildLevelGrid() {
             testBtn.disabled = testLocked;
             testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${cumLo}–${cumHi}</span>`;
             testBtn.onclick = () => startCapsGame(testIdx);
+            card.appendChild(testBtn);
+
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    if (currentAppMode === "cursive") {
+        grid.classList.add("nh-mode");
+        let gIdx = 0;
+
+        CURSIVE_ZONE_GROUPS.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+
+            group.learns.forEach(letters => {
+                const normIdx = gIdx++;
+                const revIdx  = gIdx++;
+                const lStr = `${letters[0]}–${letters[letters.length - 1]}`;
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+
+                // Normal (teal) — see cursive letter, pick image
+                const normLocked = homeworkLocked("cursive", normIdx);
+                const normBtn = document.createElement("button");
+                normBtn.className = "hindi-pair-btn" + (normLocked ? " nh-node-locked" : "");
+                normBtn.disabled = normLocked;
+                normBtn.style.background = "#2E5E6E";
+                normBtn.innerHTML = `<span class="hindi-pair-letters cursive-label">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+                normBtn.onclick = () => startCursiveGame(letters, "normal");
+                row.appendChild(normBtn);
+
+                // Reverse (red) — see image, pick cursive letter
+                const revLocked = homeworkLocked("cursive", revIdx);
+                const revBtn = document.createElement("button");
+                revBtn.className = "hindi-pair-btn" + (revLocked ? " nh-node-locked" : "");
+                revBtn.disabled = revLocked;
+                revBtn.style.background = "#C04A4A";
+                revBtn.innerHTML = `<span class="hindi-pair-letters cursive-label">${lStr}</span><span class="hindi-pair-icon">${QTYPE_ICONS.letter}</span>`;
+                revBtn.onclick = () => startCursiveGame(letters, "reverse");
+                row.appendChild(revBtn);
+
+                card.appendChild(row);
+            });
+
+            // Cumulative test pill
+            const testIdx = gIdx++;
+            const testLocked = homeworkLocked("cursive", testIdx);
+            const testBtn = document.createElement("button");
+            testBtn.className = "nh-test-node" + (testLocked ? " nh-node-locked" : "");
+            testBtn.disabled = testLocked;
+            const tw = group.test;
+            testBtn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel cursive-label">${tw[0]}–${tw[tw.length - 1]}</span>`;
+            testBtn.onclick = () => startCursiveGame(tw, "normal");
             card.appendChild(testBtn);
 
             grid.appendChild(card);
@@ -2115,6 +2195,8 @@ function showFeedback(correct) {
         text.textContent = `It's ${currentItem.blend}!`;
     } else if (["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode)) {
         text.textContent = `It's "${currentItem.word}"!`;
+    } else if (currentAppMode === "cursive") {
+        text.textContent = `It's ${currentItem.letter} for ${currentItem.word}!`;
     } else if (currentAppMode === "saynumbers" && nhItem) {
         text.textContent = `It's ${nhItem.num} — ${nhItem.word} rhymes with ${nhItem.rhyme}!`;
     } else {
@@ -3195,6 +3277,102 @@ function startWordsAgGame(words, mode) {
     loadWordsRound();
 }
 
+// ── Cursive Game ──────────────────────────────────────────────────────
+
+let cursiveMode = "normal";
+let cursiveFamilyItems = [];
+
+function startCursiveGame(letters, mode) {
+    cursiveMode = mode;
+    cursiveFamilyItems = ALL_ITEMS.filter(it => letters.includes(it.letter));
+    gameMode = "cursive-" + mode;
+    currentAppMode = "cursive";
+    queue = shuffleNoRepeat([...cursiveFamilyItems, ...cursiveFamilyItems, ...cursiveFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("cursive");
+    showScreen("quiz-screen");
+    loadCursiveRound();
+}
+
+function loadCursiveRound() {
+    if (currentIndex >= queue.length) { showDone(); return; }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+    document.getElementById("choices").className = "";
+
+    setLetterDisplayColor("cursive");
+
+    const wrongPool = shuffle(cursiveFamilyItems.filter(it => it.letter !== currentItem.letter)).slice(0, 3);
+    const options = shuffle([currentItem, ...wrongPool]);
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+    letterDisplay.classList.remove("words-display");
+
+    if (cursiveMode === "normal") {
+        // Show big cursive letter → child picks matching image
+        letterDisplay.innerHTML = `<span class="big-cursive-letter">${currentItem.letter.toLowerCase()}</span>`;
+        choicesEl.className = "image-choices words-image-choices";
+        options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-img-btn";
+            styleTile(btn, i);
+            btn.innerHTML = `<img src="${opt.image}" alt="${opt.word}">`;
+            btn.dataset.letter = opt.letter;
+            btn.onclick = () => handleCursiveChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        // Show image → child picks cursive letter
+        letterDisplay.classList.add("words-display");
+        letterDisplay.innerHTML = `<img src="${currentItem.image}" style="width:190px;height:190px;object-fit:cover;border-radius:20px;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`;
+        options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            styleTile(btn, i);
+            btn.innerHTML = `<span class="big-cursive-letter" style="font-size:clamp(42px,11vw,64px)">${opt.letter.toLowerCase()}</span>`;
+            btn.dataset.letter = opt.letter;
+            btn.onclick = () => handleCursiveChoice(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    }
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleCursiveChoice(btn, opt) {
+    if (answered) return;
+    const isCorrect = opt.letter === currentItem.letter;
+    if (isCorrect) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        setTimeout(() => advanceRound(), 1400);
+    } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        roundClean = false;
+        roundWrongs++;
+        playWrongSound();
+        showFeedback(false);
+        answered = false;
+    }
+}
+
 function playWordInitialPhonic(word, onDone) {
     const letter = word[0].toUpperCase();
     const start = PHONETICS_TIMESTAMPS[letter] ?? 0;
@@ -3331,6 +3509,8 @@ function advanceRound() {
         loadBlendsRound();
     } else if (["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode)) {
         loadWordsRound();
+    } else if (currentAppMode === "cursive") {
+        loadCursiveRound();
     } else {
         loadRound();
     }
@@ -3340,17 +3520,18 @@ function advanceRound() {
 // "matchcaps" has no nav button of its own — it lives inside the Quiz tab
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
-    if (mode === "matchcaps" || mode === "lowercase") return "quiz";
+    if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
     if (["words-am","words-an","words-ap","words-ag"].includes(mode)) return "words";
     return mode;
 }
 function updateQuizCaseToggle() {
     const wrap = document.getElementById("quiz-case-toggle");
-    const isQuizFamily = ["quiz", "matchcaps", "lowercase"].includes(currentAppMode);
+    const isQuizFamily = ["quiz", "matchcaps", "lowercase", "cursive"].includes(currentAppMode);
     wrap.style.display = isQuizFamily ? "flex" : "none";
     document.getElementById("toggle-quiz").classList.toggle("active", currentAppMode === "quiz");
     document.getElementById("toggle-lowercase").classList.toggle("active", currentAppMode === "lowercase");
     document.getElementById("toggle-case").classList.toggle("active", currentAppMode === "matchcaps");
+    document.getElementById("toggle-cursive").classList.toggle("active", currentAppMode === "cursive");
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
@@ -3382,6 +3563,7 @@ document.getElementById("tab-words").addEventListener("click", () => setActiveTa
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));
 document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
+document.getElementById("toggle-cursive").addEventListener("click", () => setActiveTab("cursive"));
 document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-words-am").addEventListener("click", () => setActiveTab("words-am"));
 document.getElementById("toggle-words-an").addEventListener("click", () => setActiveTab("words-an"));

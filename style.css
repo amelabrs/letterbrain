@@ -1277,3 +1277,27 @@ body.theme-rainbow .theme-btn.active {
   align-items: center;
   justify-content: center;
 }
+
+/* ── Cursive tab ──────────────────────────────────────────────────────── */
+.cursive-tab-btn {
+  font-family: 'Dancing Script', cursive !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+}
+
+.big-cursive-letter {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(72px, 20vw, 110px);
+  font-weight: 700;
+  line-height: 1;
+  color: inherit;
+  animation: popIn 0.4s ease-out;
+  display: block;
+}
+
+.cursive-label {
+  font-family: 'Dancing Script', cursive !important;
+  font-size: 1.2rem !important;
+  letter-spacing: 0.04em;
+}
