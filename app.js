@@ -513,6 +513,18 @@ const NH_CLIPS = {
         after6: { start: 134, dur: 7 },
         outro:  { start: 143, dur: 8 },
     },
+    'nhz7-8': {
+        intro:  { start: 157, dur: 5 },  // 7 puzzle piece appears
+        after7: { start: 165, dur: 7 },  // crate game — "SEE THE NUMBERS ON A CRATE"
+        after8: { start: 169, dur: 7 },  // plate game — "SEE THE NUMBERS ON A PLATE"
+        outro:  { start: 182, dur: 7 },  // "SAY IT!!! SEVEN AND EIGHT"
+    },
+    'nhz9-10': {
+        intro:  { start: 190, dur: 5 },  // 9 & 10 puzzle pieces
+        after9: { start: 194, dur: 7 },  // 9 on kid's head
+        after10:{ start: 206, dur: 7 },  // trampolines bouncing
+        outro:  { start: 214, dur: 7 },  // "SAY IT!!! NINE AND TEN"
+    },
 };
 
 // NH game state
