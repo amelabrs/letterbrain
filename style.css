@@ -1280,14 +1280,14 @@ body.theme-rainbow .theme-btn.active {
 
 /* ── Cursive tab ──────────────────────────────────────────────────────── */
 .cursive-tab-btn {
-  font-family: 'Dancing Script', cursive !important;
+  font-family: 'Great Vibes', cursive !important;
   font-size: 18px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em;
 }
 
 .big-cursive-letter {
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Great Vibes', cursive;
   font-size: clamp(72px, 20vw, 110px);
   font-weight: 700;
   line-height: 1;
@@ -1297,7 +1297,7 @@ body.theme-rainbow .theme-btn.active {
 }
 
 .cursive-label {
-  font-family: 'Dancing Script', cursive !important;
+  font-family: 'Great Vibes', cursive !important;
   font-size: 1.2rem !important;
   letter-spacing: 0.04em;
 }

@@ -788,7 +788,7 @@ function setModeChip(mode) {
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:${c}">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
             words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:${c}">word</span>`,
-            cursive:    `<span style="font-family:'Dancing Script',cursive;font-size:22px;font-weight:700;color:${c}">Aa</span>`,
+            cursive:    `<span style="font-family:'Great Vibes',cursive;font-size:22px;font-weight:700;color:${c}">Aa</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     } else {
@@ -804,7 +804,7 @@ function setModeChip(mode) {
             saynumbers: `<span style="font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:700;color:#fff">3</span>`,
             blends:     `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v4"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>`,
             words:      `<span style="font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:800;color:#fff">word</span>`,
-            cursive:    `<span style="font-family:'Dancing Script',cursive;font-size:22px;font-weight:700;color:#fff">Aa</span>`,
+            cursive:    `<span style="font-family:'Great Vibes',cursive;font-size:22px;font-weight:700;color:#fff">Aa</span>`,
         };
         chip.innerHTML = icons[mode] || '';
     }
