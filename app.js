@@ -550,6 +550,37 @@ const NH_CLIPS = {
     },
 };
 
+// Cursive drawing clips — timestamps in videos/cursive.mp4
+// Each entry: start of the letter's drawing demonstration, duration to show
+const CURSIVE_CLIPS = {
+    A: { start:  10, dur: 14 },
+    B: { start:  30, dur: 14 },
+    C: { start:  50, dur: 14 },
+    D: { start:  70, dur: 14 },
+    E: { start:  90, dur: 14 },
+    F: { start: 110, dur: 14 },
+    G: { start: 130, dur: 14 },
+    H: { start: 150, dur: 14 },
+    I: { start: 170, dur: 14 },
+    J: { start: 190, dur: 14 },
+    K: { start: 210, dur: 14 },
+    L: { start: 230, dur: 14 },
+    M: { start: 250, dur: 14 },
+    N: { start: 270, dur: 14 },
+    O: { start: 290, dur: 14 },
+    P: { start: 310, dur: 14 },
+    Q: { start: 330, dur: 14 },
+    R: { start: 350, dur: 14 },
+    S: { start: 370, dur: 14 },
+    T: { start: 390, dur: 14 },
+    U: { start: 410, dur: 14 },
+    V: { start: 430, dur: 14 },
+    W: { start: 450, dur: 14 },
+    X: { start: 480, dur: 14 },
+    Y: { start: 506, dur: 14 },
+    Z: { start: 527, dur: 13 },
+};
+
 // NH game state
 let currentNHZone = null;
 let nhQueue = [], nhIdx = 0, nhItem = null;
@@ -3361,7 +3392,7 @@ function handleCursiveChoice(btn, opt) {
         playCorrectSound();
         showFeedback(true);
         spawnConfetti();
-        setTimeout(() => advanceRound(), 1400);
+        setTimeout(() => playCursiveClip(currentItem.letter, advanceRound), 800);
     } else {
         btn.classList.add("wrong");
         btn.disabled = true;
@@ -3371,6 +3402,44 @@ function handleCursiveChoice(btn, opt) {
         showFeedback(false);
         answered = false;
     }
+}
+
+function playCursiveClip(letter, callback) {
+    const clip = CURSIVE_CLIPS[letter.toUpperCase()];
+    if (!clip || getVideosDisabled()) { if (callback) callback(); return; }
+
+    const { start, dur } = clip;
+    const overlay    = document.getElementById("video-overlay");
+    const localPlayer = document.getElementById("local-player");
+    const ytEl       = document.getElementById("yt-player");
+
+    afterVideoHide = callback;
+
+    if (!localPlayer.src || localPlayer.src.indexOf("cursive.mp4") === -1) {
+        localPlayer.src = "videos/cursive.mp4";
+        localPlayer.load();
+    }
+    localPlayer.currentTime = start;
+    localPlayer.style.display = "block";
+    if (ytEl) ytEl.style.display = "none";
+    overlay.className = "video-overlay show";
+    videoShowing = true;
+
+    localPlayer.play().catch(() => { hideVideoOverlay(); });
+
+    clearInterval(videoTimer);
+    clearTimeout(safetyTimer);
+    const endAt = start + dur;
+    videoTimer = setInterval(() => {
+        if (localPlayer.currentTime >= endAt) {
+            clearInterval(videoTimer);
+            hideVideoOverlay();
+        }
+    }, 200);
+    safetyTimer = setTimeout(() => {
+        clearInterval(videoTimer);
+        hideVideoOverlay();
+    }, (dur + 3) * 1000);
 }
 
 function playWordInitialPhonic(word, onDone) {
