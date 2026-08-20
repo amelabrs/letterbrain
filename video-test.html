@@ -71,6 +71,9 @@
 <h1 style="margin-top:3rem">Lowercase English — Video Clip Tester</h1>
 <div class="grid" id="grid-lowercase"></div>
 
+<h1 style="margin-top:3rem">Cursive Letters — Video Clip Tester <span style="font-size:0.65rem;color:#E0604A">(local file)</span></h1>
+<div class="grid" id="grid-cursive"></div>
+
 <button id="copy-btn" onclick="copyChanges()">📋 Copy corrections</button>
 <div id="toast">Copied!</div>
 
@@ -306,6 +309,60 @@ buildGrid(VOWELS,      "grid-vowels",     KN_VIDEO, "kn-vowel");
 buildGrid(CONSONANTS,  "grid-consonants", KN_VIDEO, "kn-cons");
 buildGrid(HINDI,       "grid-hindi",      HI_VIDEO, "hi-cons");
 buildGrid(LOWERCASE_EN,"grid-lowercase",  LC_VIDEO, "en-lower", 6);
+
+// ── Cursive local-video section — uses pre-extracted clips (no seeking) ──
+const CURSIVE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const CURSIVE_STARTS  = {
+  A:12,  B:29,  C:48,  D:64,  E:86,  F:104,
+  G:125, H:144, I:161, J:178, K:196, L:220,
+  M:240, N:262, O:282, P:303, Q:323, R:344,
+  S:364, T:385, U:407, V:431, W:458, X:482,
+  Y:506, Z:532
+};
+
+function buildCursiveGrid() {
+  const grid = document.getElementById("grid-cursive");
+  CURSIVE_LETTERS.forEach(letter => {
+    const vidId   = `cursive-vid-${letter}`;
+    const inputId = `cursive-inp-${letter}`;
+    const src     = `videos/cursive_clips/${letter}.mp4`;
+    const start   = CURSIVE_STARTS[letter];
+    const card    = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="letter" style="font-family:Georgia,serif;font-style:italic;font-size:2.2rem">${letter}</div>
+        <div class="meta"><strong>${letter} — cursive</strong></div>
+        <a class="yt-link" href="${src}" target="_blank">↗ file</a>
+      </div>
+      <div class="embed-wrap">
+        <video id="${vidId}" src="${src}" preload="metadata" controls
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000">
+        </video>
+      </div>
+      <div class="ts-row">
+        <span class="ts-label">start (s)</span>
+        <input id="${inputId}" class="ts-input" type="number" value="${start}" min="0" max="570" step="1">
+        <button class="reload-btn" onclick="applyCursiveChange('${letter}','${inputId}',this.closest('.card'))">▶ Apply</button>
+      </div>
+    `;
+    card.querySelector(`#${inputId}`).addEventListener("keydown", e => {
+      if (e.key === "Enter") card.querySelector(".reload-btn").click();
+    });
+    grid.appendChild(card);
+  });
+}
+
+function applyCursiveChange(letter, inputId, card) {
+  const val = parseInt(document.getElementById(inputId).value, 10);
+  if (isNaN(val)) return;
+  document.getElementById(inputId).classList.add("dirty");
+  card.classList.add("changed");
+  // Record correction for the Copy button
+  changes[`cursive:${letter}`] = { roman: letter, section: "cursive", sec: val };
+}
+
+buildCursiveGrid();
 </script>
 </body>
 </html>

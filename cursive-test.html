@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursive Clip Tester</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: monospace; background: #1a1a2e; color: #e0e0e0; padding: 20px; }
+  h1 { color: #A78BFA; margin-bottom: 16px; font-size: 1.4rem; }
+
+  video { display: block; width: 100%; max-width: 640px; border-radius: 8px; background: #000; }
+
+  .time-bar {
+    max-width: 640px;
+    display: flex; align-items: center; gap: 12px;
+    margin: 10px 0 20px;
+    font-size: 0.85rem;
+  }
+  #time-display { color: #A78BFA; min-width: 80px; text-align: right; font-size: 1rem; }
+
+  .letters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    gap: 8px;
+    max-width: 640px;
+    margin-bottom: 20px;
+  }
+  .letter-btn {
+    background: #2d2d4e; border: 2px solid #444; border-radius: 8px;
+    color: #e0e0e0; padding: 8px 4px; cursor: pointer; text-align: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .letter-btn:hover  { background: #3d3d6e; border-color: #A78BFA; }
+  .letter-btn.active { background: #5b21b6; border-color: #A78BFA; color: #fff; }
+  .letter-btn .big   { font-size: 1.4rem; font-weight: bold; display: block; }
+  .letter-btn .times { font-size: 0.65rem; color: #999; margin-top: 2px; }
+
+  #status {
+    max-width: 640px; background: #0f3460; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; min-height: 36px;
+  }
+  #status span { color: #A78BFA; font-weight: bold; }
+
+  .edit-panel {
+    max-width: 640px; background: #0f3460; border-radius: 8px;
+    padding: 14px; margin-top: 20px;
+  }
+  .edit-panel h2 { font-size: 0.9rem; color: #A78BFA; margin-bottom: 10px; }
+  .edit-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .edit-row label { min-width: 60px; font-size: 0.8rem; color: #aaa; }
+  .edit-row input[type=number] {
+    width: 80px; background: #1a1a2e; border: 1px solid #555;
+    border-radius: 4px; color: #e0e0e0; padding: 4px 6px; font-family: monospace;
+  }
+  select { background:#1a1a2e; border:1px solid #555; border-radius:4px; color:#e0e0e0; padding:4px 8px; font-family:monospace; }
+  .ctrl-btn, #mark-btn {
+    background: #2d2d4e; border: 1px solid #555; border-radius: 6px;
+    color: #e0e0e0; padding: 6px 14px; cursor: pointer; font-family: monospace;
+  }
+  .ctrl-btn:hover { background: #3d3d6e; }
+  #mark-btn { background: #5b21b6; border-color: #7c3aed; }
+  #mark-btn:hover { background: #7c3aed; }
+  #output-box {
+    margin-top: 14px; background: #1a1a2e; border-radius: 6px;
+    padding: 12px; font-size: 0.75rem; color: #7dd3fc;
+    white-space: pre; overflow-x: auto; max-height: 260px; overflow-y: auto;
+    border: 1px solid #333;
+  }
+  #copy-btn {
+    margin-top: 8px; background: #2d2d4e; border: 1px solid #555; border-radius: 6px;
+    color: #e0e0e0; padding: 5px 12px; cursor: pointer; font-family: monospace; font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>🖊️ Cursive Clip Tester</h1>
+
+<video id="vid" controls preload="metadata"></video>
+
+<div class="time-bar">
+  <span id="time-display">–</span>
+</div>
+
+<div id="status">Click a letter to jump to its clip and play it.</div>
+
+<div class="letters-grid" id="letters-grid"></div>
+
+<div class="edit-panel">
+  <h2>✏️ Adjust timestamps — then copy the CURSIVE_CLIPS block</h2>
+  <div class="edit-row">
+    <label>Letter</label>
+    <select id="edit-letter"></select>
+    <button class="ctrl-btn" onclick="previewEditLetter()">▶ Preview</button>
+  </div>
+  <div class="edit-row">
+    <label>Start (s)</label>
+    <input type="number" id="edit-start" step="1" min="0" max="570">
+    <button class="ctrl-btn" onclick="setStartToNow()">← use current time</button>
+  </div>
+  <div class="edit-row">
+    <label>Dur (s)</label>
+    <input type="number" id="edit-dur" step="1" min="5" max="30" value="14">
+  </div>
+  <button id="mark-btn" onclick="saveEdit()">💾 Save this letter</button>
+
+  <div id="output-box"></div>
+  <button id="copy-btn" onclick="copyOutput()">📋 Copy CURSIVE_CLIPS block</button>
+</div>
+
+<script>
+const DEFAULT_CLIPS = {
+  A:{ start: 16, dur:14 }, B:{ start: 30, dur:14 }, C:{ start: 50, dur:14 },
+  D:{ start: 70, dur:14 }, E:{ start: 90, dur:14 }, F:{ start:110, dur:14 },
+  G:{ start:130, dur:14 }, H:{ start:150, dur:14 }, I:{ start:170, dur:14 },
+  J:{ start:190, dur:14 }, K:{ start:210, dur:14 }, L:{ start:230, dur:14 },
+  M:{ start:250, dur:14 }, N:{ start:270, dur:14 }, O:{ start:290, dur:14 },
+  P:{ start:310, dur:14 }, Q:{ start:330, dur:14 }, R:{ start:350, dur:14 },
+  S:{ start:370, dur:14 }, T:{ start:390, dur:14 }, U:{ start:410, dur:14 },
+  V:{ start:430, dur:14 }, W:{ start:450, dur:14 }, X:{ start:480, dur:14 },
+  Y:{ start:506, dur:14 }, Z:{ start:527, dur:13 },
+};
+
+const SAVED_KEY = "cursive_clip_edits_v2";
+let clips = JSON.parse(JSON.stringify(DEFAULT_CLIPS));
+try {
+  const saved = JSON.parse(localStorage.getItem(SAVED_KEY) || "{}");
+  Object.assign(clips, saved);
+} catch(e) {}
+
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const vid = document.getElementById("vid");
+const timeEl = document.getElementById("time-display");
+const statusEl = document.getElementById("status");
+
+let clipTimer = null;
+let activeBtn = null;
+
+// Track current time
+vid.addEventListener("timeupdate", () => {
+  timeEl.textContent = vid.currentTime.toFixed(1) + "s";
+});
+
+// Load the video with a specific start time using #t= fragment
+// This is the most reliable seek method — no waiting for seeked events
+function loadAt(start) {
+  vid.src = `videos/cursive.mp4#t=${start}`;
+  vid.load();
+}
+
+function playFrom(start, dur, onDone) {
+  clearTimeout(clipTimer);
+  loadAt(start);
+  // Wait for enough data then play
+  vid.addEventListener("canplay", function onCan() {
+    vid.removeEventListener("canplay", onCan);
+    vid.play().catch(() => {});
+    clipTimer = setTimeout(() => {
+      vid.pause();
+      if (onDone) onDone();
+    }, dur * 1000);
+  }, { once: true });
+}
+
+// Build letter grid
+const grid = document.getElementById("letters-grid");
+LETTERS.forEach(l => {
+  const btn = document.createElement("button");
+  btn.className = "letter-btn";
+  btn.id = "btn-" + l;
+  btn.innerHTML = `<span class="big">${l}</span><span class="times" id="t-${l}">${clips[l].start}s / ${clips[l].dur}s</span>`;
+  btn.onclick = () => {
+    if (activeBtn) activeBtn.classList.remove("active");
+    btn.classList.add("active");
+    activeBtn = btn;
+
+    const { start, dur } = clips[l];
+    syncEditor(l);
+    statusEl.innerHTML = `Loading <span>${l}</span> — starts at <span>${start}s</span>, playing for ${dur}s…`;
+
+    playFrom(start, dur, () => {
+      if (activeBtn === btn) btn.classList.remove("active");
+      statusEl.innerHTML = `Done playing <span>${l}</span>.`;
+    });
+  };
+  grid.appendChild(btn);
+});
+
+// Editor select
+const sel = document.getElementById("edit-letter");
+LETTERS.forEach(l => {
+  const opt = document.createElement("option");
+  opt.value = l; opt.textContent = l;
+  sel.appendChild(opt);
+});
+sel.addEventListener("change", () => syncEditor(sel.value));
+syncEditor("A");
+
+function syncEditor(l) {
+  sel.value = l;
+  document.getElementById("edit-start").value = clips[l].start;
+  document.getElementById("edit-dur").value   = clips[l].dur;
+}
+
+function previewEditLetter() {
+  const l     = sel.value;
+  const start = parseInt(document.getElementById("edit-start").value);
+  const dur   = parseInt(document.getElementById("edit-dur").value);
+  statusEl.innerHTML = `Previewing <span>${l}</span> at ${start}s for ${dur}s…`;
+  playFrom(start, dur, () => {
+    statusEl.innerHTML = `Preview done.`;
+  });
+}
+
+function setStartToNow() {
+  document.getElementById("edit-start").value = Math.round(vid.currentTime);
+}
+
+function saveEdit() {
+  const l     = sel.value;
+  const start = parseInt(document.getElementById("edit-start").value);
+  const dur   = parseInt(document.getElementById("edit-dur").value);
+  if (isNaN(start) || isNaN(dur)) return;
+  clips[l] = { start, dur };
+
+  // Persist overrides
+  const toSave = {};
+  LETTERS.forEach(x => {
+    if (clips[x].start !== DEFAULT_CLIPS[x].start || clips[x].dur !== DEFAULT_CLIPS[x].dur)
+      toSave[x] = clips[x];
+  });
+  localStorage.setItem(SAVED_KEY, JSON.stringify(toSave));
+
+  document.getElementById("t-" + l).textContent = `${start}s / ${dur}s`;
+  statusEl.innerHTML = `Saved <span>${l}</span>: start=${start}s, dur=${dur}s`;
+  renderOutput();
+}
+
+function renderOutput() {
+  let out = "const CURSIVE_CLIPS = {\n";
+  LETTERS.forEach(l => {
+    const { start, dur } = clips[l];
+    const changed = start !== DEFAULT_CLIPS[l].start || dur !== DEFAULT_CLIPS[l].dur;
+    out += `    ${l}: { start: ${String(start).padStart(3)}, dur: ${dur} },${changed ? "  // ✏️" : ""}\n`;
+  });
+  out += "};";
+  document.getElementById("output-box").textContent = out;
+}
+
+function copyOutput() {
+  navigator.clipboard.writeText(document.getElementById("output-box").textContent).then(() => {
+    const btn = document.getElementById("copy-btn");
+    btn.textContent = "✅ Copied!";
+    setTimeout(() => btn.textContent = "📋 Copy CURSIVE_CLIPS block", 2000);
+  });
+}
+
+renderOutput();
+</script>
+</body>
+</html>
