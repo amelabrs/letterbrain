@@ -431,7 +431,7 @@ const HINDI_ITEMS = [
     { letter: "ञ", roman: "nya",  audio: "audio/hindi/nya.mp3",  vidStart: 99,  image: null                  },
     // ta-varga (retroflex)
     { letter: "ट", roman: "ta",   audio: "audio/hindi/ta2.mp3",  vidStart: 104, image: "images/ram.png"      },
-    { letter: "ठ", roman: "tha",  audio: "audio/hindi/tha2.mp3", vidStart: 109, image: "images/stamp.png"    },
+    { letter: "ठ", roman: "tha",  audio: "audio/hindi/tha2.mp3", vidStart: 109, image: "images/shop.png"     },
     { letter: "ड", roman: "da",   audio: "audio/hindi/da2.mp3",  vidStart: 113, image: "images/drum.png"     },
     { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 118, image: "images/damaru.png"  },
     { letter: "ण", roman: "na",   audio: "audio/hindi/na2.mp3",  vidStart: 123, image: "images/fly.png"      },
