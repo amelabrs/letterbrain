@@ -243,7 +243,7 @@ const KANNADA_CONSONANT_ITEMS = [
     { letter: "ಛ",  roman: "chha", audio: "audio/kannada/chha.mp3", vidStart: 320, image: "images/umbrella.png" },
     { letter: "ಜ",  roman: "ja",   audio: "audio/kannada/ja.mp3",   vidStart: 336, image: "images/ship.png"     },
     { letter: "ಝ",  roman: "jha",  audio: "audio/kannada/jha.mp3",  vidStart: 351, image: "images/waterfall.png"},
-    { letter: "ಞ",  roman: "nya",  audio: "audio/kannada/nya.mp3",  vidStart: 366, image: null                  },
+    // ಞ (nya) — hidden: no image available yet
     // ta-varga (retroflex)
     { letter: "ಟ",  roman: "Ta",   audio: "audio/kannada/Ta.mp3",   vidStart: 371, image: "images/ram.png"      },
     { letter: "ಠ",  roman: "Tha",  audio: "audio/kannada/Tha.mp3",  vidStart: 387, image: "images/stamp.png"    },
@@ -272,8 +272,7 @@ const KANNADA_CONSONANT_ITEMS = [
     { letter: "ಷ",  roman: "sha2", audio: "audio/kannada/sha2.mp3", vidStart: 683, image: "images/hexagon.png"  },
     { letter: "ಸ",  roman: "sa",   audio: "audio/kannada/sa.mp3",   vidStart: 699, image: "images/snake.png"    },
     { letter: "ಹ",  roman: "ha",   audio: "audio/kannada/ha.mp3",   vidStart: 715, image: "images/swan.png"     },
-    // special
-    { letter: "ಳ",  roman: "La",   audio: "audio/kannada/La.mp3",   vidStart: null, image: "images/tap.png"     },
+    // ಳ (La) — hidden: no video timestamp, rare letter
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
