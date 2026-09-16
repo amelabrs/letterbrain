@@ -568,10 +568,44 @@ const CURSIVE_CLIPS = {
 let currentNHZone = null;
 let nhQueue = [], nhIdx = 0, nhItem = null;
 
+// ── Number Faces (image quiz) ─────────────────────────────────────────
+// Images sourced from numbers/ folder. 4, 9, 10 pending.
+const NUM_IMAGES = {
+    1: "numbers/one.jpg",
+    2: "numbers/two.jpg",
+    3: "numbers/three.jpg",
+    4: "numbers/four.jpg",   // add numbers/four.jpg to enable
+    5: "numbers/five.jpg",
+    6: "numbers/six.jpg",
+    7: "numbers/seven.jpg",
+    8: "numbers/eight.jpg",
+    9: "numbers/nine.jpg",   // add numbers/nine.jpg to enable
+    10: "numbers/ten.jpg",   // add numbers/ten.jpg to enable
+};
+// Only use numbers whose image file actually exists (checked at runtime)
+const NIM_AVAILABLE = [1,2,3,4,5,6,7,8]; // update when 9/10 images land
+
+// Zone groups — hear a number, pick its face image
+const NIM_ZONE_GROUPS = [
+    { id:"nimz1-2", label:"1 & 2",    nums:[1,2] },
+    { id:"nimz3-4", label:"3 & 4",    nums:[3,4] },
+    { id:"nimzt1",  label:"Test 1–4", nums:[1,2,3,4], isTest:true },
+    { id:"nimz5-6", label:"5 & 6",    nums:[5,6] },
+    { id:"nimz7-8", label:"7 & 8",    nums:[7,8] },
+    { id:"nimzt2",  label:"Test 1–8", nums:[1,2,3,4,5,6,7,8], isTest:true },
+];
+const NIM_LEVELS = [];
+NIM_ZONE_GROUPS.forEach(g => {
+    NIM_LEVELS.push(g);
+});
+
+let nimCurrentZone = null;
+let nimQueue = [], nimIdx = 0, nimCurrentNum = null;
+
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "words", "words-am", "words-an", "words-ap", "words-ag"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "numimages", "words", "words-am", "words-an", "words-ap", "words-ag"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -596,6 +630,7 @@ function getLevelsForTab(tab) {
         case "kannada": return KANNADA_LEVELS;
         case "hindi": return HINDI_LEVELS;
         case "saynumbers": return NH_ZONES;
+        case "numimages": return NIM_LEVELS;
         case "cursive": return CURSIVE_LEVELS;
         case "words": return WORD_LEVELS;
         case "words-am": return AM_WORD_LEVELS;
@@ -1181,6 +1216,51 @@ function buildLevelGrid() {
                 card.appendChild(btn);
             }
 
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    if (currentAppMode === "numimages") {
+        grid.classList.add("nh-mode");
+        const groups = [];
+        let learns = [];
+        NIM_ZONE_GROUPS.forEach(zone => {
+            if (!zone.isTest) { learns.push(zone); }
+            else { groups.push({ learns: [...learns], test: zone }); learns = []; }
+        });
+        if (learns.length) groups.push({ learns, test: null });
+
+        groups.forEach(group => {
+            const card = document.createElement("div");
+            card.className = "nh-group-card";
+            if (group.learns.length) {
+                const row = document.createElement("div");
+                row.className = "nh-learn-row";
+                group.learns.forEach(zone => {
+                    const idx = NIM_ZONE_GROUPS.indexOf(zone);
+                    const locked = homeworkLocked("numimages", idx);
+                    const btn = document.createElement("button");
+                    btn.className = "nh-learn-btn" + (locked ? " nh-node-locked" : "");
+                    btn.disabled = locked;
+                    btn.textContent = zone.label;
+                    const col = RAINBOW_TILE_COLORS[(zone.nums[0] - 1) % RAINBOW_TILE_COLORS.length];
+                    btn.style.background = col;
+                    btn.onclick = () => startNumImagesGame(zone);
+                    row.appendChild(btn);
+                });
+                card.appendChild(row);
+            }
+            if (group.test) {
+                const idx = NIM_ZONE_GROUPS.indexOf(group.test);
+                const locked = homeworkLocked("numimages", idx);
+                const btn = document.createElement("button");
+                btn.className = "nh-test-node" + (locked ? " nh-node-locked" : "");
+                btn.disabled = locked;
+                btn.innerHTML = `<span class="nh-test-icon">★</span><span class="nh-test-sublabel">${group.test.label}</span>`;
+                btn.onclick = () => startNumImagesGame(group.test);
+                card.appendChild(btn);
+            }
             grid.appendChild(card);
         });
         return;
@@ -3556,6 +3636,8 @@ function advanceRound() {
         loadWordsRound();
     } else if (currentAppMode === "cursive") {
         loadCursiveRound();
+    } else if (currentAppMode === "numimages") {
+        loadNumImagesRound();
     } else {
         loadRound();
     }
@@ -3567,6 +3649,7 @@ function advanceRound() {
 function navTabFor(mode) {
     if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
     if (["words-am","words-an","words-ap","words-ag"].includes(mode)) return "words";
+    if (mode === "numimages") return "saynumbers";
     return mode;
 }
 function updateQuizCaseToggle() {
@@ -3577,6 +3660,13 @@ function updateQuizCaseToggle() {
     document.getElementById("toggle-lowercase").classList.toggle("active", currentAppMode === "lowercase");
     document.getElementById("toggle-case").classList.toggle("active", currentAppMode === "matchcaps");
     document.getElementById("toggle-cursive").classList.toggle("active", currentAppMode === "cursive");
+}
+function updateNumbersToggle() {
+    const wrap = document.getElementById("numbers-toggle");
+    const isNumbersFamily = ["saynumbers","numimages"].includes(currentAppMode);
+    wrap.style.display = isNumbersFamily ? "flex" : "none";
+    document.getElementById("toggle-saynumbers").classList.toggle("active", currentAppMode === "saynumbers");
+    document.getElementById("toggle-numimages").classList.toggle("active", currentAppMode === "numimages");
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
@@ -3597,6 +3687,7 @@ function setActiveTab(mode) {
         if (el) el.classList.toggle("active", m === activeNavTab);
     });
     updateQuizCaseToggle();
+    updateNumbersToggle();
     updateWordFamilyToggle();
     buildLevelGrid();
 }
@@ -3604,6 +3695,8 @@ document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
 document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
+document.getElementById("toggle-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
+document.getElementById("toggle-numimages").addEventListener("click", () => setActiveTab("numimages"));
 document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));
@@ -4179,6 +4272,68 @@ function showNumbersDone() {
         : `Good try! You got ${stars} out of ${total}. Keep practising!`;
     speak(msg);
     spawnConfetti();
+}
+
+// ── Number Faces (numimages) Game ────────────────────────────────────
+
+function startNumImagesGame(zone) {
+    nimCurrentZone = zone;
+    nimQueue = shuffle([...zone.nums, ...zone.nums, ...zone.nums]);
+    nimIdx = 0;
+    currentAppMode = "numimages";
+    stars = 0; sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("saynumbers");
+    showScreen("quiz-screen");
+    loadNumImagesRound();
+}
+
+function loadNumImagesRound() {
+    if (nimIdx >= nimQueue.length) { showNumbersDone(); return; }
+    nimCurrentNum = nimQueue[nimIdx++];
+    answered = false; roundClean = true; roundWrongs = 0;
+
+    document.getElementById("round-info").textContent = `${nimIdx} / ${nimQueue.length}`;
+    document.getElementById("progress-fill").style.width = `${((nimIdx - 1) / nimQueue.length) * 100}%`;
+
+    const display = document.getElementById("letter-display");
+    display.style.background = "transparent";
+    display.style.borderRadius = "0";
+    display.innerHTML = `<span class="nh-rhyme-word" style="font-size:2rem;opacity:0.4">🔊</span>`;
+    speak(String(nimCurrentNum));
+
+    const others = NIM_AVAILABLE.filter(n => n !== nimCurrentNum);
+    others.sort(() => Math.random() - 0.5);
+    const opts = shuffle([nimCurrentNum, ...others.slice(0, 3)]);
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+    choicesEl.className = "image-choices words-image-choices";
+    opts.forEach((num, i) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-img-btn";
+        styleTile(btn, i);
+        btn.innerHTML = `<img src="${NUM_IMAGES[num]}?v=2" alt="${num}" style="width:90%;height:90%;object-fit:contain;border-radius:12px">`;
+        btn.onclick = () => handleNumImagesChoice(btn, num);
+        choicesEl.appendChild(btn);
+    });
+}
+
+function handleNumImagesChoice(btn, chosen) {
+    if (answered) return;
+    if (chosen === nimCurrentNum) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed"); btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound(); showFeedback(true); spawnConfetti();
+        setTimeout(() => advanceRound(), 1400);
+    } else {
+        btn.classList.add("wrong"); btn.disabled = true;
+        roundClean = false; roundWrongs++;
+        playWrongSound(); showFeedback(false);
+    }
 }
 
 // ── Send Stats to Google Sheet ──────────────────────────────────────
