@@ -435,7 +435,7 @@ const HINDI_ITEMS = [
     { letter: "ढ", roman: "dha",  audio: "audio/hindi/dha2.mp3", vidStart: 118, image: "images/drum.png"    },
     { letter: "ण", roman: "na",   audio: "audio/hindi/na2.mp3",  vidStart: 123, image: "images/fly.png"      },
     // ta-varga (dental)
-    { letter: "त", roman: "ta",   audio: "audio/hindi/ta.mp3",   vidStart: 127, image: "images/scale.png"    },
+    { letter: "त", roman: "ta",   audio: "audio/hindi/ta.mp3",   vidStart: 127, image: "images/watermelon.png" },
     { letter: "थ", roman: "tha",  audio: "audio/hindi/tha.mp3",  vidStart: 132, image: "images/thermos.png"  },
     { letter: "द", roman: "da",   audio: "audio/hindi/da.mp3",   vidStart: 137, image: "images/cow.png"      },
     { letter: "ध", roman: "dha",  audio: "audio/hindi/dha.mp3",  vidStart: 141, image: "images/arrow.png"    },
