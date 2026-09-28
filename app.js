@@ -416,8 +416,22 @@ function playPhonics(word) {
 }
 
 const HINDI_ITEMS = [
+    // svaras (vowels) — audio borrowed from Kannada; video from 0EfSycgslF0
+    { letter: "अ",  roman: "a",   audio: "audio/hindi/a.mp3",   vidStart: 0,  image: "hindi/anar.jpg"  },
+    { letter: "आ",  roman: "aa",  audio: "audio/hindi/aa.mp3",  vidStart: 5,  image: "hindi/aam.jpg"   },
+    { letter: "इ",  roman: "i",   audio: "audio/hindi/i.mp3",   vidStart: 9,  image: "hindi/imli.jpg"  },
+    { letter: "ई",  roman: "ii",  audio: "audio/hindi/ii.mp3",  vidStart: 14, image: "hindi/eek.jpg"   },
+    { letter: "उ",  roman: "u",   audio: "audio/hindi/u.mp3",   vidStart: 18, image: "hindi/ullu.jpg"  },
+    { letter: "ऊ",  roman: "uu",  audio: "audio/hindi/uu.mp3",  vidStart: 23, image: "hindi/oont.jpg"  },
+    { letter: "ऋ",  roman: "ru",  audio: "audio/hindi/ru.mp3",  vidStart: 27, image: "hindi/rushi.jpg" },
+    { letter: "ए",  roman: "e",   audio: "audio/hindi/e.mp3",   vidStart: 32, image: "hindi/edi.jpg"   },
+    { letter: "ऐ",  roman: "ai",  audio: "audio/hindi/ai.mp3",  vidStart: 36, image: "hindi/enak.jpg"  },
+    { letter: "ओ",  roman: "o",   audio: "audio/hindi/o.mp3",   vidStart: 41, image: "hindi/aukli.jpg" },
+    { letter: "औ",  roman: "au",  audio: "audio/hindi/au.mp3",  vidStart: 45, image: "hindi/lady.jpg"  },
+    { letter: "अं", roman: "am",  audio: "audio/hindi/am.mp3",  vidStart: 50, image: "hindi/grape.jpg" },
+    { letter: "अः", roman: "ah",  audio: "audio/hindi/ah.mp3",  vidStart: 54, image: "images/sun.png"   },
     // ka-varga
-    { letter: "क", roman: "ka",   audio: "audio/hindi/ka.mp3",   vidStart: 58,  image: "images/lotus.png"    },
+    { letter: "क", roman: "ka",   audio: "audio/hindi/ka.mp3",   vidStart: 58,  image: "hindi/kaboothar.jpg" },
     { letter: "ख", roman: "kha",  audio: "audio/hindi/kha.mp3",  vidStart: 63,  image: "images/sword.png"    },
     { letter: "ग", roman: "ga",   audio: "audio/hindi/ga.mp3",   vidStart: 67,  image: "images/watch.png"    },
     { letter: "घ", roman: "gha",  audio: "audio/hindi/gha.mp3",  vidStart: 72,  image: "images/bell.png"     },
@@ -460,6 +474,7 @@ const HINDI_ITEMS = [
 const HINDI_VIDEO_ID = "0EfSycgslF0";
 // ── Hindi zones: one pair per group, cumulative test after each ────────
 const HINDI_ALL_PAIRS = [
+    ["अ","आ"], ["इ","ई"], ["उ","ऊ"], ["ऋ","ए"], ["ऐ","ओ"], ["औ","अं","अः"],
     ["क","ख"], ["ग","घ"], ["ङ","च"], ["छ","ज"], ["झ","ट"],
     ["ठ","ड"], ["ढ","ण"], ["त","थ"], ["द","ध"], ["न","प"],
     ["फ","ब"], ["भ","म"], ["य","र"], ["ल","व"], ["श","ष"], ["स","ह"],

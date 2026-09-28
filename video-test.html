@@ -65,6 +65,9 @@
 <h2>Consonants <span style="font-size:0.65rem;color:#E0604A">(some timestamps estimated)</span></h2>
 <div class="grid" id="grid-consonants"></div>
 
+<h1 style="margin-top:3rem">Hindi Vowels — Image Check</h1>
+<div class="grid" id="grid-hindi-vowels"></div>
+
 <h1 style="margin-top:3rem">Hindi Consonants — Video Clip Tester</h1>
 <div class="grid" id="grid-hindi"></div>
 
@@ -305,6 +308,23 @@ function copyChanges() {
   });
 }
 
+const HINDI_VOWELS = [
+  { letter:"अ",  roman:"a",   vidStart:0  },
+  { letter:"आ",  roman:"aa",  vidStart:5  },
+  { letter:"इ",  roman:"i",   vidStart:9  },
+  { letter:"ई",  roman:"ii",  vidStart:14 },
+  { letter:"उ",  roman:"u",   vidStart:18 },
+  { letter:"ऊ",  roman:"uu",  vidStart:23 },
+  { letter:"ऋ",  roman:"ru",  vidStart:27 },
+  { letter:"ए",  roman:"e",   vidStart:32 },
+  { letter:"ऐ",  roman:"ai",  vidStart:36 },
+  { letter:"ओ",  roman:"o",   vidStart:41 },
+  { letter:"औ",  roman:"au",  vidStart:45 },
+  { letter:"अं", roman:"am",  vidStart:50 },
+  { letter:"अः", roman:"ah",  vidStart:54 },
+];
+
+buildGrid(HINDI_VOWELS, "grid-hindi-vowels", HI_VIDEO, "hi-vowel");
 buildGrid(VOWELS,      "grid-vowels",     KN_VIDEO, "kn-vowel");
 buildGrid(CONSONANTS,  "grid-consonants", KN_VIDEO, "kn-cons");
 buildGrid(HINDI,       "grid-hindi",      HI_VIDEO, "hi-cons");
