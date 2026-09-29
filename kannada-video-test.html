@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kannada Local Videos</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, sans-serif; background: #111; color: #e8e4d4; padding: 1.5rem; }
+h1 { font-size: 1rem; color: #A78BFA; border-bottom: 2px solid #A78BFA; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.card { background: #1c1a26; border-radius: 10px; overflow: hidden; border: 2px solid #2e2b3a; }
+.card-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; }
+.letter { font-family: "Noto Sans Kannada", sans-serif; font-size: 1.8rem; line-height: 1; }
+.meta { font-size: 0.75rem; color: #807888; }
+video { width: 100%; display: block; background: #000; }
+.missing { padding: 1rem; color: #E0604A; font-size: 0.75rem; text-align: center; }
+</style>
+</head>
+<body>
+<h1>ಕನ್ನಡ — Local Videos</h1>
+<div class="grid" id="grid"></div>
+<script>
+const ITEMS = [
+  { letter:"ಅ",  roman:"a",   word:"ಅರಮನೆ",  src:"videos/Kannada/aramana palace.mp4" },
+  { letter:"ಆ",  roman:"aa",  word:"ಆಮೆ",    src:"videos/Kannada/tortoise.mp4" },
+  { letter:"ಇ",  roman:"i",   word:"ಇಟ್ಟಿಗೆ", src:"videos/Kannada/bricks.mp4" },
+  { letter:"ಈ",  roman:"ii",  word:"ಈಶಾ",    src:"videos/Kannada/eesha.mp4" },
+  { letter:"ಉ",  roman:"u",   word:"ಉಗುರು",  src:"videos/Kannada/finger uguru.mp4" },
+  { letter:"ಏ",  roman:"E",   word:"ಏಣಿ",    src:"videos/Kannada/ladder.mp4" },
+  { letter:"ಐ",  roman:"ai",  word:"ಐವರು",  src:"videos/Kannada/five.mp4" },
+  { letter:"ಒ",  roman:"o",   word:"ಒಣಫಲ",  src:"videos/Kannada/dry fruits o.mp4" },
+];
+
+const grid = document.getElementById("grid");
+ITEMS.forEach(({ letter, roman, word, src }) => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="card-head">
+      <div class="letter">${letter}</div>
+      <div class="meta"><strong>${roman}</strong><br>${word}</div>
+    </div>
+    <video src="${src}" controls preload="none"
+      onerror="this.outerHTML='<div class=missing>missing: ${src}</div>'"></video>
+  `;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

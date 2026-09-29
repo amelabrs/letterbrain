@@ -2179,8 +2179,14 @@ function playKannadaVideo() {
     const ytEl = document.getElementById("yt-player");
 
     const localVideoMap = {
-        "ಈ": "videos/only ee.mp4",
+        "ಅ": "videos/Kannada/aramana palace.mp4",
         "ಆ": "videos/Kannada/tortoise.mp4",
+        "ಇ": "videos/Kannada/bricks.mp4",
+        "ಈ": "videos/Kannada/eesha.mp4",
+        "ಉ": "videos/Kannada/finger uguru.mp4",
+        "ಏ": "videos/Kannada/ladder.mp4",
+        "ಐ": "videos/Kannada/five.mp4",
+        "ಒ": "videos/Kannada/dry fruits o.mp4",
     };
     if (localVideoMap[currentItem.letter]) {
         localPlayer.src = localVideoMap[currentItem.letter];
