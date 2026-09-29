@@ -185,9 +185,9 @@ function setCapsUnlockedLevel(lvl) {
 
 // ── Kannada ───────────────────────────────────────────────────────────
 const KANNADA_ITEMS = [
-    { letter: "ಅ", roman: "a",  audio: "audio/kannada/a.mp3",  vidStart: 14,  image: "kannada/palace.jpg" },
+    { letter: "ಅ", roman: "a",  audio: "audio/kannada/a.mp3",  vidStart: 14,  image: "kannada/palace.png" },
     { letter: "ಆ", roman: "aa", audio: "audio/kannada/aa.mp3", vidStart: 31,  image: "kannada/tortoise.jpg" },
-    { letter: "ಇ", roman: "i",  audio: "audio/kannada/i.mp3",  vidStart: 44,  image: "kannada/brick.jpg" },
+    { letter: "ಇ", roman: "i",  audio: "audio/kannada/i.mp3",  vidStart: 44,  image: "kannada/brick.png" },
     { letter: "ಈ", roman: "ii", audio: "audio/kannada/ii.mp3", vidStart: 60,  image: "kannada/shiva.jpg" },
     { letter: "ಉ", roman: "u",  audio: "audio/kannada/u.mp3",  vidStart: 79,  image: "kannada/fingernails.jpg" },
     { letter: "ಊ", roman: "uu", audio: "audio/kannada/uu.mp3", vidStart: 94,  image: "images/sadhya.png" },
@@ -195,7 +195,7 @@ const KANNADA_ITEMS = [
     { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 122, image: "images/leaf.png" },
     { letter: "ಏ", roman: "E",  audio: "audio/kannada/E.mp3",  vidStart: 138, image: "kannada/ladder.jpg" },
     { letter: "ಐ", roman: "ai", audio: "audio/kannada/ai.mp3", vidStart: 154, image: "images/five.png" },
-    { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 169, image: "kannada/driedfruit.jpg" },
+    { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 169, image: "kannada/driedfruit.png" },
     { letter: "ಓ", roman: "oo", audio: "audio/kannada/oo.mp3", vidStart: 185, image: "images/run.png" },
     { letter: "ಔ", roman: "au", audio: "audio/kannada/au.mp3", vidStart: 201, image: "images/medicine.png" },
     { letter: "ಅಂ", roman: "am", audio: "audio/kannada/am.mp3", vidStart: 218, image: "images/shop.png"     },
