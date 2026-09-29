@@ -2178,8 +2178,12 @@ function playKannadaVideo() {
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
 
-    if (currentItem.letter === "ಈ") {
-        localPlayer.src = "videos/only ee.mp4";
+    const localVideoMap = {
+        "ಈ": "videos/only ee.mp4",
+        "ಆ": "videos/Kannada/tortoise.mp4",
+    };
+    if (localVideoMap[currentItem.letter]) {
+        localPlayer.src = localVideoMap[currentItem.letter];
         localPlayer.load();
         localPlayer.currentTime = 0;
         localPlayer.style.display = "block";
@@ -2191,7 +2195,8 @@ function playKannadaVideo() {
             proceedFromVideo();
         });
         videoTimer = setInterval(() => {
-            if (localPlayer.duration && localPlayer.currentTime >= localPlayer.duration - 0.2) {
+            if (localPlayer.currentTime >= 5 ||
+                (localPlayer.duration && localPlayer.currentTime >= localPlayer.duration - 0.2)) {
                 clearInterval(videoTimer);
                 hideVideoOverlay();
             }
@@ -2199,7 +2204,7 @@ function playKannadaVideo() {
         safetyTimer = setTimeout(() => {
             clearInterval(videoTimer);
             hideVideoOverlay();
-        }, 10000);
+        }, 5500);
         return;
     }
 
