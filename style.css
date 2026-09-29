@@ -616,6 +616,14 @@ body.theme-rainbow .segmented-btn[data-mode="matchcaps"].active { background: #2
   border-radius: 50%;
 }
 
+/* Kannada/Hindi image choices: larger fill */
+.image-choices:not(.words-image-choices) .choice-img-btn img {
+  width: 82%;
+  height: 82%;
+  border-radius: 16px;
+  object-fit: contain;
+}
+
 /* Word-family tabs: larger images in both choice buttons and display box */
 .image-choices.words-image-choices .choice-img-btn img {
   width: 84%;
