@@ -1638,6 +1638,12 @@ noVideoToggle.addEventListener("change", () => {
     if (noVideoToggle.checked) { videoBeforeToggle.checked = false; setVideoBeforeQuestion(false); }
 });
 
+const localVideosToggle = document.getElementById("local-videos-toggle");
+localVideosToggle.checked = getLocalVideosEnabled();
+localVideosToggle.addEventListener("change", () => {
+    setLocalVideosEnabled(localVideosToggle.checked);
+});
+
 
 
 // ── Settings (gear icon) ──────────────────────────────────────────────
@@ -2027,6 +2033,13 @@ function setVideoBeforeQuestion(val) {
     localStorage.setItem("lb_video_before", val ? "1" : "0");
 }
 
+function getLocalVideosEnabled() {
+    return localStorage.getItem("lb_local_videos") === "1";
+}
+function setLocalVideosEnabled(val) {
+    localStorage.setItem("lb_local_videos", val ? "1" : "0");
+}
+
 function getPhonicsClip(letter) {
     const start = PHONICS_TIMESTAMPS[letter] ?? 0;
     return { start, end: start + 5 };
@@ -2178,7 +2191,7 @@ function playKannadaVideo() {
     const localPlayer = document.getElementById("local-player");
     const ytEl = document.getElementById("yt-player");
 
-    const localVideoMap = {
+    const localVideoMap = getLocalVideosEnabled() ? {
         "ಅ": "videos/Kannada/aramana palace.mp4",
         "ಆ": "videos/Kannada/tortoise.mp4",
         "ಇ": "videos/Kannada/bricks.mp4",
@@ -2187,7 +2200,7 @@ function playKannadaVideo() {
         "ಏ": "videos/Kannada/ladder.mp4",
         "ಐ": "videos/Kannada/five.mp4",
         "ಒ": "videos/Kannada/dry fruits o.mp4",
-    };
+    } : {};
     if (localVideoMap[currentItem.letter]) {
         localPlayer.src = localVideoMap[currentItem.letter];
         localPlayer.load();
