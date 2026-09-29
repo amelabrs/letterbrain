@@ -194,7 +194,7 @@ const KANNADA_ITEMS = [
     { letter: "ಋ", roman: "ru", audio: "audio/kannada/ru.mp3", vidStart: 107, image: "images/saint.jpg" },
     { letter: "ಎ", roman: "e",  audio: "audio/kannada/e.mp3",  vidStart: 122, image: "images/leaf.png" },
     { letter: "ಏ", roman: "E",  audio: "audio/kannada/E.mp3",  vidStart: 138, image: "kannada/ladder.png" },
-    { letter: "ಐ", roman: "ai", audio: "audio/kannada/ai.mp3", vidStart: 154, image: "images/five.png" },
+    { letter: "ಐ", roman: "ai", audio: "audio/kannada/ai.mp3", vidStart: 154, image: "kannada/five.png" },
     { letter: "ಒ", roman: "o",  audio: "audio/kannada/o.mp3",  vidStart: 169, image: "kannada/driedfruit.png" },
     { letter: "ಓ", roman: "oo", audio: "audio/kannada/oo.mp3", vidStart: 185, image: "images/run.png" },
     { letter: "ಔ", roman: "au", audio: "audio/kannada/au.mp3", vidStart: 201, image: "images/medicine.png" },
