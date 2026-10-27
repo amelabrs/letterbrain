@@ -203,8 +203,9 @@ const KANNADA_ITEMS = [
 ];
 const KANNADA_VIDEO_ID = "KMNRrw5fPCY";
 
-// ── Kannada vowel zones: one pair per group, cumulative test after each ─
+// ── Kannada zones: vowels then consonants, one pair per group ───────────
 const KANNADA_ALL_PAIRS = [
+    // Vowels
     ["ಅ","ಆ"],
     ["ಇ","ಈ"],
     ["ಉ","ಊ"],
@@ -212,6 +213,10 @@ const KANNADA_ALL_PAIRS = [
     ["ಏ","ಐ"],
     ["ಒ","ಓ","ಔ"],
     ["ಅಂ","ಅಃ"],
+    // Consonants
+    ["ಕ","ಖ"], ["ಗ","ಘ"], ["ಙ","ಚ"], ["ಛ","ಜ"], ["ಝ","ಟ"],
+    ["ಠ","ಡ"], ["ಢ","ಣ"], ["ತ","ಥ"], ["ದ","ಧ"], ["ನ","ಪ"],
+    ["ಫ","ಬ"], ["ಭ","ಮ"], ["ಯ","ರ"], ["ಲ","ವ"], ["ಶ","ಷ"], ["ಸ","ಹ"],
 ];
 
 const KANNADA_ZONE_GROUPS = KANNADA_ALL_PAIRS.map((pair, i) => ({
@@ -274,6 +279,8 @@ const KANNADA_CONSONANT_ITEMS = [
     { letter: "ಹ",  roman: "ha",   audio: "audio/kannada/ha.mp3",   vidStart: 715, image: "images/swan.png"     },
     // ಳ (La) — hidden: no video timestamp, rare letter
 ];
+
+const KANNADA_ALL_ITEMS = [...KANNADA_ITEMS, ...KANNADA_CONSONANT_ITEMS];
 
 // ── Word Families ────────────────────────────────────────────────────
 const WORD_ITEMS = [
@@ -2583,13 +2590,13 @@ function handleCapsChoice(btn, chosen) {
 // ── Kannada Game ─────────────────────────────────────────────────────
 
 let kannadaMode = "see";
-let kannadaActiveItems = KANNADA_ITEMS;
+let kannadaActiveItems = KANNADA_ALL_ITEMS;
 
 let hindiMode = "see";
 let hindiActiveItems = HINDI_ITEMS;
 
 const _kannadaAudios = {};
-KANNADA_ITEMS.forEach(item => {
+KANNADA_ALL_ITEMS.forEach(item => {
     const a = new Audio(item.audio);
     a.preload = "auto";
     _kannadaAudios[item.letter] = a;
@@ -2604,7 +2611,7 @@ HINDI_ITEMS.forEach(item => {
 let _hindiClipTimer = null;
 
 function playKannadaClip(letter) {
-    const item = KANNADA_ITEMS.find(it => it.letter === letter);
+    const item = KANNADA_ALL_ITEMS.find(it => it.letter === letter);
     if (!item) return;
     clearTimeout(_kannadaClipTimer);
     Object.values(_kannadaAudios).forEach(a => a.pause());
@@ -2645,7 +2652,7 @@ function getKannadaOptions(correctLetter, levelLetters = [], isTest = false, lev
     };
     const pairLetters = pairMap[correct] || [correct];
 
-    const distractorPool = KANNADA_ITEMS
+    const distractorPool = KANNADA_ALL_ITEMS
         .map(item => item.letter)
         .filter(letter => {
             if (letter === "ಅ" && !allowFirstVowel) return false;
@@ -2666,9 +2673,9 @@ function getKannadaOptions(correctLetter, levelLetters = [], isTest = false, lev
 let kannadaLevelIndex = 0;
 let kannadaLevelIsTest = false;
 
-function startKannadaGame(letters = KANNADA_ITEMS.map(it => it.letter), mode = "see", isTest = false, levelIndex = 0) {
+function startKannadaGame(letters = KANNADA_ALL_ITEMS.map(it => it.letter), mode = "see", isTest = false, levelIndex = 0) {
     kannadaMode = mode;
-    kannadaActiveItems = KANNADA_ITEMS.filter(it => letters.includes(it.letter));
+    kannadaActiveItems = KANNADA_ALL_ITEMS.filter(it => letters.includes(it.letter));
     kannadaLevelIndex = levelIndex;
     kannadaLevelIsTest = isTest;
     isExamMode = false;
@@ -2720,7 +2727,7 @@ function loadKannadaRound() {
         `;
         choicesEl.className = "image-choices";
         options.forEach((opt, i) => {
-            const item = KANNADA_ITEMS.find(k => k.letter === opt);
+            const item = KANNADA_ALL_ITEMS.find(k => k.letter === opt);
             const btn = document.createElement("button");
             btn.className = "choice-btn choice-img-btn";
             styleTile(btn, i);
