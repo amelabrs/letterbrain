@@ -282,6 +282,13 @@ const KANNADA_CONSONANT_ITEMS = [
 
 const KANNADA_ALL_ITEMS = [...KANNADA_ITEMS, ...KANNADA_CONSONANT_ITEMS];
 
+// ── Spell Words ───────────────────────────────────────────────────────
+const SPELL_ITEMS = [
+    { word: "CAR", emoji: "🚗", letters: ["C","A","R"], distractors: ["B","D","O"] },
+    { word: "BUS", emoji: "🚌", letters: ["B","U","S"], distractors: ["C","A","G"] },
+    { word: "DOG", emoji: "🐕", letters: ["D","O","G"], distractors: ["B","U","R"] },
+];
+
 // ── Word Families ────────────────────────────────────────────────────
 const WORD_ITEMS = [
     { word: "cat", image: "images/cat.png" },
@@ -627,7 +634,7 @@ let nimQueue = [], nimIdx = 0, nimCurrentNum = null;
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "numimages", "words", "words-am", "words-an", "words-ap", "words-ag"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "numimages", "words", "words-am", "words-an", "words-ap", "words-ag", "words-spell"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -1181,6 +1188,33 @@ function buildLevelGrid() {
     }
     if (currentAppMode === "words-ag") {
         buildWordFamilyGrid(AG_WORD_ZONE_GROUPS, AG_WORD_ITEMS, "words-ag", startWordsAgGame);
+        return;
+    }
+
+    if (currentAppMode === "words-spell") {
+        grid.classList.add("nh-mode");
+        const card = document.createElement("div");
+        card.className = "nh-group-card";
+
+        const row = document.createElement("div");
+        row.className = "nh-learn-row";
+
+        const matchBtn = document.createElement("button");
+        matchBtn.className = "hindi-pair-btn";
+        matchBtn.style.background = "#C04A4A";
+        matchBtn.innerHTML = `<span class="hindi-pair-letters">CAR · BUS · DOG</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+        matchBtn.onclick = () => startSpellGame(SPELL_ITEMS, "match");
+        row.appendChild(matchBtn);
+
+        const buildBtn = document.createElement("button");
+        buildBtn.className = "hindi-pair-btn";
+        buildBtn.style.background = "#2E5E6E";
+        buildBtn.innerHTML = `<span class="hindi-pair-letters">CAR · BUS · DOG</span><span class="hindi-pair-icon">🧩</span>`;
+        buildBtn.onclick = () => startSpellGame(SPELL_ITEMS, "build");
+        row.appendChild(buildBtn);
+
+        card.appendChild(row);
+        grid.appendChild(card);
         return;
     }
 
@@ -3678,6 +3712,8 @@ function advanceRound() {
         loadLowercaseRound();
     } else if (currentAppMode === "blends") {
         loadBlendsRound();
+    } else if (currentAppMode === "words-spell") {
+        loadSpellRound();
     } else if (["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode)) {
         loadWordsRound();
     } else if (currentAppMode === "cursive") {
@@ -3694,7 +3730,7 @@ function advanceRound() {
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
     if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
-    if (["words-am","words-an","words-ap","words-ag"].includes(mode)) return "words";
+    if (["words-am","words-an","words-ap","words-ag","words-spell"].includes(mode)) return "words";
     if (mode === "numimages") return "saynumbers";
     return mode;
 }
@@ -4379,6 +4415,151 @@ function handleNumImagesChoice(btn, chosen) {
         btn.classList.add("wrong"); btn.disabled = true;
         roundClean = false; roundWrongs++;
         playWrongSound(); showFeedback(false);
+    }
+}
+
+// ── Spell Game ────────────────────────────────────────────────────────
+
+let spellMode = "match";
+let spellNextLetterIdx = 0;
+let spellUsed = {};
+
+function startSpellGame(items, mode) {
+    spellMode = mode;
+    gameMode = "spell-" + mode;
+    queue = shuffleNoRepeat([...items, ...items, ...items]);
+    currentIndex = 0;
+    stars = 0;
+    spellUsed = {};
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadSpellRound();
+}
+
+function loadSpellRound() {
+    if (currentIndex >= queue.length) { showDone(); return; }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    spellNextLetterIdx = 0;
+    spellUsed = {};
+    currentItem = queue[currentIndex];
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl    = document.getElementById("choices");
+    const blanksEl     = document.getElementById("spell-blanks-row");
+
+    letterDisplay.className = "";
+    choicesEl.className = "";
+    choicesEl.innerHTML = "";
+    blanksEl.innerHTML = "";
+    blanksEl.style.display = "none";
+
+    letterDisplay.innerHTML = `<div style="font-size:5.5rem;line-height:1;animation:popIn 0.4s ease-out">${currentItem.emoji}</div>`;
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+
+    if (spellMode === "match") {
+        const options = shuffle([...SPELL_ITEMS]);
+        options.forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.fontSize = "1.5rem";
+            btn.style.fontWeight = "900";
+            btn.style.letterSpacing = "0.06em";
+            styleTile(btn, i);
+            btn.textContent = opt.word;
+            btn.dataset.word = opt.word;
+            btn.onclick = () => handleSpellMatch(btn, opt);
+            choicesEl.appendChild(btn);
+        });
+    } else {
+        // Build mode
+        blanksEl.style.display = "flex";
+
+        currentItem.letters.forEach((_, i) => {
+            const tile = document.createElement("div");
+            tile.className = "spell-blank-tile";
+            tile.id = `spell-blank-${i}`;
+            blanksEl.appendChild(tile);
+        });
+
+        const pool = shuffle([...currentItem.letters, ...currentItem.distractors]);
+        choicesEl.className = "spell-pool";
+        pool.forEach((letter, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn choice-letter-btn";
+            btn.style.fontSize = "1.7rem";
+            btn.style.fontWeight = "900";
+            styleTile(btn, idx % 4);
+            btn.dataset.poolIdx = idx;
+            btn.textContent = letter;
+            btn.onclick = () => handleSpellBuild(btn, letter, idx);
+            choicesEl.appendChild(btn);
+        });
+    }
+}
+
+function handleSpellMatch(btn, chosen) {
+    if (answered) return;
+    if (chosen.word === currentItem.word) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        speak(currentItem.word);
+        setTimeout(() => speak(currentItem.word), 1000);
+        setTimeout(() => advanceRound(), 2800);
+    } else {
+        roundClean = false;
+        roundWrongs++;
+        btn.classList.add("wrong");
+        playWrongSound();
+        showFeedback(false);
+        setTimeout(() => btn.classList.remove("wrong"), 500);
+    }
+}
+
+function handleSpellBuild(btn, letter, idx) {
+    if (answered || spellUsed[idx]) return;
+    const expected = currentItem.letters[spellNextLetterIdx];
+
+    if (letter === expected) {
+        spellUsed[idx] = true;
+        btn.classList.add("dimmed");
+        btn.style.pointerEvents = "none";
+
+        const tile = document.getElementById(`spell-blank-${spellNextLetterIdx}`);
+        tile.textContent = letter;
+        tile.classList.add("filled");
+        spellNextLetterIdx++;
+
+        if (spellNextLetterIdx === currentItem.letters.length) {
+            answered = true;
+            if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+            playCorrectSound();
+            showFeedback(true);
+            spawnConfetti();
+            speak(currentItem.word);
+            setTimeout(() => speak(currentItem.word), 1000);
+            setTimeout(() => advanceRound(), 2800);
+        }
+    } else {
+        roundClean = false;
+        roundWrongs++;
+        btn.classList.add("wrong");
+        playWrongSound();
+        showFeedback(false);
+        setTimeout(() => btn.classList.remove("wrong"), 500);
     }
 }
 
