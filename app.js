@@ -3714,7 +3714,7 @@ function advanceRound() {
         loadBlendsRound();
     } else if (currentAppMode === "words-spell") {
         loadSpellRound();
-    } else if (["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode)) {
+    } else if (currentAppMode === "words") {
         loadWordsRound();
     } else if (currentAppMode === "cursive") {
         loadCursiveRound();
@@ -3730,7 +3730,7 @@ function advanceRound() {
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
     if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
-    if (["words-am","words-an","words-ap","words-ag","words-spell"].includes(mode)) return "words";
+    if (["words-spell"].includes(mode)) return "words";
     if (mode === "numimages") return "saynumbers";
     return mode;
 }
@@ -3752,9 +3752,9 @@ function updateNumbersToggle() {
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
-    const isWordsFamily = ["words","words-am","words-an","words-ap","words-ag"].includes(currentAppMode);
+    const isWordsFamily = ["words","words-spell"].includes(currentAppMode);
     wrap.style.display = isWordsFamily ? "flex" : "none";
-    ["at","am","an","ap","ag"].forEach(fam => {
+    ["at","spell"].forEach(fam => {
         const mode = fam === "at" ? "words" : `words-${fam}`;
         const el = document.getElementById(`toggle-words-${fam}`);
         if (el) el.classList.toggle("active", currentAppMode === mode);
@@ -3785,10 +3785,7 @@ document.getElementById("toggle-lowercase").addEventListener("click", () => setA
 document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("toggle-cursive").addEventListener("click", () => setActiveTab("cursive"));
 document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
-document.getElementById("toggle-words-am").addEventListener("click", () => setActiveTab("words-am"));
-document.getElementById("toggle-words-an").addEventListener("click", () => setActiveTab("words-an"));
-document.getElementById("toggle-words-ap").addEventListener("click", () => setActiveTab("words-ap"));
-document.getElementById("toggle-words-ag").addEventListener("click", () => setActiveTab("words-ag"));
+document.getElementById("toggle-words-spell").addEventListener("click", () => setActiveTab("words-spell"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
