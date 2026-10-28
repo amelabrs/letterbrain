@@ -291,10 +291,10 @@ const SPELL_ITEMS = [
 
 // ── These / Those ────────────────────────────────────────────────────
 const THESE_THOSE_ITEMS = [
-    { word: "bells",    image: "images/bell.png",     answer: "these" },
-    { word: "stars",    image: "images/star.png",     answer: "those" },
-    { word: "sweets",   image: "images/laddoo.png",   answer: "these" },
-    { word: "crackers", image: "images/crackers.png", answer: "those" },
+    { word: "bells",    image: "images/bells.png",    answer: "these" },
+    { word: "stars",    image: "images/stars.png",    answer: "those" },
+    { word: "sweets",   image: "images/sweets.png",   answer: "these" },
+    { word: "crackers", image: "images/crackers.jpeg", answer: "those" },
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
