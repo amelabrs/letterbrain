@@ -284,9 +284,9 @@ const KANNADA_ALL_ITEMS = [...KANNADA_ITEMS, ...KANNADA_CONSONANT_ITEMS];
 
 // ── Spell Words ───────────────────────────────────────────────────────
 const SPELL_ITEMS = [
-    { word: "CAR", emoji: "🚗", letters: ["C","A","R"], distractors: ["B","D","O"] },
-    { word: "BUS", emoji: "🚌", letters: ["B","U","S"], distractors: ["C","A","G"] },
-    { word: "DOG", emoji: "🐕", letters: ["D","O","G"], distractors: ["B","U","R"] },
+    { word: "car", emoji: "🚗", letters: ["c","a","r"], distractors: ["b","d","o"] },
+    { word: "bus", emoji: "🚌", letters: ["b","u","s"], distractors: ["c","a","g"] },
+    { word: "dog", emoji: "🐕", letters: ["d","o","g"], distractors: ["b","u","r"] },
 ];
 
 // ── Word Families ────────────────────────────────────────────────────
@@ -1202,14 +1202,14 @@ function buildLevelGrid() {
         const matchBtn = document.createElement("button");
         matchBtn.className = "hindi-pair-btn";
         matchBtn.style.background = "#C04A4A";
-        matchBtn.innerHTML = `<span class="hindi-pair-letters">CAR · BUS · DOG</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+        matchBtn.innerHTML = `<span class="hindi-pair-letters">car · bus · dog</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
         matchBtn.onclick = () => startSpellGame(SPELL_ITEMS, "match");
         row.appendChild(matchBtn);
 
         const buildBtn = document.createElement("button");
         buildBtn.className = "hindi-pair-btn";
         buildBtn.style.background = "#2E5E6E";
-        buildBtn.innerHTML = `<span class="hindi-pair-letters">CAR · BUS · DOG</span><span class="hindi-pair-icon">🧩</span>`;
+        buildBtn.innerHTML = `<span class="hindi-pair-letters">car · bus · dog</span><span class="hindi-pair-icon">🧩</span>`;
         buildBtn.onclick = () => startSpellGame(SPELL_ITEMS, "build");
         row.appendChild(buildBtn);
 
