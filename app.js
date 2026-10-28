@@ -289,6 +289,14 @@ const SPELL_ITEMS = [
     { word: "dog", emoji: "🐕", letters: ["d","o","g"], distractors: ["b","u","r"] },
 ];
 
+// ── These / Those ────────────────────────────────────────────────────
+const THESE_THOSE_ITEMS = [
+    { word: "bells",    image: "images/bell.png",     answer: "these" },
+    { word: "stars",    image: "images/star.png",     answer: "those" },
+    { word: "sweets",   image: "images/laddoo.png",   answer: "these" },
+    { word: "crackers", image: "images/crackers.png", answer: "those" },
+];
+
 // ── Word Families ────────────────────────────────────────────────────
 const WORD_ITEMS = [
     { word: "cat", image: "images/cat.png" },
@@ -409,6 +417,30 @@ AG_WORD_ZONE_GROUPS.forEach(group => {
         AG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
     });
     AG_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
+});
+
+// ── UG word family ─────────────────────────────────────────────────────
+const UG_WORD_ITEMS = [
+    { word: "bug", image: "images/bug.png" },
+    { word: "mug", image: "images/mug.png" },
+    { word: "tug", image: "images/tug.png" },
+    { word: "dug", image: "images/dug.png" },
+];
+const UG_WORD_ALL_PAIRS = [
+    ["bug","mug"],
+    ["tug","dug"],
+];
+const UG_WORD_ZONE_GROUPS = UG_WORD_ALL_PAIRS.map((pair, i) => ({
+    learns: [pair],
+    test: [...new Set(UG_WORD_ALL_PAIRS.slice(0, i + 1).flat())],
+}));
+const UG_WORD_LEVELS = [];
+UG_WORD_ZONE_GROUPS.forEach(group => {
+    group.learns.forEach(words => {
+        UG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "normal" });
+        UG_WORD_LEVELS.push({ label: words.join("·"), words, mode: "reverse" });
+    });
+    UG_WORD_LEVELS.push({ label: "test", words: group.test, mode: "normal", isTest: true });
 });
 
 const PHONEME_MAP = {
@@ -634,7 +666,7 @@ let nimQueue = [], nimIdx = 0, nimCurrentNum = null;
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "numimages", "words", "words-am", "words-an", "words-ap", "words-ag", "words-spell"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "numimages", "words", "words-ug", "words-spell", "words-these"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -1188,6 +1220,28 @@ function buildLevelGrid() {
     }
     if (currentAppMode === "words-ag") {
         buildWordFamilyGrid(AG_WORD_ZONE_GROUPS, AG_WORD_ITEMS, "words-ag", startWordsAgGame);
+        return;
+    }
+
+    if (currentAppMode === "words-ug") {
+        buildWordFamilyGrid(UG_WORD_ZONE_GROUPS, UG_WORD_ITEMS, "words-ug", startWordsUgGame);
+        return;
+    }
+
+    if (currentAppMode === "words-these") {
+        grid.classList.add("nh-mode");
+        const card = document.createElement("div");
+        card.className = "nh-group-card";
+        const row = document.createElement("div");
+        row.className = "nh-learn-row";
+        const btn = document.createElement("button");
+        btn.className = "hindi-pair-btn";
+        btn.style.background = "#7C3AED";
+        btn.innerHTML = `<span class="hindi-pair-letters">these · those</span><span class="hindi-pair-icon">👇</span>`;
+        btn.onclick = () => startTheseThosetGame();
+        row.appendChild(btn);
+        card.appendChild(row);
+        grid.appendChild(card);
         return;
     }
 
@@ -3451,6 +3505,21 @@ function startWordsAgGame(words, mode) {
     loadWordsRound();
 }
 
+function startWordsUgGame(words, mode) {
+    wordsMode = mode;
+    wordsFamilyItems = UG_WORD_ITEMS.filter(it => words.includes(it.word));
+    gameMode = "words-" + mode;
+    currentAppMode = "words-ug";
+    queue = shuffleNoRepeat([...wordsFamilyItems, ...wordsFamilyItems, ...wordsFamilyItems]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadWordsRound();
+}
+
 // ── Cursive Game ──────────────────────────────────────────────────────
 
 let cursiveMode = "normal";
@@ -3714,6 +3783,10 @@ function advanceRound() {
         loadBlendsRound();
     } else if (currentAppMode === "words-spell") {
         loadSpellRound();
+    } else if (currentAppMode === "words-ug") {
+        loadWordsRound();
+    } else if (currentAppMode === "words-these") {
+        loadTheseThosetRound();
     } else if (currentAppMode === "words") {
         loadWordsRound();
     } else if (currentAppMode === "cursive") {
@@ -3730,7 +3803,7 @@ function advanceRound() {
 // behind the Quiz/Case segmented toggle, so it highlights the Quiz tab.
 function navTabFor(mode) {
     if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
-    if (["words-spell"].includes(mode)) return "words";
+    if (["words-spell","words-ug","words-these"].includes(mode)) return "words";
     if (mode === "numimages") return "saynumbers";
     return mode;
 }
@@ -3752,9 +3825,9 @@ function updateNumbersToggle() {
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
-    const isWordsFamily = ["words","words-spell"].includes(currentAppMode);
+    const isWordsFamily = ["words","words-ug","words-spell","words-these"].includes(currentAppMode);
     wrap.style.display = isWordsFamily ? "flex" : "none";
-    ["at","spell"].forEach(fam => {
+    ["at","ug","spell","these"].forEach(fam => {
         const mode = fam === "at" ? "words" : `words-${fam}`;
         const el = document.getElementById(`toggle-words-${fam}`);
         if (el) el.classList.toggle("active", currentAppMode === mode);
@@ -3785,7 +3858,9 @@ document.getElementById("toggle-lowercase").addEventListener("click", () => setA
 document.getElementById("toggle-case").addEventListener("click", () => setActiveTab("matchcaps"));
 document.getElementById("toggle-cursive").addEventListener("click", () => setActiveTab("cursive"));
 document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
+document.getElementById("toggle-words-ug").addEventListener("click", () => setActiveTab("words-ug"));
 document.getElementById("toggle-words-spell").addEventListener("click", () => setActiveTab("words-spell"));
+document.getElementById("toggle-words-these").addEventListener("click", () => setActiveTab("words-these"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
@@ -4550,6 +4625,90 @@ function handleSpellBuild(btn, letter, idx) {
             setTimeout(() => speak(currentItem.word), 1000);
             setTimeout(() => advanceRound(), 2800);
         }
+    } else {
+        roundClean = false;
+        roundWrongs++;
+        btn.classList.add("wrong");
+        playWrongSound();
+        showFeedback(false);
+        setTimeout(() => btn.classList.remove("wrong"), 500);
+    }
+}
+
+// ── These / Those Game ────────────────────────────────────────────────
+
+function startTheseThosetGame() {
+    gameMode = "these-those";
+    queue = shuffleNoRepeat([...THESE_THOSE_ITEMS, ...THESE_THOSE_ITEMS, ...THESE_THOSE_ITEMS]);
+    currentIndex = 0;
+    stars = 0;
+    sessionStats = [];
+    document.getElementById("stars").textContent = stars;
+    setModeChip("words");
+    showScreen("quiz-screen");
+    loadTheseThosetRound();
+}
+
+function loadTheseThosetRound() {
+    if (currentIndex >= queue.length) { showDone(); return; }
+
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    currentItem = queue[currentIndex];
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl    = document.getElementById("choices");
+    const blanksEl     = document.getElementById("spell-blanks-row");
+
+    letterDisplay.className = "";
+    choicesEl.className = "";
+    choicesEl.innerHTML = "";
+    blanksEl.innerHTML = "";
+    blanksEl.style.display = "none";
+
+    // Near = "these" shown big; Far = "those" shown small/distant
+    const isNear = currentItem.answer === "these";
+    const imgStyle = isNear
+        ? "width:160px;height:160px;object-fit:contain;border-radius:16px;animation:popIn 0.4s ease-out"
+        : "width:80px;height:80px;object-fit:contain;border-radius:10px;opacity:0.7;margin-top:40px;animation:popIn 0.4s ease-out";
+    const label = isNear ? "👇 Here" : "👉 There";
+
+    letterDisplay.innerHTML = `
+        <div style="font-size:0.85rem;color:#9ca3af;letter-spacing:0.06em;margin-bottom:0.4rem">${label}</div>
+        <img src="${currentItem.image}" style="${imgStyle}" alt="${currentItem.word}">
+        <div style="font-size:1.1rem;font-weight:700;margin-top:0.5rem;letter-spacing:0.04em">_____ are ${currentItem.word}</div>
+    `;
+
+    ["these","those"].forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-letter-btn";
+        btn.style.fontSize = "1.5rem";
+        btn.style.fontWeight = "900";
+        styleTile(btn, i);
+        btn.textContent = opt;
+        btn.onclick = () => handleTheseThosetChoice(btn, opt);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
+    document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
+}
+
+function handleTheseThosetChoice(btn, chosen) {
+    if (answered) return;
+    if (chosen === currentItem.answer) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        speak(`${chosen} are ${currentItem.word}`);
+        setTimeout(() => advanceRound(), 2800);
     } else {
         roundClean = false;
         roundWrongs++;
