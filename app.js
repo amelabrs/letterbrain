@@ -284,9 +284,11 @@ const KANNADA_ALL_ITEMS = [...KANNADA_ITEMS, ...KANNADA_CONSONANT_ITEMS];
 
 // ── Spell Words ───────────────────────────────────────────────────────
 const SPELL_ITEMS = [
-    { word: "car", emoji: "🚗", letters: ["c","a","r"], distractors: ["b","d","o"] },
-    { word: "bus", emoji: "🚌", letters: ["b","u","s"], distractors: ["c","a","g"] },
-    { word: "dog", emoji: "🐕", letters: ["d","o","g"], distractors: ["b","u","r"] },
+    { word: "car",   emoji: "🚗", letters: ["c","a","r"],   distractors: ["b","d","o"] },
+    { word: "bus",   emoji: "🚌", letters: ["b","u","s"],   distractors: ["c","a","g"] },
+    { word: "dog",   emoji: "🐕", letters: ["d","o","g"],   distractors: ["b","u","r"] },
+    { word: "fox",   image: "images/fox.png",   letters: ["f","o","x"],   distractors: ["c","r","g"] },
+    { word: "crane", image: "images/crane.png", letters: ["c","r","a","n","e"], distractors: ["f","o","x"] },
 ];
 
 // ── These / Those ────────────────────────────────────────────────────
@@ -1272,14 +1274,14 @@ function buildLevelGrid() {
         const matchBtn = document.createElement("button");
         matchBtn.className = "hindi-pair-btn";
         matchBtn.style.background = "#C04A4A";
-        matchBtn.innerHTML = `<span class="hindi-pair-letters">car · bus · dog</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
+        matchBtn.innerHTML = `<span class="hindi-pair-letters">car · bus · dog · fox · crane</span><span class="hindi-pair-icon">${QTYPE_ICONS.image}</span>`;
         matchBtn.onclick = () => startSpellGame(SPELL_ITEMS, "match");
         row.appendChild(matchBtn);
 
         const buildBtn = document.createElement("button");
         buildBtn.className = "hindi-pair-btn";
         buildBtn.style.background = "#2E5E6E";
-        buildBtn.innerHTML = `<span class="hindi-pair-letters">car · bus · dog</span><span class="hindi-pair-icon">🧩</span>`;
+        buildBtn.innerHTML = `<span class="hindi-pair-letters">car · bus · dog · fox · crane</span><span class="hindi-pair-icon">🧩</span>`;
         buildBtn.onclick = () => startSpellGame(SPELL_ITEMS, "build");
         row.appendChild(buildBtn);
 
@@ -4560,7 +4562,9 @@ function loadSpellRound() {
     blanksEl.innerHTML = "";
     blanksEl.style.display = "none";
 
-    letterDisplay.innerHTML = `<div style="font-size:5.5rem;line-height:1;animation:popIn 0.4s ease-out">${currentItem.emoji}</div>`;
+    letterDisplay.innerHTML = currentItem.image
+        ? `<img src="${currentItem.image}" style="width:160px;height:160px;object-fit:contain;border-radius:16px;animation:popIn 0.4s ease-out" alt="${currentItem.word}">`
+        : `<div style="font-size:5.5rem;line-height:1;animation:popIn 0.4s ease-out">${currentItem.emoji}</div>`;
 
     document.getElementById("round-info").textContent = `${currentIndex + 1} / ${queue.length}`;
     document.getElementById("progress-fill").style.width = `${(currentIndex / queue.length) * 100}%`;
