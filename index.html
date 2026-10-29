@@ -34,6 +34,7 @@
                 <button id="tab-hindi" class="mode-tab mode-tab-hindi" title="हिंदी">अ</button>
                 <button id="tab-saynumbers" class="mode-tab mode-tab-numbers" title="Numbers">3</button>
                 <button id="tab-words" class="mode-tab mode-tab-words" title="Words">word</button>
+                <button id="tab-lessons" class="mode-tab mode-tab-lessons" title="Lessons">📖</button>
             </div>
 
             <div id="quiz-case-toggle" class="segmented-toggle">
@@ -52,7 +53,6 @@
                 <button id="toggle-words-at" class="segmented-btn active" data-mode="words">AT</button>
                 <button id="toggle-words-ug" class="segmented-btn" data-mode="words-ug">UG</button>
                 <button id="toggle-words-spell" class="segmented-btn" data-mode="words-spell">Spell</button>
-                <button id="toggle-words-these" class="segmented-btn" data-mode="words-these">These</button>
             </div>
 
             <div id="homework-banner" class="homework-banner" onclick="openHomeworkSetup()">🏠 Homework Mode — tap to set what's been learned</div>
@@ -150,6 +150,16 @@
             <div id="hw-level-grid"></div>
         </div>
 
+        <!-- Lessons Screen -->
+        <div id="lessons-screen" class="screen">
+            <div class="lessons-top">
+                <select id="lesson-select" class="lesson-select" onchange="renderLesson(this.value)">
+                    <option value="fox-crane">🦊 Fox and the Crane</option>
+                </select>
+            </div>
+            <div id="lesson-content" class="lesson-content"></div>
+        </div>
+
         <!-- Done Screen -->
         <div id="done-screen" class="screen">
             <div class="big-emoji">🎉</div>
@@ -163,6 +173,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="app.js?v=102"></script>
+    <script src="app.js?v=103"></script>
 </body>
 </html>

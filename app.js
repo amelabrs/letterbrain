@@ -297,6 +297,23 @@ const THESE_THOSE_ITEMS = [
     { word: "crackers", image: "images/crackers.jpeg", answer: "those" },
 ];
 
+// ── Lessons ───────────────────────────────────────────────────────────
+const LESSONS = {
+    "fox-crane": {
+        title: "The Fox and the Crane",
+        video: "videos/the_fox_and_the_crane_storybook.mp4",
+        vocab: [
+            { word: "soup",      image: "images/soup.png"      },
+            { word: "tricked",   image: "images/tricked.png"   },
+            { word: "porridge",  image: "images/porridge.png"  },
+            { word: "cunning",   image: "images/cunning.png"   },
+            { word: "delicious", image: "images/delicious.png" },
+            { word: "snout",     image: "images/snout.png"     },
+        ],
+        theseThose: true,
+    }
+};
+
 // ── Word Families ────────────────────────────────────────────────────
 const WORD_ITEMS = [
     { word: "cat", image: "images/cat.png" },
@@ -3804,6 +3821,7 @@ function advanceRound() {
 function navTabFor(mode) {
     if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
     if (["words-spell","words-ug","words-these"].includes(mode)) return "words";
+    if (mode === "lessons") return "lessons";
     if (mode === "numimages") return "saynumbers";
     return mode;
 }
@@ -3825,9 +3843,9 @@ function updateNumbersToggle() {
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
-    const isWordsFamily = ["words","words-ug","words-spell","words-these"].includes(currentAppMode);
+    const isWordsFamily = ["words","words-ug","words-spell"].includes(currentAppMode);
     wrap.style.display = isWordsFamily ? "flex" : "none";
-    ["at","ug","spell","these"].forEach(fam => {
+    ["at","ug","spell"].forEach(fam => {
         const mode = fam === "at" ? "words" : `words-${fam}`;
         const el = document.getElementById(`toggle-words-${fam}`);
         if (el) el.classList.toggle("active", currentAppMode === mode);
@@ -3837,10 +3855,23 @@ function setActiveTab(mode) {
     currentAppMode = mode;
     localStorage.setItem("lb_mode", mode);
     const activeNavTab = navTabFor(mode);
-    ["quiz", "kannada", "hindi", "saynumbers", "words"].forEach(m => {
+    ["quiz", "kannada", "hindi", "saynumbers", "words", "lessons"].forEach(m => {
         const el = document.getElementById(`tab-${m}`);
         if (el) el.classList.toggle("active", m === activeNavTab);
     });
+
+    if (mode === "lessons") {
+        showScreen("lessons-screen");
+        renderLessons();
+        return;
+    }
+
+    // If coming back from lessons, restore start-screen
+    const activeScreen = document.querySelector(".screen.active");
+    if (activeScreen && activeScreen.id === "lessons-screen") {
+        showScreen("start-screen");
+    }
+
     updateQuizCaseToggle();
     updateNumbersToggle();
     updateWordFamilyToggle();
@@ -3861,6 +3892,7 @@ document.getElementById("toggle-words-at").addEventListener("click", () => setAc
 document.getElementById("toggle-words-ug").addEventListener("click", () => setActiveTab("words-ug"));
 document.getElementById("toggle-words-spell").addEventListener("click", () => setActiveTab("words-spell"));
 document.getElementById("toggle-words-these").addEventListener("click", () => setActiveTab("words-these"));
+document.getElementById("tab-lessons").addEventListener("click", () => setActiveTab("lessons"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
@@ -3868,7 +3900,7 @@ if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && cu
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
 const initialNavTab = navTabFor(currentAppMode);
-["quiz", "kannada", "hindi", "saynumbers", "words"].forEach(m => {
+["quiz", "kannada", "hindi", "saynumbers", "words", "lessons"].forEach(m => {
     const el = document.getElementById(`tab-${m}`);
     if (el) el.classList.toggle("active", m === initialNavTab);
 });
@@ -4633,6 +4665,84 @@ function handleSpellBuild(btn, letter, idx) {
         showFeedback(false);
         setTimeout(() => btn.classList.remove("wrong"), 500);
     }
+}
+
+// ── Lessons ───────────────────────────────────────────────────────────
+
+let currentLessonId = "fox-crane";
+let lessonCardIdx = 0;
+
+function renderLessons() {
+    const sel = document.getElementById("lesson-select");
+    if (sel) sel.value = currentLessonId;
+    renderLesson(currentLessonId);
+}
+
+function renderLesson(id) {
+    currentLessonId = id;
+    const lesson = LESSONS[id];
+    if (!lesson) return;
+    lessonCardIdx = 0;
+
+    const content = document.getElementById("lesson-content");
+    if (!content) return;
+
+    content.innerHTML = `
+        <section class="lesson-section">
+            <div class="lesson-section-title">📖 Story</div>
+            <video class="lesson-video" src="${lesson.video}" controls playsinline preload="metadata"></video>
+        </section>
+
+        <section class="lesson-section">
+            <div class="lesson-section-title">🔤 Vocabulary</div>
+            <div class="vocab-card" id="vocab-card"></div>
+            <div class="vocab-nav">
+                <button class="vocab-nav-btn" onclick="lessonCardPrev()">◀</button>
+                <span id="vocab-counter">1 / ${lesson.vocab.length}</span>
+                <button class="vocab-nav-btn" onclick="lessonCardNext()">▶</button>
+            </div>
+        </section>
+
+        <section class="lesson-section">
+            <div class="lesson-section-title">👇 These &amp; Those</div>
+            <button class="lesson-activity-btn" onclick="startTheseThosetGame()">Play These / Those →</button>
+        </section>
+    `;
+
+    updateVocabCard();
+}
+
+function buildVocabCardHTML(item) {
+    return `
+        <img class="vocab-img" src="${item.image}" alt="${item.word}"
+             onerror="this.style.display='none';document.getElementById('vocab-placeholder').style.display='flex'">
+        <div id="vocab-placeholder" class="vocab-placeholder" style="display:none">📷</div>
+        <div class="vocab-word">${item.word}</div>
+    `;
+}
+
+function updateVocabCard() {
+    const lesson = LESSONS[currentLessonId];
+    const card = document.getElementById("vocab-card");
+    const counter = document.getElementById("vocab-counter");
+    if (!card || !counter) return;
+    card.innerHTML = buildVocabCardHTML(lesson.vocab[lessonCardIdx]);
+    counter.textContent = `${lessonCardIdx + 1} / ${lesson.vocab.length}`;
+    card.style.animation = "none";
+    void card.offsetWidth;
+    card.style.animation = "popIn 0.35s ease-out";
+}
+
+function lessonCardNext() {
+    const lesson = LESSONS[currentLessonId];
+    lessonCardIdx = (lessonCardIdx + 1) % lesson.vocab.length;
+    updateVocabCard();
+}
+
+function lessonCardPrev() {
+    const lesson = LESSONS[currentLessonId];
+    lessonCardIdx = (lessonCardIdx - 1 + lesson.vocab.length) % lesson.vocab.length;
+    updateVocabCard();
 }
 
 // ── These / Those Game ────────────────────────────────────────────────

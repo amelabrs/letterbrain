@@ -1352,3 +1352,137 @@ body.theme-rainbow .theme-btn.active {
   height: 64px;
   flex: none;
 }
+
+/* ── Lessons Screen ─────────────────────────────────────── */
+.mode-tab-lessons { font-size: 1.1rem; }
+
+#lessons-screen {
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem 1rem 2rem;
+  overflow-y: auto;
+  gap: 0;
+}
+
+.lessons-top {
+  margin-bottom: 1rem;
+}
+
+.lesson-select {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 2px solid #4b4880;
+  background: #2a2750;
+  color: #f0ede4;
+  appearance: none;
+  cursor: pointer;
+}
+
+.lesson-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.lesson-section {
+  background: #1c1a26;
+  border-radius: 16px;
+  padding: 1rem;
+  border: 2px solid #2e2b3a;
+}
+
+.lesson-section-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #A78BFA;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.lesson-video {
+  width: 100%;
+  border-radius: 10px;
+  background: #000;
+  display: block;
+}
+
+/* Vocabulary flash cards */
+.vocab-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 200px;
+  justify-content: center;
+  animation: popIn 0.35s ease-out;
+}
+
+.vocab-img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+.vocab-placeholder {
+  width: 160px;
+  height: 160px;
+  border-radius: 14px;
+  background: #2a2750;
+  border: 2px dashed #4b4880;
+  font-size: 2.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.vocab-word {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #f0ede4;
+}
+
+.vocab-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 0.75rem;
+}
+
+.vocab-nav-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid #7C3AED;
+  background: #2a2750;
+  color: #A78BFA;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vocab-nav-btn:active { background: #7C3AED; color: #fff; }
+
+#vocab-counter {
+  font-size: 0.9rem;
+  color: #807888;
+  min-width: 50px;
+  text-align: center;
+}
+
+.lesson-activity-btn {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  background: #7C3AED;
+  color: #fff;
+  cursor: pointer;
+}
+.lesson-activity-btn:active { opacity: 0.85; }
