@@ -4700,9 +4700,10 @@ function renderLesson(id) {
             <div class="vocab-card" id="vocab-card"></div>
             <div class="vocab-nav">
                 <button class="vocab-nav-btn" onclick="lessonCardPrev()">◀</button>
-                <span id="vocab-counter">1 / ${lesson.vocab.length}</span>
+                <button class="vocab-say-btn" onclick="speak(document.querySelector('.vocab-word').textContent)">🔊 Say it</button>
                 <button class="vocab-nav-btn" onclick="lessonCardNext()">▶</button>
             </div>
+            <div id="vocab-counter" class="vocab-counter-label">1 / ${lesson.vocab.length}</div>
         </section>
 
         <section class="lesson-section">

@@ -1486,3 +1486,23 @@ body.theme-rainbow .theme-btn.active {
   cursor: pointer;
 }
 .lesson-activity-btn:active { opacity: 0.85; }
+
+.vocab-say-btn {
+  padding: 0.55rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 22px;
+  border: 2px solid #7C3AED;
+  background: #2a2750;
+  color: #A78BFA;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vocab-say-btn:active { background: #7C3AED; color: #fff; }
+
+.vocab-counter-label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #807888;
+  margin-top: 0.4rem;
+}
