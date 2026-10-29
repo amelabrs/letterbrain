@@ -308,7 +308,6 @@ const LESSONS = {
             { word: "porridge",  image: "images/porridge.png"  },
             { word: "cunning",   image: "images/cunning.png"   },
             { word: "delicious", image: "images/delicious.png" },
-            { word: "snout",     image: "images/snout.png"     },
         ],
         theseThose: true,
     }
