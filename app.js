@@ -303,7 +303,7 @@ const THESE_THOSE_ITEMS = [
 const LESSONS = {
     "fox-crane": {
         title: "The Fox and the Crane",
-        video: "videos/the_fox_and_the_crane_storybook.mp4",
+        video: "videos/fox and crane.mp4",
         vocab: [
             { word: "soup",      image: "images/soup.png"      },
             { word: "tricked",   image: "images/tricked.png"   },
