@@ -4793,12 +4793,14 @@ function loadTheseThosetRound() {
     `;
 
     // th[e]se vs th[o]se — highlight the distinguishing vowel in red
-    const highlights = { "these": "th<span style='color:#f87171'>e</span>se", "those": "th<span style='color:#f87171'>o</span>se" };
+    // wrap in outer span so flex-direction:column doesn't split text nodes
+    const highlights = {
+        "these": `<span>th<span style="color:#f87171;font-style:normal">e</span>se</span>`,
+        "those": `<span>th<span style="color:#f87171;font-style:normal">o</span>se</span>`
+    };
     ["these","those"].forEach(opt => {
         const btn = document.createElement("button");
-        btn.className = "choice-btn choice-letter-btn";
-        btn.style.fontSize = "1.5rem";
-        btn.style.fontWeight = "900";
+        btn.className = "choice-btn these-those-btn";
         styleTile(btn, 0); // same tile index = same color for both
         btn.innerHTML = highlights[opt];
         btn.onclick = () => handleTheseThosetChoice(btn, opt);

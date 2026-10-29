@@ -648,14 +648,14 @@ body.theme-rainbow .segmented-btn[data-mode="matchcaps"].active { background: #2
   padding: 0;
 }
 
-#choices.these-those-choices {
-  grid-template-columns: 1fr;
-  max-width: 340px;
-}
 #choices.these-those-choices .choice-btn {
   aspect-ratio: unset;
-  height: 72px;
-  white-space: nowrap;
+  height: 90px;
+}
+.these-those-btn {
+  font-size: 1.8rem !important;
+  font-weight: 900 !important;
+  font-family: var(--font-display) !important;
 }
 
 .choice-letter-btn {
