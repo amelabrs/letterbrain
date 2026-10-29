@@ -4781,17 +4781,17 @@ function loadTheseThosetRound() {
 
     // Near = "these" shown big; Far = "those" shown small/distant
     const isNear = currentItem.answer === "these";
-    const sz = currentItem.big ? 280 : 220;
-    const szFar = currentItem.big ? 160 : 120;
+    const sz = currentItem.big ? 340 : 290;
+    const szFar = currentItem.big ? 200 : 160;
     const imgStyle = isNear
         ? `width:${sz}px;height:${sz}px;object-fit:contain;border-radius:20px;animation:popIn 0.4s ease-out`
-        : `width:${szFar}px;height:${szFar}px;object-fit:contain;border-radius:14px;opacity:0.7;margin-top:40px;animation:popIn 0.4s ease-out`;
+        : `width:${szFar}px;height:${szFar}px;object-fit:contain;border-radius:14px;opacity:0.7;margin-top:20px;animation:popIn 0.4s ease-out`;
     const label = isNear ? "👇 Here" : "👉 There";
 
     letterDisplay.innerHTML = `
-        <div style="font-size:0.85rem;color:#9ca3af;letter-spacing:0.06em;margin-bottom:0.4rem">${label}</div>
+        <div style="font-size:0.8rem;color:#9ca3af;letter-spacing:0.06em;margin-bottom:0.3rem">${label}</div>
         <img src="${currentItem.image}" style="${imgStyle}" alt="${currentItem.word}">
-        <div style="font-size:1.1rem;font-weight:700;margin-top:0.5rem;letter-spacing:0.04em">_____ are ${currentItem.word}</div>
+        <div style="font-size:0.85rem;font-weight:700;margin-top:0.4rem;letter-spacing:0.04em;color:#c4bfd4">_____ are ${currentItem.word}</div>
     `;
 
     ["these","those"].forEach((opt, i) => {
