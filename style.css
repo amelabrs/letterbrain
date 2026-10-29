@@ -1379,9 +1379,10 @@ body.theme-rainbow .theme-btn.active {
 #lessons-screen {
   display: flex;
   flex-direction: column;
-  padding: 0.8rem 1rem 2rem;
+  padding: 3.2rem 1rem 2rem;
   overflow-y: auto;
   gap: 0;
+  position: relative;
 }
 
 .lessons-top {

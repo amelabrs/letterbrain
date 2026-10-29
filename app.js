@@ -4792,13 +4792,15 @@ function loadTheseThosetRound() {
         <div style="font-size:0.85rem;font-weight:700;margin-top:0.5rem;letter-spacing:0.04em;color:#c4bfd4">_____ are ${currentItem.word}</div>
     `;
 
-    ["these","those"].forEach((opt, i) => {
+    // th[e]se vs th[o]se — highlight the distinguishing vowel in red
+    const highlights = { "these": "th<span style='color:#f87171'>e</span>se", "those": "th<span style='color:#f87171'>o</span>se" };
+    ["these","those"].forEach(opt => {
         const btn = document.createElement("button");
         btn.className = "choice-btn choice-letter-btn";
         btn.style.fontSize = "1.5rem";
         btn.style.fontWeight = "900";
-        styleTile(btn, i);
-        btn.textContent = opt;
+        styleTile(btn, 0); // same tile index = same color for both
+        btn.innerHTML = highlights[opt];
         btn.onclick = () => handleTheseThosetChoice(btn, opt);
         choicesEl.appendChild(btn);
     });
