@@ -3823,6 +3823,7 @@ function navTabFor(mode) {
     if (["matchcaps","lowercase","cursive"].includes(mode)) return "quiz";
     if (["words-spell","words-ug","words-these"].includes(mode)) return "words";
     if (mode === "lessons") return "lessons";
+
     if (mode === "numimages") return "saynumbers";
     return mode;
 }
@@ -3844,9 +3845,9 @@ function updateNumbersToggle() {
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
-    const isWordsFamily = ["words","words-ug","words-spell"].includes(currentAppMode);
+    const isWordsFamily = ["words","words-ug","words-spell","words-these"].includes(currentAppMode);
     wrap.style.display = isWordsFamily ? "flex" : "none";
-    ["at","ug","spell"].forEach(fam => {
+    ["at","ug","spell","these"].forEach(fam => {
         const mode = fam === "at" ? "words" : `words-${fam}`;
         const el = document.getElementById(`toggle-words-${fam}`);
         if (el) el.classList.toggle("active", currentAppMode === mode);
@@ -3892,6 +3893,7 @@ document.getElementById("toggle-cursive").addEventListener("click", () => setAct
 document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-words-ug").addEventListener("click", () => setActiveTab("words-ug"));
 document.getElementById("toggle-words-spell").addEventListener("click", () => setActiveTab("words-spell"));
+document.getElementById("toggle-words-these").addEventListener("click", () => setActiveTab("words-these"));
 document.getElementById("tab-lessons").addEventListener("click", () => setActiveTab("lessons"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
@@ -4706,10 +4708,6 @@ function renderLesson(id) {
             <div id="vocab-counter" class="vocab-counter-label">1 / ${lesson.vocab.length}</div>
         </section>
 
-        <section class="lesson-section">
-            <div class="lesson-section-title">👇 These &amp; Those</div>
-            <button class="lesson-activity-btn" onclick="startTheseThosetGame()">Play These / Those →</button>
-        </section>
     `;
 
     updateVocabCard();
@@ -4752,6 +4750,7 @@ function lessonCardPrev() {
 
 function startTheseThosetGame() {
     gameMode = "these-those";
+    currentAppMode = "words-these";
     queue = shuffleNoRepeat([...THESE_THOSE_ITEMS, ...THESE_THOSE_ITEMS, ...THESE_THOSE_ITEMS]);
     currentIndex = 0;
     stars = 0;
