@@ -4783,8 +4783,8 @@ function loadTheseThosetRound() {
     // Near = "these" shown big; Far = "those" shown small/distant
     const isNear = currentItem.answer === "these";
     const imgStyle = isNear
-        ? "width:160px;height:160px;object-fit:contain;border-radius:16px;animation:popIn 0.4s ease-out"
-        : "width:80px;height:80px;object-fit:contain;border-radius:10px;opacity:0.7;margin-top:40px;animation:popIn 0.4s ease-out";
+        ? "width:220px;height:220px;object-fit:contain;border-radius:20px;animation:popIn 0.4s ease-out"
+        : "width:120px;height:120px;object-fit:contain;border-radius:14px;opacity:0.7;margin-top:40px;animation:popIn 0.4s ease-out";
     const label = isNear ? "👇 Here" : "👉 There";
 
     letterDisplay.innerHTML = `
