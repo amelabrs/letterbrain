@@ -1443,15 +1443,15 @@ body.theme-rainbow .theme-btn.active {
 }
 
 .vocab-img {
-  width: 160px;
-  height: 160px;
+  width: min(300px, 80vw);
+  height: min(300px, 80vw);
   object-fit: contain;
   border-radius: 14px;
 }
 
 .vocab-placeholder {
-  width: 160px;
-  height: 160px;
+  width: min(300px, 80vw);
+  height: min(300px, 80vw);
   border-radius: 14px;
   background: #2a2750;
   border: 2px dashed #4b4880;
