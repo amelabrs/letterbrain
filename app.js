@@ -3891,7 +3891,6 @@ document.getElementById("toggle-cursive").addEventListener("click", () => setAct
 document.getElementById("toggle-words-at").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-words-ug").addEventListener("click", () => setActiveTab("words-ug"));
 document.getElementById("toggle-words-spell").addEventListener("click", () => setActiveTab("words-spell"));
-document.getElementById("toggle-words-these").addEventListener("click", () => setActiveTab("words-these"));
 document.getElementById("tab-lessons").addEventListener("click", () => setActiveTab("lessons"));
 // Reset any stored mode from removed/retired tabs
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
