@@ -4677,8 +4677,6 @@ let currentLessonId = "fox-crane";
 let lessonCardIdx = 0;
 
 function renderLessons() {
-    const sel = document.getElementById("lesson-select");
-    if (sel) sel.value = currentLessonId;
     renderLesson(currentLessonId);
 }
 
@@ -4773,25 +4771,25 @@ function loadTheseThosetRound() {
     const choicesEl    = document.getElementById("choices");
     const blanksEl     = document.getElementById("spell-blanks-row");
 
-    letterDisplay.className = "";
-    choicesEl.className = "";
+    letterDisplay.className = "these-those-display";
+    choicesEl.className = "these-those-choices";
     choicesEl.innerHTML = "";
     blanksEl.innerHTML = "";
     blanksEl.style.display = "none";
 
     // Near = "these" shown big; Far = "those" shown small/distant
     const isNear = currentItem.answer === "these";
-    const sz = currentItem.big ? 340 : 290;
-    const szFar = currentItem.big ? 200 : 160;
+    const nearSz = currentItem.big ? "min(300px,78vw)" : "min(260px,70vw)";
+    const farSz  = currentItem.big ? "min(160px,42vw)" : "min(130px,36vw)";
     const imgStyle = isNear
-        ? `width:${sz}px;height:${sz}px;object-fit:contain;border-radius:20px;animation:popIn 0.4s ease-out`
-        : `width:${szFar}px;height:${szFar}px;object-fit:contain;border-radius:14px;opacity:0.7;margin-top:20px;animation:popIn 0.4s ease-out`;
+        ? `width:${nearSz};height:${nearSz};object-fit:contain;border-radius:20px;animation:popIn 0.4s ease-out`
+        : `width:${farSz};height:${farSz};object-fit:contain;border-radius:14px;opacity:0.7;margin-top:16px;animation:popIn 0.4s ease-out`;
     const label = isNear ? "👇 Here" : "👉 There";
 
     letterDisplay.innerHTML = `
         <div style="font-size:0.8rem;color:#9ca3af;letter-spacing:0.06em;margin-bottom:0.3rem">${label}</div>
         <img src="${currentItem.image}" style="${imgStyle}" alt="${currentItem.word}">
-        <div style="font-size:0.85rem;font-weight:700;margin-top:0.4rem;letter-spacing:0.04em;color:#c4bfd4">_____ are ${currentItem.word}</div>
+        <div style="font-size:0.85rem;font-weight:700;margin-top:0.5rem;letter-spacing:0.04em;color:#c4bfd4">_____ are ${currentItem.word}</div>
     `;
 
     ["these","those"].forEach((opt, i) => {

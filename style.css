@@ -638,6 +638,26 @@ body.theme-rainbow .segmented-btn[data-mode="matchcaps"].active { background: #2
   border-radius: 40px;
 }
 
+#letter-display.these-those-display {
+  width: min(300px, 82vw);
+  height: auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  padding: 0;
+}
+
+#choices.these-those-choices {
+  max-width: 340px;
+}
+#choices.these-those-choices .choice-btn {
+  aspect-ratio: unset;
+  min-height: 80px;
+  max-height: 110px;
+  padding: 0.9rem 0.5rem;
+}
+
 .choice-letter-btn {
   font-size: clamp(32px, 9vw, 52px) !important;
   font-weight: 700 !important;
