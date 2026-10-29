@@ -293,10 +293,10 @@ const SPELL_ITEMS = [
 
 // ── These / Those ────────────────────────────────────────────────────
 const THESE_THOSE_ITEMS = [
-    { word: "bells",    image: "images/bells.png",    answer: "these" },
-    { word: "stars",    image: "images/stars.png",    answer: "those" },
-    { word: "sweets",   image: "images/sweets.png",   answer: "these" },
-    { word: "crackers", image: "images/crackers.jpeg", answer: "those" },
+    { word: "bells",    image: "images/bells.png",     answer: "these" },
+    { word: "stars",    image: "images/stars.png",     answer: "those", big: true },
+    { word: "sweets",   image: "images/sweets.png",    answer: "these" },
+    { word: "crackers", image: "images/crackers.jpeg", answer: "those", big: true },
 ];
 
 // ── Lessons ───────────────────────────────────────────────────────────
@@ -4781,9 +4781,11 @@ function loadTheseThosetRound() {
 
     // Near = "these" shown big; Far = "those" shown small/distant
     const isNear = currentItem.answer === "these";
+    const sz = currentItem.big ? 280 : 220;
+    const szFar = currentItem.big ? 160 : 120;
     const imgStyle = isNear
-        ? "width:220px;height:220px;object-fit:contain;border-radius:20px;animation:popIn 0.4s ease-out"
-        : "width:120px;height:120px;object-fit:contain;border-radius:14px;opacity:0.7;margin-top:40px;animation:popIn 0.4s ease-out";
+        ? `width:${sz}px;height:${sz}px;object-fit:contain;border-radius:20px;animation:popIn 0.4s ease-out`
+        : `width:${szFar}px;height:${szFar}px;object-fit:contain;border-radius:14px;opacity:0.7;margin-top:40px;animation:popIn 0.4s ease-out`;
     const label = isNear ? "👇 Here" : "👉 There";
 
     letterDisplay.innerHTML = `
