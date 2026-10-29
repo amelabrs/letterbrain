@@ -1377,7 +1377,6 @@ body.theme-rainbow .theme-btn.active {
 .mode-tab-lessons { font-size: 1.1rem; }
 
 #lessons-screen {
-  display: flex;
   flex-direction: column;
   padding: 3.2rem 1rem 2rem;
   overflow-y: auto;
