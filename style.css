@@ -649,13 +649,13 @@ body.theme-rainbow .segmented-btn[data-mode="matchcaps"].active { background: #2
 }
 
 #choices.these-those-choices {
+  grid-template-columns: 1fr;
   max-width: 340px;
 }
 #choices.these-those-choices .choice-btn {
   aspect-ratio: unset;
-  min-height: 80px;
-  max-height: 110px;
-  padding: 0.9rem 0.5rem;
+  height: 72px;
+  white-space: nowrap;
 }
 
 .choice-letter-btn {
