@@ -681,10 +681,17 @@ NIM_ZONE_GROUPS.forEach(g => {
 let nimCurrentZone = null;
 let nimQueue = [], nimIdx = 0, nimCurrentNum = null;
 
+// ── Numbers Quiz ─────────────────────────────────────────────────────
+const NUM_WORDS = ["","one","two","three","four","five","six","seven","eight","nine","ten",
+    "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
+const NUMS_1_10  = [1,2,3,4,5,6,7,8,9,10];
+const NUMS_11_20 = [11,12,13,14,15,16,17,18,19,20];
+let numQuizQueue = [], numQuizIdx = 0, numQuizCurrent = null, numQuizRange = [];
+
 // ── Homework Mode ────────────────────────────────────────────────────
 // A parent sets a per-tab ceiling ("learned up to here"); tabs are clamped
 // to it so a child only ever sees content that's actually been taught.
-const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "saynumbers", "numimages", "words", "words-ug", "words-spell", "words-these"];
+const HOMEWORK_TABS = ["quiz", "matchcaps", "lowercase", "cursive", "kannada", "hindi", "numbers-1-10", "numbers-11-20", "words", "words-ug", "words-spell", "words-these"];
 
 function isHomeworkMode() {
     return localStorage.getItem("lb_homework_mode") !== "0"; // default ON
@@ -3787,8 +3794,10 @@ function handleWordsChoice(btn, chosen) {
 // ── Advance helper (mode-aware) ──────────────────────────────────────
 function advanceRound() {
     currentIndex++;
-    if (currentAppMode === "saynumbers") {
-        loadNHRound(); // NH game manages its own queue
+    if (currentAppMode === "numbers-1-10" || currentAppMode === "numbers-11-20") {
+        loadNumbersRound();
+    } else if (currentAppMode === "saynumbers") {
+        loadNHRound();
     } else if (currentAppMode === "matchcaps") {
         loadCapsRound();
     } else if (currentAppMode === "kannada") {
@@ -3824,7 +3833,7 @@ function navTabFor(mode) {
     if (["words-spell","words-ug","words-these"].includes(mode)) return "words";
     if (mode === "lessons") return "lessons";
 
-    if (mode === "numimages") return "saynumbers";
+    if (["numimages","numbers-1-10","numbers-11-20"].includes(mode)) return "saynumbers";
     return mode;
 }
 function updateQuizCaseToggle() {
@@ -3838,10 +3847,10 @@ function updateQuizCaseToggle() {
 }
 function updateNumbersToggle() {
     const wrap = document.getElementById("numbers-toggle");
-    const isNumbersFamily = ["saynumbers","numimages"].includes(currentAppMode);
+    const isNumbersFamily = ["saynumbers","numimages","numbers-1-10","numbers-11-20"].includes(currentAppMode);
     wrap.style.display = isNumbersFamily ? "flex" : "none";
-    document.getElementById("toggle-saynumbers").classList.toggle("active", currentAppMode === "saynumbers");
-    document.getElementById("toggle-numimages").classList.toggle("active", currentAppMode === "numimages");
+    document.getElementById("toggle-numbers-1-10").classList.toggle("active", currentAppMode === "numbers-1-10");
+    document.getElementById("toggle-numbers-11-20").classList.toggle("active", currentAppMode === "numbers-11-20");
 }
 function updateWordFamilyToggle() {
     const wrap = document.getElementById("word-family-toggle");
@@ -3868,6 +3877,12 @@ function setActiveTab(mode) {
         return;
     }
 
+    if (mode === "numbers-1-10" || mode === "numbers-11-20") {
+        updateNumbersToggle();
+        startNumbersQuiz(mode === "numbers-1-10" ? NUMS_1_10 : NUMS_11_20);
+        return;
+    }
+
     // If coming back from lessons, restore start-screen
     const activeScreen = document.querySelector(".screen.active");
     if (activeScreen && activeScreen.id === "lessons-screen") {
@@ -3882,9 +3897,9 @@ function setActiveTab(mode) {
 document.getElementById("tab-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("tab-kannada").addEventListener("click", () => setActiveTab("kannada"));
 document.getElementById("tab-hindi").addEventListener("click", () => setActiveTab("hindi"));
-document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
-document.getElementById("toggle-saynumbers").addEventListener("click", () => setActiveTab("saynumbers"));
-document.getElementById("toggle-numimages").addEventListener("click", () => setActiveTab("numimages"));
+document.getElementById("tab-saynumbers").addEventListener("click", () => setActiveTab("numbers-1-10"));
+document.getElementById("toggle-numbers-1-10").addEventListener("click", () => setActiveTab("numbers-1-10"));
+document.getElementById("toggle-numbers-11-20").addEventListener("click", () => setActiveTab("numbers-11-20"));
 document.getElementById("tab-words").addEventListener("click", () => setActiveTab("words"));
 document.getElementById("toggle-quiz").addEventListener("click", () => setActiveTab("quiz"));
 document.getElementById("toggle-lowercase").addEventListener("click", () => setActiveTab("lowercase"));
@@ -3899,6 +3914,11 @@ document.getElementById("tab-lessons").addEventListener("click", () => setActive
 if (["sayit", "saywords", "sayletters", "blends"].includes(currentAppMode) && currentAppMode !== "lowercase") {
     currentAppMode = "quiz";
     localStorage.setItem("lb_mode", "quiz");
+}
+// Migrate old number modes
+if (["saynumbers","numimages"].includes(currentAppMode)) {
+    currentAppMode = "numbers-1-10";
+    localStorage.setItem("lb_mode", "numbers-1-10");
 }
 // Set initial tab highlight (grid is built by initWordVideos below)
 const initialNavTab = navTabFor(currentAppMode);
@@ -4836,6 +4856,99 @@ function handleTheseThosetChoice(btn, chosen) {
 }
 
 // ── Send Stats to Google Sheet ──────────────────────────────────────
+
+// ── Numbers Quiz Game ─────────────────────────────────────────────────
+function startNumbersQuiz(range) {
+    numQuizRange = range;
+    // 3 passes through the range, no adjacent repeats
+    const pool = [];
+    for (let r = 0; r < 3; r++) pool.push(...shuffle([...range]));
+    for (let i = 1; i < pool.length; i++) {
+        if (pool[i] === pool[i - 1]) {
+            for (let j = i + 1; j < pool.length; j++) {
+                if (pool[j] !== pool[i - 1]) { [pool[i], pool[j]] = [pool[j], pool[i]]; break; }
+            }
+        }
+    }
+    numQuizQueue = pool;
+    numQuizIdx = 0;
+    stars = 0;
+    document.getElementById("stars").textContent = stars;
+    setModeChip("saynumbers");
+    showScreen("quiz-screen");
+    loadNumbersRound();
+}
+
+function loadNumbersRound() {
+    if (numQuizIdx >= numQuizQueue.length) { showDone(); return; }
+    answered = false;
+    roundClean = true;
+    roundWrongs = 0;
+    numQuizCurrent = numQuizQueue[numQuizIdx];
+
+    const letterDisplay = document.getElementById("letter-display");
+    const choicesEl = document.getElementById("choices");
+    const blanksEl = document.getElementById("spell-blanks-row");
+
+    letterDisplay.className = "";
+    choicesEl.className = "";
+    choicesEl.innerHTML = "";
+    blanksEl.innerHTML = "";
+    blanksEl.style.display = "none";
+
+    // Style the display as a neutral tile and make it tappable to replay
+    letterDisplay.style.background = "#2a2750";
+    letterDisplay.style.border = "2px solid #4b4880";
+    letterDisplay.style.borderRadius = "44px";
+    letterDisplay.style.cursor = "pointer";
+    letterDisplay.innerHTML = `<div style="font-size:3.5rem;line-height:1">🔊</div><div style="font-size:0.75rem;color:#9ca3af;margin-top:0.4rem">tap to hear again</div>`;
+    letterDisplay.onclick = () => speak(NUM_WORDS[numQuizCurrent]);
+
+    // Auto-speak the number
+    speak(NUM_WORDS[numQuizCurrent]);
+
+    // 4 choices: correct + 3 distractors from same range
+    const others = numQuizRange.filter(n => n !== numQuizCurrent);
+    const distractors = shuffle([...others]).slice(0, 3);
+    const options = shuffle([numQuizCurrent, ...distractors]);
+
+    options.forEach((n, i) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn choice-number-btn";
+        styleTile(btn, i);
+        btn.textContent = n;
+        btn.onclick = () => handleNumbersChoice(btn, n);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById("round-info").textContent = `${numQuizIdx + 1} / ${numQuizQueue.length}`;
+    document.getElementById("progress-fill").style.width = `${(numQuizIdx / numQuizQueue.length) * 100}%`;
+}
+
+function handleNumbersChoice(btn, chosen) {
+    if (answered) return;
+    if (chosen === numQuizCurrent) {
+        answered = true;
+        document.querySelectorAll(".choice-btn").forEach(b => b.classList.add("dimmed"));
+        btn.classList.remove("dimmed");
+        btn.classList.add("correct");
+        addCheckBadge(btn);
+        if (roundClean) { stars++; document.getElementById("stars").textContent = stars; }
+        playCorrectSound();
+        showFeedback(true);
+        spawnConfetti();
+        speak(NUM_WORDS[chosen]);
+        numQuizIdx++;
+        setTimeout(() => advanceRound(), 2800);
+    } else {
+        roundClean = false;
+        roundWrongs++;
+        btn.classList.add("wrong");
+        playWrongSound();
+        showFeedback(false);
+        setTimeout(() => btn.classList.remove("wrong"), 500);
+    }
+}
 
 function sendStats() {
     if (!SHEET_URL) return;
