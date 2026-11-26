@@ -1083,6 +1083,10 @@ function buildLevelGrid() {
     document.getElementById("letter-display")?.classList.remove("words-display"); // reset word image sizing
     updateHomeworkBanner();
 
+    if (currentAppMode === "numbers-1-10" || currentAppMode === "numbers-11-20") {
+        return; // quiz auto-starts; nothing to render on start-screen
+    }
+
     if (currentAppMode === "words") {
         grid.classList.add("nh-mode");
         let gIdx = 0;
@@ -3878,7 +3882,9 @@ function setActiveTab(mode) {
     }
 
     if (mode === "numbers-1-10" || mode === "numbers-11-20") {
+        updateQuizCaseToggle();
         updateNumbersToggle();
+        updateWordFamilyToggle();
         startNumbersQuiz(mode === "numbers-1-10" ? NUMS_1_10 : NUMS_11_20);
         return;
     }
